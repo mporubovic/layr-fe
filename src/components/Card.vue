@@ -89,6 +89,7 @@ export default {
         cardDynamicStyle() {
             
                 return this.isInStack ? { 'z-index': this.index} : {};
+
         },
 
 
@@ -243,7 +244,7 @@ export default {
 <style>
 
 .card-title h1 {
-    font-size: 30px;
+    font-size: 40px;
     margin: 0px;
     color: white;
 }
