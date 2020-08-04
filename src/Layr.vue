@@ -6,6 +6,7 @@
             <stack>
             </stack>
 
+
                 <!-- <p>Stack bottom</p> -->
 
             <div class="cards" id="cards"></div>
@@ -30,27 +31,33 @@ export default {
         Stack
     },
 
-    data() {
-    
-    }
 
 }
 </script>
 
 <style>
-* {
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+
+*, html {
     margin: 0;
     padding: 0;
     outline: 0px solid red;
     border: 0;
     appearance: none;
     background: transparent;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .board {
     position: fixed;
     background-image: linear-gradient(to left bottom, #32bffd, #00aaff, #0092ff, #0076ff, #1653ff);
+    height:100%;
+    width:100%;
+    overflow:hidden
+}
+
+.cards {
     height:100%;
     width:100%;
     overflow:hidden
