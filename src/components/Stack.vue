@@ -1,3 +1,5 @@
+
+
 <template>
     
     <div class="stack stack-draggable" id="stack">
@@ -10,14 +12,17 @@
                         :index=index
                         @cardStackInteraction="stackRearrangeCards"
                         >
-                <component :is="imageViewer()" 
-                            :content="content"></component>
+                <component :is="cardProgram(card.info.type)" 
+                            :content="card.content"
+                            >
+                </component>
             </card>
         </div>
 
-        <div class="stack-controls">
-            <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">Toggle</button>
-            <button class="stack-controls-common stack-controls-drag">Drag</button>
+        <div class="stack-controls" id="stack-controls">
+            <!-- <button class="stack-controls-s">S</button> -->
+            <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">{{ toggleButtonText }}</button>
+            <button class="stack-controls-common stack-controls-drag">Move</button>
             <button class="stack-controls-common stack-controls-edit">Edit</button>
         </div>
             
@@ -28,23 +33,191 @@
 
 <script>
 import Card from './Card.vue';
-import ImageViewer from './programs/ImageViewer.vue'
 import interact from 'interactjs';
+
+import ImageViewer from './programs/ImageViewer.vue'
+import VideoViewer from './programs/VideoViewer.vue'
+import PdfViewer from './programs/PdfViewer.vue'
+
+
 
 export default {
     components: {
         Card,
         ImageViewer,
+        VideoViewer,
+        PdfViewer,
 
     },
 
+    data() {
+        return {
+            cards: this.generateCards(8),
+            
+            // stackSettings: {
+            //     cardGap: this.calculateCardGap(),
+            // },
+            // boundingRect: null,
+
+            controls: {
+                toggleActive: true, 
+                toggleExpand: true
+            },
+
+            cardLoadContent: false,
+
+        }
+    },
+    
+    
     methods: {
-        imageViewer() {
-            return ImageViewer;
+        cardProgram(type) {
+            switch (type) {
+                
+                case("image") :
+                    return "ImageViewer";                
+                    
+                case("video") :
+                    return "VideoViewer";                
+                
+                case("pdf") :
+                    return "PdfViewer";                
+                
+                case("todo") :
+                    return "TodoViewer";                
+                
+                case("url") :
+                    return "UrlViewer";                
+            }
+        },
+
+        isCardInStack(index) {
+            if ( this.cardsInStack[index] !== null ) {
+                return false;
+            } else {
+                return false;
+            }
+        },
+
+        generateCards(count) {
+            let cards = [];
+            for (let index = 0; index < count; index++) {
+                cards.push(
+                    {
+                        "info": {
+                            "id": 1,
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "pdf", 
+                            "title": "NFX"
+                        },
+
+                        "content": [
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+                                    "name": "NFX"
+                                }    
+                            }
+                        ],
+
+                    },
+                    
+                    {
+                        "info": {
+                            "id": 2,
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "image", 
+                            "title": "Andromeda"
+                        },
+
+                        "content": [
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
+                                    "name": "AndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromeda"
+                                }
+
+                            },
+
+
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/ne0213-last-hubble-mission.jpg',
+                                    "name": "Hubble"
+                                }
+
+                            },
+
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2005a.jpg',
+                                    "name": "Hubble"
+                                }
+
+                            },
+
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2006a.jpg',
+                                    "name": "Hubble"
+                                }
+
+                            },
+                            {
+
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2004a.jpg',
+                                    "name": "Hubble"
+                                }
+
+                            },
+
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2003a.jpg',
+                                    "name": "Hubble"
+                                }
+
+                            },
+
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2002a.jpg',
+                                    "name": "Hubble"
+                                }
+
+                            },
+
+
+                        ]
+                    }
+                )
+            
+            }
+            return cards;
         },
         
         initializeInteractJs() {
             interact('.stack-draggable')
+            // interact('.stack-controls')
                 .draggable({
                     // enable inertial throwing
                     inertia: true,
@@ -52,6 +225,12 @@ export default {
                     allowFrom: '.stack-controls-drag',
                     // keep the element within the area of it's parent
                     modifiers: [
+                    // interact.modifiers.restrictRect({
+                    //     // restriction: 'parent',
+                    //     restriction: document.getElementById('stack-controls'),
+                    //     endOnly: true
+                    // })
+
                     interact.modifiers.restrictRect({
                         restriction: 'parent',
                         endOnly: true
@@ -65,6 +244,7 @@ export default {
                         move (event) {
                             
                             var target = event.target
+                            // var target = document.getElementById('stack')
                             
                             target.classList.add("stack-no-delay");
                             // keep the dragged position in the data-x/data-y attributes
@@ -81,8 +261,10 @@ export default {
                             target.setAttribute('data-y', y)
                         },
 
+                        // end (event) {
                         end (event) {
                             var target = event.target
+                            // var target = document.getElementById('stack')
                             target.classList.remove("stack-no-delay");
                         }
                     }
@@ -126,6 +308,10 @@ export default {
 
             }
 
+            setTimeout(() => {
+                this.cardLoadContent = true;
+            }, 1000);
+
             
 
         },
@@ -164,7 +350,7 @@ export default {
                 cards.forEach((card, index) => {
                     setTimeout(() => {
                             requestAnimationFrame(function() {
-                                card.onCardMouseDown();
+                                card.onCardMouseUp();
                         })
                     }, 100 + 100*index); 
 
@@ -172,39 +358,20 @@ export default {
                 
                 });
                                     
+                
                 setTimeout(() => {
                     document.getElementById("stack-controls-toggle").style.opacity = 1;
                     this.controls.toggleActive = true;
+                    this.controls.toggleExpand = !this.controls.toggleExpand;
 
-                }, 100 + 100*this.cards.length);
+                }, 700 + 100*this.cards.length);
 
-        },
-
-        generateCards(count) {
-            let cards = [];
-            for (let index = 0; index < count; index++) {
-                cards.push(
-                    {
-                        "info": {
-                            "id": index+1,
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
-                            }
-                        }
-                    }
-                )
-            
-            }
-            return cards;
         },
 
         generateDimensions(d) {
             switch (d) {
                 case "x":
-                    return  Math.floor(Math.random() * 1400 );
+                    return  Math.floor(Math.random() * 1200 );
                 
                 case "y":
                     return  Math.floor(Math.random() * 800 );
@@ -271,25 +438,16 @@ export default {
             
         },
 
+        toggleButtonText() {
+            // return this.controls.toggleExpand ? "Expand" : "Collapse";
+            return this.controls.toggleExpand ? "Open" : "Close";
+        },
+
+        // cardLoadContent(index) {
+        //     this.cards[index].info
+        // }
+
     },
-
-    data() {
-        return {
-            cards: this.generateCards(20),
-            
-            // stackSettings: {
-            //     cardGap: this.calculateCardGap(),
-            // },
-            // boundingRect: null,
-            content: [
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg'
-            ],
-
-            controls: {
-                toggleActive: true, 
-            }
-        }
-    }
 }
 </script>
 
@@ -314,6 +472,11 @@ export default {
     box-sizing: border-box;
     z-index: 999;
     /* overflow: hidden; */
+    /* height: 20px; */
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* justify-content: center; */
+    /* align-items: center; */
 
     
     
@@ -327,13 +490,22 @@ export default {
     /* position: absolute; */ 
     /* margin-top: 30px; */
     /* margin-left: -25px; */
-    width: 220px;
-    outline: black solid 0px;
+    width: 240px;
+    height: 50px;
+    /* outline: black solid -5px; */
+    background-color: rgba(0, 0, 0, 0.30);
     /* display: table-row; */
+    /* position: absolute; */
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     user-select: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 99px;
+    /* box-sizing: border-box; */
+    /* bottom: 20px; */
 }
 
 .stack-controls-common {
@@ -341,11 +513,12 @@ export default {
     text-decoration: none;
     cursor: pointer;
     font-size: 15px;
+    /* height: 30px; */
     padding: 5px 15px 5px 15px;
     border-radius: 99px;
     box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
                 inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
-    transition-duration: 0.2s;
+    transition: all 0.5s;
 }
 
 .stack-controls-drag:active {
@@ -353,12 +526,32 @@ export default {
     background-color: lightgreen;
 }
 
+.stack-controls-s {
+    background-color:orange;
+    color: white;
+    text-decoration: none;
+    /* cursor: none; */
+    font-size: 20px;
+    height: 30px;
+    width: 30px;
+    padding: 5px 10px 5px 9px;
+    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
+                inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+    border-radius: 99px;
+    /* text-align: center;  */
+    /* box-sizing: border-box; */
+    line-height: 10px;
+}
+
 
 .stack-cards {
     position: relative;
-    margin-left: 1px;
+    margin-left: 20px;
     /* bottom: 150px; */
     margin-bottom: -20px;
+    padding-bottom: 20px;
+    z-index: -20;
+    /* overflow: hidden; */
 }
 
 </style>

@@ -7,6 +7,7 @@
                 @mousedown="isInStack ? onCardMouseDown() : null"
                 @mouseover="onCardHeaderMouseOver"
                 @mouseleave="onCardHeaderMouseLeave"
+                @mouseover="onCardHeaderMouseDown"
 <template>
     <div class="card card-in-stack" 
         :ref="'card' + index"  
@@ -17,14 +18,14 @@
         >
         
         <div class="card-header "
-
+            
             >
             <div class="card-header-title card-header-drag-handle">
-                <h1>Card title</h1>
+                <h1>{{ card.info.title }}</h1>
             </div>
 
             <div class="card-header-controls "
-                    @mousedown="isInStack ? null : onCardMouseDown()"
+                    @mouseup="isInStack ? null : onCardMouseUp()"
                     >
                 ✕
             </div>
@@ -33,6 +34,7 @@
 
         <div class="card-body card-body-resize-handle"
                 @mousedown="isInStack ? onCardMouseDown() : null"
+                @mouseup="isInStack ? onCardMouseUp() : null"
                 @mouseover="onCardBodyMouseOver"
                 @mouseleave="onCardBodyMouseLeave"
                 
@@ -46,9 +48,12 @@
 
             <p>in STACK {{ isInStack }}</p> -->
             <!-- TEXT -->
-            <!-- <slot></slot> -->
-            <h1>N {{ id }}</h1>
-            <h4>[EMPTY]</h4>
+            <slot v-if="loadContent()"></slot>   
+            
+            
+            <!-- <h1 v-if="isInStack">N {{ id }}</h1> -->
+            <h2 style="font-size: 60px;" v-if="isInStack">{{ card.info.type }}</h2>
+            <!-- <h4>[EMPTY]</h4> -->
         
         </div>
 
@@ -60,6 +65,7 @@
 
 <script>
 import interact from 'interactjs';
+
 export default {
     
     // props: ['card', 'index'],
@@ -110,6 +116,7 @@ export default {
 
             id: this.card.info.id,
 
+
         }
     },
     
@@ -121,6 +128,10 @@ export default {
 
         },
 
+        // loadContent() {
+        //     return !this.isInStack;
+        // }
+
 
     },
     
@@ -129,7 +140,7 @@ export default {
         // this.stackPosition = (this.index -1 );
         this.stackPosition = (this.index);
         this.$el.style.bottom = this.stackPosition * this.stackSettings.cardGap + 'px'
-        this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.7)";
+        this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
     
         // let r = Math.floor(Math.random()* 254) ;
         // let g = Math.floor(Math.random()* 254) ;
@@ -164,7 +175,7 @@ export default {
             if (this.isInStack) {
                 this.$el.children[0].style.opacity = 1;
                 this.$el.style.transform = "";
-                this.$el.style.transform += "rotate3d(-41, 14, 15, 50deg) rotateX(15deg) scale(0.7)";
+                this.$el.style.transform += "rotate3d(-41, 14, 15, 50deg) rotateX(15deg) scale(0.8)";
             }
 
         },
@@ -174,13 +185,13 @@ export default {
             if (this.isInStack) {
                 this.$el.children[0].style.opacity = 0;
                 this.$el.style.transform = "";
-                this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.7)";
+                this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
             }
             // this.$el.style.transform -= "rotateX(15deg)";
 
         },
 
-        onCardMouseDown() {
+        onCardMouseUp() {
             
 
             this.mouseDown = true;
@@ -263,7 +274,7 @@ export default {
                     crd.style.bottom = (this.stackPosition * this.stackSettings.cardGap) + 'px';
 
                     crd.style.left = 0;
-                    this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.7)";
+                    this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
                     
                     crd.style.width = this.stackSettings.cardDimensions.width + 'px';
                     crd.style.height = this.stackSettings.cardDimensions.height + 'px';
@@ -288,7 +299,13 @@ export default {
         
         },
 
-        onCardMouseUp() {
+        onCardMouseDown() {
+            
+            this.$el.style.transform += "translateY(10px)" ;
+
+
+            
+            
         },
 
 
@@ -343,6 +360,7 @@ export default {
 
                     allowFrom: '.card-body-resize-handle',
                     ratio: 1,
+                    // ratio: 800/526,
 
                     listeners: {
                         move (event) {
@@ -394,7 +412,8 @@ export default {
                         }),
 
                         // interact.modifiers.aspectRatio({ 
-                        //     ratio: 1,
+                        //     ratio: 481/354,
+
 
                         // })
                     ],
@@ -459,6 +478,11 @@ export default {
                             }
                         }
                     })
+        },
+                
+        loadContent() {
+            return !this.isInStack;
+            
         }
     }
 }
@@ -472,8 +496,11 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
+    /* width: 100%; */
     opacity: 0; 
+    /* background-color: white; */
+    outline: 1px black solid;
+
 }
 
 .card-header-controls {
@@ -484,13 +511,15 @@ export default {
 }
 
 .card-header-title {
-    padding-left: 10px;
+    /* padding-left: 10px; */
+    flex: 1;
 
 }
 
 .card-header-title h1 {
-    font-size: 30px;
+    font-size: 25px;
     margin: 0px;
+    padding-left: 10px;
     color: black;
 }
 
@@ -502,6 +531,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-color: rgba(0,0,0,0.15);
 }
 
 .card-body p {
@@ -529,8 +559,8 @@ export default {
                 /* opacity 0.8s, */
                 transform 0.15s ease,
                 /* transform 1.5s ease, */
-                width 1.5s,
-                height 1.5s;
+                width 0.8s ease-in-out,
+                height 0.8s ease-in-out;
 
 
 
@@ -542,12 +572,15 @@ export default {
     flex-direction: column;
     align-items:stretch;
     /* float:left; */
-    border-radius: 14px;
+    border-radius: 13px;
     box-shadow: 0px 0px 9px 1px rgba(0,0,0,0.75);
     /* background-color: white; */
     overflow: hidden;
+    background-color: rgba(0,0,0,0.1);
+
 
 }
+
 
 .card:after {
     content: '';
@@ -557,7 +590,7 @@ export default {
     border-radius: 100%;
     width: 25px;
     height: 25px;
-    box-shadow: 0px 0px 0px 9999px white;
+    /* box-shadow: 0px 0px 0px 9999px white; */
     /* box-shadow: 0px 0px 0px 0px white; */
     z-index: -1;
     /* overflow: visible; */
@@ -573,7 +606,7 @@ export default {
     opacity: 0.15;
     /* transform: rotate3d(-41, 14, 15, 50deg); */
     transform-style: preserve-3d;
-    /* transform: scale(0.7); */
+    /* transform: scale(0.8); */
 
 }
 
