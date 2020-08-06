@@ -10,12 +10,15 @@
                         :index=index
                         @cardStackInteraction="stackRearrangeCards"
                         >
+                <component :is="imageViewer()" 
+                            :content="content"></component>
             </card>
         </div>
 
         <div class="stack-controls">
-            <button @click="toggleCardStack">Toggle</button>
-            <p class="handle">drag me</p>
+            <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">Toggle</button>
+            <button class="stack-controls-common stack-controls-drag">Drag</button>
+            <button class="stack-controls-common stack-controls-edit">Edit</button>
         </div>
             
     </div>
@@ -25,22 +28,28 @@
 
 <script>
 import Card from './Card.vue';
+import ImageViewer from './programs/ImageViewer.vue'
 import interact from 'interactjs';
 
 export default {
     components: {
         Card,
+        ImageViewer,
 
     },
 
     methods: {
+        imageViewer() {
+            return ImageViewer;
+        },
+        
         initializeInteractJs() {
             interact('.stack-draggable')
                 .draggable({
                     // enable inertial throwing
                     inertia: true,
 
-                    allowFrom: '.handle',
+                    allowFrom: '.stack-controls-drag',
                     // keep the element within the area of it's parent
                     modifiers: [
                     interact.modifiers.restrictRect({
@@ -141,9 +150,15 @@ export default {
             },
 
         toggleCardStack() {
+                if (!this.controls.toggleActive) return;
+                document.getElementById("stack-controls-toggle").style.opacity = 0.5;
+                
+                
+                this.controls.toggleActive = false;
+                
                 let cards = this.cardsInStack.length > 1 
-                            // ? this.$children.slice().reverse()
-                            ? this.$children
+                            ? this.$children.slice().reverse()
+                            // ? this.$children
                             : this.$children;
                 
                 cards.forEach((card, index) => {
@@ -152,18 +167,57 @@ export default {
                                 card.onCardMouseDown();
                         })
                     }, 100 + 100*index); 
+
+
                 
                 });
-                
+                                    
+                setTimeout(() => {
+                    document.getElementById("stack-controls-toggle").style.opacity = 1;
+                    this.controls.toggleActive = true;
+
+                }, 100 + 100*this.cards.length);
 
         },
 
         generateCards(count) {
             let cards = [];
             for (let index = 0; index < count; index++) {
-                cards.push({"id": index+1});      
+                cards.push(
+                    {
+                        "info": {
+                            "id": index+1,
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            }
+                        }
+                    }
+                )
+            
             }
             return cards;
+        },
+
+        generateDimensions(d) {
+            switch (d) {
+                case "x":
+                    return  Math.floor(Math.random() * 1400 );
+                
+                case "y":
+                    return  Math.floor(Math.random() * 800 );
+                    
+                case "width":
+                    return  225 + Math.floor(Math.random() * 500 );
+                    
+                case "height":
+                    return  225 + Math.floor(Math.random() * 200 );
+            
+                default:
+                    break;
+            }
         },
 
         calculateCardGap() {
@@ -207,7 +261,12 @@ export default {
             // return {cardGap: 50 - this.cards.length * 1};
             // return cardCount <= 45 ? console.log(50 - cardCount) : console.log(5);
             return {
-                cardGap: (cardCount <= 65 ? 70 - cardCount : 7),
+                cardGap: (cardCount <= 65 ? 75 - cardCount - 20 : 7),
+                cardDimensions: {
+                    width: 225,
+                    height: 225,
+                }
+                // cardGap: -100,
             } 
             
         },
@@ -216,12 +275,19 @@ export default {
 
     data() {
         return {
-            cards: this.generateCards(15),
+            cards: this.generateCards(20),
             
             // stackSettings: {
             //     cardGap: this.calculateCardGap(),
             // },
             // boundingRect: null,
+            content: [
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg'
+            ],
+
+            controls: {
+                toggleActive: true, 
+            }
         }
     }
 }
@@ -234,24 +300,20 @@ export default {
 
 .stack { 
     position: fixed;
-    /* top: 600px;
-    left: 1600px; */
-    bottom: 50px;
-    right: 250px; 
+
+    bottom: 20px;
+    right: 20px; 
     transition: all 0.2s;
-    /* transform: scale(0.9); */
-    /* height: 100%; */
+
+    /* height: 100px;
+    width: 100px; */
     /* width: 100px;
     height: 100px; */
-    /* min-height: 300px; */
-    /* overflow:visible; */
 
     touch-action: none;
     box-sizing: border-box;
     z-index: 999;
-    /* display: table; */
-    /* display: inline; */
-    /* display: table; */
+    /* overflow: hidden; */
 
     
     
@@ -262,11 +324,41 @@ export default {
 }
 
 .stack-controls {
-    position: relative;
-    margin-top: 10px;
-    width: 100%;
-    outline: black solid 1px;
+    /* position: absolute; */ 
+    /* margin-top: 30px; */
+    /* margin-left: -25px; */
+    width: 220px;
+    outline: black solid 0px;
     /* display: table-row; */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    user-select: none;
+}
+
+.stack-controls-common {
+    background-color: white;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 5px 15px 5px 15px;
+    border-radius: 99px;
+    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
+                inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+    transition-duration: 0.2s;
+}
+
+.stack-controls-drag:active {
+    cursor: grabbing;
+    background-color: lightgreen;
+}
+
+
+.stack-cards {
+    position: relative;
+    margin-left: 1px;
+    /* bottom: 150px; */
+    margin-bottom: -20px;
 }
 
 </style>

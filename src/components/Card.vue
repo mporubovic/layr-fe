@@ -7,13 +7,12 @@
                 @mousedown="isInStack ? onCardMouseDown() : null"
                 @mouseover="onCardHeaderMouseOver"
                 @mouseleave="onCardHeaderMouseLeave"
-
 <template>
     <div class="card card-in-stack" 
-        :ref="'card' + id"  
-        key="id"
+        :ref="'card' + index"  
+        key="index"
         :style="cardDynamicStyle"
-        @mouseover="onCardMouseOver" 
+        @mouseover="onCardMouseOver"
         @mouseleave="onCardMouseLeave"
         >
         
@@ -36,6 +35,7 @@
                 @mousedown="isInStack ? onCardMouseDown() : null"
                 @mouseover="onCardBodyMouseOver"
                 @mouseleave="onCardBodyMouseLeave"
+                
                 >
             <!-- <p>Card description</p> -->
         
@@ -46,7 +46,9 @@
 
             <p>in STACK {{ isInStack }}</p> -->
             <!-- TEXT -->
-            <h1>{{ id }}</h1>
+            <!-- <slot></slot> -->
+            <h1>N {{ id }}</h1>
+            <h4>[EMPTY]</h4>
         
         </div>
 
@@ -95,11 +97,18 @@ export default {
 
             stackPosition: 0,
 
+            boardPosition: {
+                x: null,
+                y: null,
+            },
+
+            dimensions: this.card.info.dimensions,
+
             isInStack: true,
             mouseDown: false,
 
 
-            id: this.card.id,
+            id: this.card.info.id,
 
         }
     },
@@ -117,9 +126,10 @@ export default {
     
     mounted() {
         this.calcBoundingRect();
-        this.stackPosition = (this.card.id -1 );
+        // this.stackPosition = (this.index -1 );
+        this.stackPosition = (this.index);
         this.$el.style.bottom = this.stackPosition * this.stackSettings.cardGap + 'px'
-        this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg)";
+        this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.7)";
     
         // let r = Math.floor(Math.random()* 254) ;
         // let g = Math.floor(Math.random()* 254) ;
@@ -141,7 +151,7 @@ export default {
         },
         
         calcBoundingRect() {
-            let cid = 'card' + this.card.id;
+            let cid = 'card' + this.index;
             let br = this.$refs[cid].getBoundingClientRect();
             this.boundingRect.x = br.x;
             this.boundingRect.y = br.y;
@@ -154,7 +164,7 @@ export default {
             if (this.isInStack) {
                 this.$el.children[0].style.opacity = 1;
                 this.$el.style.transform = "";
-                this.$el.style.transform += "rotate3d(-41, 14, 15, 50deg) rotateX(15deg)";
+                this.$el.style.transform += "rotate3d(-41, 14, 15, 50deg) rotateX(15deg) scale(0.7)";
             }
 
         },
@@ -164,7 +174,7 @@ export default {
             if (this.isInStack) {
                 this.$el.children[0].style.opacity = 0;
                 this.$el.style.transform = "";
-                this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg)";
+                this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.7)";
             }
             // this.$el.style.transform -= "rotateX(15deg)";
 
@@ -184,31 +194,36 @@ export default {
                 this.$el.classList.add("card-on-board");
                 this.calcBoundingRect();
                 
-                let cid = 'card' + this.card.id;
-                let crd = this.$refs[cid];
                 
-                document.getElementById("cards").appendChild(crd);
+                document.getElementById("cards").appendChild(this.$el);
                 
-                crd.style.bottom = "" ;
-                crd.style.top = this.boundingRect.y + 'px' ;
-                crd.style.left = this.boundingRect.x + 'px';
-                // crd.style.opacity = 1;
+                this.$el.style.bottom = "" ;
+                this.$el.style.top = this.boundingRect.y + 'px' ;
+                this.$el.style.left = this.boundingRect.x + 'px';
+                
+            
 
-                setTimeout(function() {
-                    crd.style.top = Math.floor( Math.random() * 800 ) + 'px';
+                setTimeout(() => {
+                    
+                    
+                    this.$el.style.left = this.dimensions.x + 'px';
+                    this.$el.style.top = this.dimensions.y + 'px';
 
-                    crd.style.left = Math.floor(Math.random() * 1400 ) + 'px';
-
-                    crd.style.opacity = 1;
-                    crd.children[0].style.opacity = 1;
+                    this.$el.style.width = this.dimensions.width + 'px';
+                    this.$el.style.height = this.dimensions.height + 'px';
 
 
-                    crd.style.transform = "";
+                    this.$el.style.opacity = 1;
+                    this.$el.children[0].style.opacity = 1;
+
+
+                    this.$el.style.transform = "";
                 }, 0);
 
-
-                crd.classList.add('draggable');
-                crd.classList.add('resizable');
+                interact(this.$refs['card'+this.index]).draggable(true).resizable(true);
+                
+                this.$el.classList.add('draggable');
+                this.$el.classList.add('resizable');
                 this.isInStack = false;
             } else {
                 // alert('GO TO STACK');
@@ -220,7 +235,7 @@ export default {
                 // this.$el.offsetHeight;
                 this.$el.classList.remove("card-on-board");
                 this.$el.classList.add("card-in-stack");
-                let cid = 'card' + this.card.id;
+                let cid = 'card' + this.index;
                 let br = this.$refs[cid].getBoundingClientRect();
                 let crd = this.$refs[cid];
                 
@@ -234,7 +249,7 @@ export default {
                 this.$el.style.transform = "";
                 this.$el.style.top = "";
                 
-                console.log(brStack);
+                // console.log(brStack);
                 this.$el.style.bottom =  (brStack.y - br.y - br.height ) + 'px' ;
                 // this.$el.style.bottom =  300 + 'px' ; 
                 this.$el.style.left = br.x - brStack.x + 'px' ;
@@ -242,25 +257,31 @@ export default {
 
                 crd.style.opacity = 1;
 
-
                 
-                setTimeout(function() {
+                setTimeout(() => {
                     
                     crd.style.bottom = (this.stackPosition * this.stackSettings.cardGap) + 'px';
 
                     crd.style.left = 0;
-                    this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg)";
+                    this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.7)";
+                    
+                    crd.style.width = this.stackSettings.cardDimensions.width + 'px';
+                    crd.style.height = this.stackSettings.cardDimensions.height + 'px';
+                    
                     crd.children[0].style.opacity = 0;
                     this.$el.style.opacity = 0.15;
                     
-                }.bind(this), 1);
+                }, 0);
                 this.$el.classList.add("card-in-stack");
                 
                 // interact('.resizable').resizable(false);
                 // interact('.draggable').draggable(false);
                 
+                interact(this.$refs['card'+this.index]).draggable(false).resizable(false);
                 crd.classList.remove('draggable');
                 crd.classList.remove('resizable');
+                
+                
                 this.isInStack = true;
 
             }
@@ -313,12 +334,15 @@ export default {
             },
             
         initializeInteractJsResizable() {
-            interact('.resizable')
+            let self = this;
+            interact(this.$refs['card'+this.index])
                 .resizable({
+                    enabled: false,
                     // resize from all edges and corners
                     edges: { left: true, right: true, bottom: true, top: false },
 
                     allowFrom: '.card-body-resize-handle',
+                    ratio: 1,
 
                     listeners: {
                         move (event) {
@@ -342,22 +366,37 @@ export default {
 
                             target.setAttribute('data-x', x)
                             target.setAttribute('data-y', y)
+
+                            // console.log(event);
+                            // console.log(self.boardPosition.x);
+                            // console.log(event.rect.left);
+                            
+                            self.dimensions.x = event.rect.left;
+                            self.dimensions.y = event.rect.top;
                         },
 
                         end (event) {
                             event.target.classList.remove("card-no-delay");
+                            // alert('uwaga');
+                            self.dimensions.width = event.rect.width;
+                            self.dimensions.height = event.rect.height;
                         }
                     },
                     modifiers: [
                     // keep the edges inside the parent
-                    interact.modifiers.restrictEdges({
-                        outer: 'parent'
-                    }),
+                        interact.modifiers.restrictEdges({
+                            outer: 'parent'
+                        }),
 
                     // minimum size
-                    interact.modifiers.restrictSize({
-                        min: { width: 200, height: 200 }
-                    })
+                        interact.modifiers.restrictSize({
+                            min: { width: 225, height: 225 }
+                        }),
+
+                        // interact.modifiers.aspectRatio({ 
+                        //     ratio: 1,
+
+                        // })
                     ],
 
                     inertia: true
@@ -367,9 +406,12 @@ export default {
         },
         
         initializeInteractJsDraggable() {
+            let self = this;
 
-            interact('.draggable')
+            interact(this.$refs['card'+this.index])
                     .draggable({
+                        enabled: false,
+                        
                         // enable inertial throwing
                         inertia: true,
                         // keep the element within the area of it's parent
@@ -407,7 +449,12 @@ export default {
                             // call this function on every dragend event
                             end (event) {
                                 event.target.classList.remove("card-no-delay");
-
+                                // console.log(event);
+                                // console.log(self.boardPosition.x);
+                                // console.log(event.rect.left);
+                                self.dimensions.x = event.rect.left;
+                                self.dimensions.y = event.rect.top;
+                                // alert(self.card.id);
 
                             }
                         }
@@ -452,7 +499,9 @@ export default {
     padding: 0;
     height: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 
 .card-body p {
@@ -462,7 +511,7 @@ export default {
 }
 
 .card-body h1 {
-    font-size: 100px;
+    font-size: 85px;
     margin: 0px;
     /* padding: 0px; */
     color: black;
@@ -470,15 +519,18 @@ export default {
 
 
 .card {
-    width: 200px;
-    height: 200px;
+    width: 225px;
+    height: 225px;
     transition: top 0.5s ease, 
                 left 0.5s ease, 
                 bottom 0.5s ease, 
                 margin 1s,
                 opacity 0.11s,
                 /* opacity 0.8s, */
-                transform 0.15s ease;
+                transform 0.15s ease,
+                /* transform 1.5s ease, */
+                width 1.5s,
+                height 1.5s;
 
 
 
@@ -500,14 +552,15 @@ export default {
 .card:after {
     content: '';
     position: absolute;
-    right: 7px;
-    bottom: 7px;
+    right: 50px;
+    top: 7px;
     border-radius: 100%;
-    width: 15px;
-    height: 15px;
-    box-shadow: 0px 0px 0px 2000px white;
+    width: 25px;
+    height: 25px;
+    box-shadow: 0px 0px 0px 9999px white;
+    /* box-shadow: 0px 0px 0px 0px white; */
     z-index: -1;
-    /* overflow: hidden; */
+    /* overflow: visible; */
 }
 
 .card-no-delay {
@@ -520,6 +573,7 @@ export default {
     opacity: 0.15;
     /* transform: rotate3d(-41, 14, 15, 50deg); */
     transform-style: preserve-3d;
+    /* transform: scale(0.7); */
 
 }
 
