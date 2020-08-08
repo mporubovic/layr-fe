@@ -12,8 +12,10 @@
                         :index=index
                         @cardStackInteraction="stackRearrangeCards"
                         >
+                
                 <component :is="cardProgram(card.info.type)" 
                             :content="card.content"
+                            :cardId="card.info.id"
                             >
                 </component>
             </card>
@@ -38,6 +40,7 @@ import interact from 'interactjs';
 import ImageViewer from './programs/ImageViewer.vue'
 import VideoViewer from './programs/VideoViewer.vue'
 import PdfViewer from './programs/PdfViewer.vue'
+import TextEditor from './programs/TextEditor.vue'
 
 
 
@@ -47,12 +50,13 @@ export default {
         ImageViewer,
         VideoViewer,
         PdfViewer,
+        TextEditor,
 
     },
 
     data() {
         return {
-            cards: this.generateCards(8),
+            cards: this.generateCards(2),
             
             // stackSettings: {
             //     cardGap: this.calculateCardGap(),
@@ -75,7 +79,7 @@ export default {
             switch (type) {
                 
                 case("image") :
-                    return "ImageViewer";                
+                    return "ImageViewer";   
                     
                 case("video") :
                     return "VideoViewer";                
@@ -87,7 +91,10 @@ export default {
                     return "TodoViewer";                
                 
                 case("url") :
-                    return "UrlViewer";                
+                    return "UrlViewer";     
+                    
+                case("text") :
+                    return "TextEditor";  
             }
         },
 
@@ -105,7 +112,7 @@ export default {
                 cards.push(
                     {
                         "info": {
-                            "id": 1,
+                            "id": Math.floor(Math.random()*1000),
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
@@ -130,7 +137,7 @@ export default {
                     
                     {
                         "info": {
-                            "id": 2,
+                            "id": Math.floor(Math.random()*1000),
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
@@ -208,7 +215,31 @@ export default {
 
 
                         ]
-                    }
+                    },
+                    {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "text", 
+                            "title": "Text editor"
+                        },
+
+                        "content": [
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+                                    "name": "NFX"
+                                }    
+                            }
+                        ],
+
+                    },
                 )
             
             }
@@ -394,6 +425,10 @@ export default {
         calculateBoundingRectangle() {
             return this.$el.getBoundingClientRect();
 
+        },
+
+        loadContent(card) {
+            return this.cardsInStack.includes(card);
         }
 
     },

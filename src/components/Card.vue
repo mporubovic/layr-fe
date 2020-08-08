@@ -8,6 +8,8 @@
                 @mouseover="onCardHeaderMouseOver"
                 @mouseleave="onCardHeaderMouseLeave"
                 @mouseover="onCardHeaderMouseDown"
+
+                
 <template>
     <div class="card card-in-stack" 
         :ref="'card' + index"  
@@ -17,9 +19,7 @@
         @mouseleave="onCardMouseLeave"
         >
         
-        <div class="card-header "
-            
-            >
+        <div class="card-header">
             <div class="card-header-title card-header-drag-handle">
                 <h1>{{ card.info.title }}</h1>
             </div>
@@ -39,23 +39,18 @@
                 @mouseleave="onCardBodyMouseLeave"
                 
                 >
-            <!-- <p>Card description</p> -->
-        
-<!--             
-            <p> CARD ID {{ id }}</p>
 
-            <p> IS HOVERING {{ isHovering }}</p>
-
-            <p>in STACK {{ isInStack }}</p> -->
-            <!-- TEXT -->
-            <slot v-if="loadContent()"></slot>   
-            
+            <div class="test">
+                
+            </div>
+                     
+            <slot v-if="loadContent()"></slot> 
             
             <!-- <h1 v-if="isInStack">N {{ id }}</h1> -->
             <h2 style="font-size: 60px;" v-if="isInStack">{{ card.info.type }}</h2>
-            <!-- <h4>[EMPTY]</h4> -->
         
         </div>
+
 
 
 
@@ -525,13 +520,27 @@ export default {
 
 .card-body {
     margin: 0;
-    padding: 0;
-    height: 100%;
+    padding: 10px;
+    /* height: 100%; */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0,0,0,0.15);
+    /* justify-content: center; */
+    /* align-items: stretch; */
+    /* background-color: rgba(0,0,0,0.15); */
+    /* overflow: hidden; */
+    /* overflow: hidden; */
+    overflow-y:auto;
+    touch-action: none;
+    
+}
+
+.test {
+    flex:1;
+    /* overflow: hidden; */
+    /* width: 100%; */
+    /* height: 100%; */
+    
 }
 
 .card-body p {
@@ -570,13 +579,13 @@ export default {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items:stretch;
+    /* align-items:stretch; */
     /* float:left; */
     border-radius: 13px;
     box-shadow: 0px 0px 9px 1px rgba(0,0,0,0.75);
-    /* background-color: white; */
+    background-color: white;
     overflow: hidden;
-    background-color: rgba(0,0,0,0.1);
+    /* background-color: rgba(0,0,0,0.1); */
 
 
 }
