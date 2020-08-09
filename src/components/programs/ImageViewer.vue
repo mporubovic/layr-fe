@@ -1,8 +1,9 @@
 <template>
     <div class="gallery-container">
-        <img :src="content[index].file.url" />
+        <img :src="images[index]" />
 
         <div class="footer">
+            
             <div class="footer-content">{{ imageName }}</div>
 
             <div class="footer-controls">
@@ -34,6 +35,7 @@ export default {
     data() {
         return {
             index: 0,
+            images: [],
         };
     },
 
@@ -56,6 +58,14 @@ export default {
                 this.index--;
             }
         },
+    },
+
+    mounted() {
+        this.content.forEach((element) => {
+            let image = new Image();
+            image.src = element.file.url
+            this.images.push(image.src);
+        });
     },
 };
 </script>
