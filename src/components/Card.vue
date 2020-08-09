@@ -12,14 +12,16 @@
                 
 <template>
     <div class="card card-in-stack" 
-        :ref="'card' + index"  
-        key="index"
+        :ref="'card' + id"  
+        key="id"
         :style="cardDynamicStyle"
         @mouseover="onCardMouseOver"
         @mouseleave="onCardMouseLeave"
         >
         
-        <div class="card-header">
+        <div class="card-header"
+                @mousedown="onCardHeaderMouseDown()"
+            >
             <div class="card-header-title card-header-drag-handle">
                 <h1>{{ card.info.title }}</h1>
             </div>
@@ -32,22 +34,35 @@
             
         </div>
 
-        <div class="card-body card-body-resize-handle"
-                @mousedown="isInStack ? onCardMouseDown() : null"
+        <div class="card-body card-body-resize-handle" id="card-body"
+                @mousedown="isInStack ? onCardMouseDown() : cardChildPointerEvents()"
                 @mouseup="isInStack ? onCardMouseUp() : null"
                 @mouseover="onCardBodyMouseOver"
                 @mouseleave="onCardBodyMouseLeave"
-                
+                :style="cardBodyDynamicStyle"
                 >
 
             <div class="test">
-                
+
             </div>
-                     
-            <slot v-if="loadContent()"></slot> 
+                <component v-if="loadContent()"
+                            :is="cardProgram(card)" 
+                            :content="card.content"
+                            :cardId="card.info.id"
+                            :hasFocus="hasFocus"
+                            >
+                </component>        
+
             
-            <!-- <h1 v-if="isInStack">N {{ id }}</h1> -->
-            <h2 style="font-size: 60px;" v-if="isInStack">{{ card.info.type }}</h2>
+            <!-- <slot v-if="loadContent()"
+                    :style="cardBodyDynamicStyle"
+                    >
+            </slot>  -->
+            
+            <!-- <h1>ix {{ indexAsData }}</h1>
+            <h2>id {{ id }}</h2> -->
+            <!-- <h1 v-if="isInStack">I {{ index }}</h1> -->
+            <h2 style="font-size: 60px; margin-left: 10px;" v-if="isInStack">{{ card.info.type }}</h2>
         
         </div>
 
@@ -76,6 +91,10 @@ export default {
         stackSettings: {
             type: Object,
             required: true, 
+        },
+        hasFocus: {
+            type: Boolean,
+            required: true
         }
     },
 
@@ -111,6 +130,12 @@ export default {
 
             id: this.card.info.id,
 
+            // hasFocus: false,
+
+            headerDoubleTap: 0,
+
+            indexAsData: this.index,
+
 
         }
     },
@@ -119,8 +144,12 @@ export default {
     computed: {
         cardDynamicStyle() {
             
-                return this.isInStack ? { 'z-index': this.index} : {'z-index': this.index};
+                return this.isInStack ? { 'z-index': this.indexAsData} : {'z-index': this.indexAsData};
 
+        },
+
+        cardBodyDynamicStyle() {
+            return this.isInStack ? {'background-color': "white"} : null
         },
 
         // loadContent() {
@@ -132,8 +161,8 @@ export default {
     
     mounted() {
         this.calcBoundingRect();
-        // this.stackPosition = (this.index -1 );
-        this.stackPosition = (this.index);
+        // this.stackPosition = (this.indexAsData -1 );
+        this.stackPosition = (this.indexAsData);
         this.$el.style.bottom = this.stackPosition * this.stackSettings.cardGap + 'px'
         this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
     
@@ -147,17 +176,60 @@ export default {
         this.initializeInteractJsResizable();
         this.initializeInteractJsDraggable();
 
+
         // this.$el.classList.remove();
  
     },
 
     methods: {
+        cardProgram(card) {
+            switch (card.info.type) {
+                
+                case("image") :
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
+
+                    }, 0);
+                    
+                    return "image-viewer";   
+                    
+                case("video") :
+                    return "VideoViewer";                
+                
+                case("pdf") :
+                    this.$el.querySelector(".card-body").style.padding = "15px 15px 15px 15px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "#D1D1D1";
+                    }, 0);
+                    
+                    // this.$el.style["background-color"] = "#D1D1D1";
+
+                    return "pdf-viewer";                
+                
+                case("todo") :
+                    return "TodoViewer";                
+                
+                case("url") :
+                    return "UrlViewer";     
+                    
+                case("text") :
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "white";
+                    }, 0);
+                    
+                    // this.$el.style["background-color"] = "white";
+
+                    return "text-editor";  
+            }
+        },
+        
         startupAnimation () {
             this.onCardMouseDown();
         },
         
         calcBoundingRect() {
-            let cid = 'card' + this.index;
+            let cid = 'card' + this.id;
             let br = this.$refs[cid].getBoundingClientRect();
             this.boundingRect.x = br.x;
             this.boundingRect.y = br.y;
@@ -182,6 +254,11 @@ export default {
                 this.$el.style.transform = "";
                 this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
             }
+            
+            // if (!this.isInStack) {
+            //     this.hasFocus = false;
+            // }
+            
             // this.$el.style.transform -= "rotateX(15deg)";
 
         },
@@ -194,7 +271,7 @@ export default {
             
             if (this.isInStack) {
                 // alert('GO TO BOARD');
-                this.$emit('cardStackInteraction', this.index, true);
+                this.$emit('cardStackInteraction', this.indexAsData, true);
                 
                 this.$el.classList.remove("card-in-stack");
                 this.$el.classList.add("card-on-board");
@@ -226,7 +303,7 @@ export default {
                     this.$el.style.transform = "";
                 }, 0);
 
-                interact(this.$refs['card'+this.index]).draggable(true).resizable(true);
+                interact(this.$refs['card'+this.id]).draggable(true).resizable(true);
                 
                 this.$el.classList.add('draggable');
                 this.$el.classList.add('resizable');
@@ -235,13 +312,13 @@ export default {
                 // alert('GO TO STACK');
 
                 let brStack = this.$parent.calculateBoundingRectangle();
-                this.$emit('cardStackInteraction', this.index, false);
+                this.$emit('cardStackInteraction', this.indexAsData, false);
                 
                 
                 // this.$el.offsetHeight;
                 this.$el.classList.remove("card-on-board");
                 this.$el.classList.add("card-in-stack");
-                let cid = 'card' + this.index;
+                let cid = 'card' + this.id;
                 let br = this.$refs[cid].getBoundingClientRect();
                 let crd = this.$refs[cid];
                 
@@ -276,6 +353,9 @@ export default {
                     
                     crd.children[0].style.opacity = 0;
                     this.$el.style.opacity = 0.15;
+
+                    // this.$el.style["background-color"] = "white";
+
                     
                 }, 0);
                 this.$el.classList.add("card-in-stack");
@@ -283,7 +363,7 @@ export default {
                 // interact('.resizable').resizable(false);
                 // interact('.draggable').draggable(false);
                 
-                interact(this.$refs['card'+this.index]).draggable(false).resizable(false);
+                interact(this.$refs['card'+this.id]).draggable(false).resizable(false);
                 crd.classList.remove('draggable');
                 crd.classList.remove('resizable');
                 
@@ -297,6 +377,11 @@ export default {
         onCardMouseDown() {
             
             this.$el.style.transform += "translateY(10px)" ;
+            if (!this.isInStack) {
+                // this.hasFocus = true;
+                alert('warn')
+            }
+                
 
 
             
@@ -308,11 +393,13 @@ export default {
         },
 
         onCardBodyMouseOver() {
-            this.$el.style.cursor = "grab";
+            // this.$el.style.cursor = "grab";
+
         },
 
         onCardBodyMouseLeave() {
             this.$el.style.cursor = "";
+            // this.$children[0].$el.style["pointer-events"] = 'none'
         },
 
         onCardHeaderMouseOver() {
@@ -321,6 +408,20 @@ export default {
         
         onCardHeaderMouseLeave() {
             this.$el.style.cursor = "";
+        },
+
+        onCardHeaderMouseDown() {
+            this.headerDoubleTap++
+
+            setTimeout(() => {
+                this.headerDoubleTap = 0;
+            }, 400);
+
+            if (this.headerDoubleTap === 2) {
+                this.headerDoubleTap = 0;
+                this.$emit('cardBringForward', this);
+            }
+
         },
 
         setStackPosition(pos) {
@@ -344,10 +445,17 @@ export default {
             target.setAttribute('data-x', x)
             target.setAttribute('data-y', y)
             },
+
+        cardChildPointerEvents() {
+            // this.hasFocus = true;
+            // alert('warning');
+            // this.$children[0].$el.style["pointer-events"] = 'all'
+            // this.$children[0].$el.style.removeProperty('pointer-events')
+        },
             
         initializeInteractJsResizable() {
             let self = this;
-            interact(this.$refs['card'+this.index])
+            interact(this.$refs['card'+this.id])
                 .resizable({
                     enabled: false,
                     // resize from all edges and corners
@@ -358,11 +466,19 @@ export default {
                     // ratio: 800/526,
 
                     listeners: {
+                        start () {
+                            // event = ""
+                            self.$emit('cardInteractJsResize', self.id, true)
+                        },
+                        
                         move (event) {
                             var target = event.target
                             
                             target.classList.add("card-no-delay");
                         
+                            
+                            
+                            
                             var x = (parseFloat(target.getAttribute('data-x')) || 0)
                             var y = (parseFloat(target.getAttribute('data-y')) || 0)
 
@@ -393,6 +509,8 @@ export default {
                             // alert('uwaga');
                             self.dimensions.width = event.rect.width;
                             self.dimensions.height = event.rect.height;
+                            self.$emit('cardInteractJsResize', self.id, false)
+                            
                         }
                     },
                     modifiers: [
@@ -422,7 +540,7 @@ export default {
         initializeInteractJsDraggable() {
             let self = this;
 
-            interact(this.$refs['card'+this.index])
+            interact(this.$refs['card'+this.id])
                     .draggable({
                         enabled: false,
                         
@@ -442,6 +560,10 @@ export default {
 
                         listeners: {
                         // call this function on every dragmove event
+                            start () {
+                                self.$emit('cardInteractJsDrag', self.id, true)
+                            },
+                            
                             move (event) {
                                 var target = event.target
                                 target.classList.add("card-no-delay");
@@ -469,6 +591,7 @@ export default {
                                 self.dimensions.x = event.rect.left;
                                 self.dimensions.y = event.rect.top;
                                 // alert(self.card.id);
+                                self.$emit('cardInteractJsDrag', self.id, false)
 
                             }
                         }
@@ -493,7 +616,7 @@ export default {
     align-items: center;
     /* width: 100%; */
     opacity: 0; 
-    /* background-color: white; */
+    background-color: white;
     outline: 1px black solid;
 
 }
@@ -520,7 +643,6 @@ export default {
 
 .card-body {
     margin: 0;
-    padding: 10px;
     /* height: 100%; */
     flex: 1;
     display: flex;
@@ -569,7 +691,8 @@ export default {
                 transform 0.15s ease,
                 /* transform 1.5s ease, */
                 width 0.8s ease-in-out,
-                height 0.8s ease-in-out;
+                height 0.8s ease-in-out,
+                ;
 
 
 
@@ -583,9 +706,10 @@ export default {
     /* float:left; */
     border-radius: 13px;
     box-shadow: 0px 0px 9px 1px rgba(0,0,0,0.75);
-    background-color: white;
+    /* background-color: none; */
     overflow: hidden;
     /* background-color: rgba(0,0,0,0.1); */
+    /* pointer-events: none; */
 
 
 }

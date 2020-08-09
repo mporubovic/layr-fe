@@ -1,4 +1,10 @@
-
+        <div class="stack-controls" id="stack-controls">
+            <!-- <button class="stack-controls-s">S</button> -->
+            <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">{{ toggleButtonText }}</button>
+            <button class="stack-controls-common stack-controls-drag">Move</button>
+            <button class="stack-controls-common stack-controls-edit">Edit</button>
+            <button class="stack-controls-common stack-controls-add-wrapper"><div class="stack-controls-add">+</div></button>
+        </div>
 
 <template>
     
@@ -6,27 +12,32 @@
 
         <div class="stack-cards" id="stack-cards">
             <card v-for="(card, index) in cards" 
-                        :key="index" 
+                        :key="card.id" 
                         :card=card
                         :stackSettings="stackSettings"
                         :index=index
+                        :hasFocus="cardHasFocus"
                         @cardStackInteraction="stackRearrangeCards"
+                        @cardInteractJsDrag="cardsSetFocus"
+                        @cardInteractJsResize="cardsSetFocus"
+                        @cardBringForward="cardBringForward"
                         >
-                
-                <component :is="cardProgram(card.info.type)" 
-                            :content="card.content"
-                            :cardId="card.info.id"
-                            >
-                </component>
             </card>
         </div>
 
-        <div class="stack-controls" id="stack-controls">
-            <!-- <button class="stack-controls-s">S</button> -->
-            <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">{{ toggleButtonText }}</button>
-            <button class="stack-controls-common stack-controls-drag">Move</button>
-            <button class="stack-controls-common stack-controls-edit">Edit</button>
+        
+
+
+        <div class="stack-controls-wrapper">
+            <div class="stack-controls">
+                <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">{{ toggleButtonText }}</button>
+                <button class="stack-controls-common stack-controls-move">Move</button>
+                <button class="stack-controls-common stack-controls-add">
+                    <img src="../assets/stack/controls/add.svg">
+                </button>
+            </div>
         </div>
+
             
     </div>
 </template>
@@ -37,20 +48,20 @@
 import Card from './Card.vue';
 import interact from 'interactjs';
 
-import ImageViewer from './programs/ImageViewer.vue'
-import VideoViewer from './programs/VideoViewer.vue'
-import PdfViewer from './programs/PdfViewer.vue'
-import TextEditor from './programs/TextEditor.vue'
+// import ImageViewer from './programs/ImageViewer.vue'
+// import VideoViewer from './programs/VideoViewer.vue'
+// import PdfViewer from './programs/PdfViewer.vue'
+// import TextEditor from './programs/TextEditor.vue'
 
 
 
 export default {
     components: {
         Card,
-        ImageViewer,
-        VideoViewer,
-        PdfViewer,
-        TextEditor,
+        // ImageViewer,
+        // VideoViewer,
+        // PdfViewer,
+        // TextEditor,
 
     },
 
@@ -70,22 +81,25 @@ export default {
 
             cardLoadContent: false,
 
+            cardContent: [],
+
+            cardHasFocus: false,
         }
     },
     
     
     methods: {
-        cardProgram(type) {
-            switch (type) {
+        cardProgram(card) {
+            switch (card.info.type) {
                 
                 case("image") :
-                    return "ImageViewer";   
+                    return "image-viewer";   
                     
                 case("video") :
                     return "VideoViewer";                
                 
                 case("pdf") :
-                    return "PdfViewer";                
+                    return "pdf-viewer";                
                 
                 case("todo") :
                     return "TodoViewer";                
@@ -94,7 +108,7 @@ export default {
                     return "UrlViewer";     
                     
                 case("text") :
-                    return "TextEditor";  
+                    return "text-editor";  
             }
         },
 
@@ -127,7 +141,7 @@ export default {
                             {
                                 "meta": {},
                                 "file": {
-                                    "url": 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+                                    "url": 'http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
                                     "name": "NFX"
                                 }    
                             }
@@ -253,7 +267,7 @@ export default {
                     // enable inertial throwing
                     inertia: true,
 
-                    allowFrom: '.stack-controls-drag',
+                    allowFrom: '.stack-controls-move',
                     // keep the element within the area of it's parent
                     modifiers: [
                     // interact.modifiers.restrictRect({
@@ -304,9 +318,10 @@ export default {
         
         stackRearrangeCards(index, stackToBoard) {
             let crds = this.cardsInStack
+            // console.log(crds)
             if (stackToBoard) {
                 let bottomCardIndex = crds.findIndex(function(card) {
-                    return card.index === index;
+                    return card.indexAsData === index;
                 });
                 
                 let crdsAbove = crds.slice(bottomCardIndex, crds.length);
@@ -317,23 +332,37 @@ export default {
                     element.stackPosition -= 1
                 });
 
+                if (this.cardsOnBoard.length === 0) {
+                    this.controls.toggleExpand = false;
+                }
             } else {
                 
                 let cardAbovePosition = crds.findIndex(function(card) {
-                    return card.index > index;
+                    return card.indexAsData > index;
                 });
 
                 if (cardAbovePosition !== -1) {
                     
                     let crdsAbove = crds.slice(cardAbovePosition, crds.length);
+                    // console.log(crdsAbove)
                     crdsAbove.forEach(element => {
                         element.$el.style.bottom = this.stackSettings.cardGap * (element.stackPosition + 1)  + 'px';
                         element.stackPosition += 1
-                        this.$children[index].setStackPosition(cardAbovePosition);
+                        // this.$children[index].setStackPosition(cardAbovePosition);
+                        // element.setStackPosition(cardAbovePosition);
                     });
+                    // console.log(cardAbovePosition)
+                    this.$children.filter(card => card.indexAsData === index)[0].setStackPosition(cardAbovePosition)
 
                 } else {
-                    this.$children[index].setStackPosition(crds.length);
+                    // console.log(this.$children[index])
+                    // console.log(this.$children.filter(card => card.indexAsData === index)[0])
+                    this.$children.filter(card => card.indexAsData === index)[0].setStackPosition(crds.length);
+                }
+
+                if (this.cardsOnBoard.length === 1) {
+                    
+                    this.controls.toggleExpand = true;
                 }
 
 
@@ -373,10 +402,11 @@ export default {
                 
                 this.controls.toggleActive = false;
                 
-                let cards = this.cardsInStack.length > 1 
-                            ? this.$children.slice().reverse()
+                let cards = this.cardsInStack.length < this.$children.length
+                            ? this.cardsOnBoard.slice().reverse()
                             // ? this.$children
-                            : this.$children;
+                            : this.cardsInStack;
+                
                 
                 cards.forEach((card, index) => {
                     setTimeout(() => {
@@ -393,9 +423,9 @@ export default {
                 setTimeout(() => {
                     document.getElementById("stack-controls-toggle").style.opacity = 1;
                     this.controls.toggleActive = true;
-                    this.controls.toggleExpand = !this.controls.toggleExpand;
+                    // this.controls.toggleExpand = !this.controls.toggleExpand;
 
-                }, 700 + 100*this.cards.length);
+                }, 700 + 100*cards.length);
 
         },
 
@@ -429,6 +459,59 @@ export default {
 
         loadContent(card) {
             return this.cardsInStack.includes(card);
+        },
+
+        cardsSetFocus(cardId, start) {
+            // let otherCards = this.$children.filter(card => card.id != cardId)
+            // let crds = this.$children
+            
+            if (start) {
+                this.cardHasFocus = false
+                // crds.forEach(card => {
+                //     card.hasFocus = false;
+                // });
+            } else {
+                this.cardHasFocus = true
+                // crds.forEach(card => {
+                //     card.hasFocus = true;
+                // });
+            }
+        },
+        
+        cardBringForward(crd) {
+            
+            let originalIndex = crd.indexAsData
+            let higherCardsOnBoard = this.cardsOnBoard.filter(card => card.indexAsData > originalIndex)
+            
+            if (!higherCardsOnBoard.length) {
+                return null
+            }
+
+            let highestCardOnBoard = higherCardsOnBoard[higherCardsOnBoard.length - 1]
+
+
+            // let higherCardsInStack = this.cardsInStack.filter(card => card.index > highestCardOnBoard.index)
+
+            // let lowerCardsOnBoard = 
+
+            let newIndex = highestCardOnBoard.indexAsData
+
+            let cardsToBeAdjusted = this.$children.filter(card => (card.indexAsData <= newIndex && card.indexAsData > originalIndex))
+
+            crd.indexAsData = newIndex;
+            // crd.stackPosition = newIndex;
+
+            // console.log(cardsToBeAdjusted)
+            // console.log(higherCardsOnBoard)
+
+            cardsToBeAdjusted.forEach((card) => {
+                // alert(index)
+                card.indexAsData--
+                // card.stackPosition = card.indexAsData -1 
+            });
+
+
+
         }
 
     },
@@ -446,11 +529,17 @@ export default {
 
     computed: {
         cardsInStack() {
-            return this.$children.filter(card => card.isInStack);
+            return this.$children.filter(card => card.isInStack)
+                                    .sort(function(a, b) {
+                                        return a.indexAsData - b.indexAsData
+                                    });
         },
         
         cardsOnBoard() {
-            return this.$children.filter(card => !card.isInStack);
+            return this.$children.filter(card => !card.isInStack)
+                                    .sort(function(a, b) {
+                                        return a.indexAsData - b.indexAsData
+                                    });
         },
         
         stackSettings() {
@@ -521,11 +610,99 @@ export default {
     transition: none !important;
 }
 
+.stack-controls-wrapper {
+
+    width:280px;
+    height: 55px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 99px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    box-sizing: border-box;
+    /* display: flex;
+    flex-direction: column; */
+    
+}
+
+.stack-controls {
+    /* position: absolute; */
+    /* padding: 5px; */
+    height: 100%;
+    /* width: 100%; */
+    /*height: 100%; */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.stack-controls-common {
+    text-decoration: none;
+    user-select: none;
+    color:black;
+    font-size: 16px;
+    background-color: white;
+    border-radius: 99px;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
+                inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+    /* margin-left: 5px; */
+    transition: background-color 0.4s,
+                box-shadow 0.1s;
+}
+
+/* .stack-controls-common:focus{
+    outline
+} */
+
+.stack-controls-move {
+    cursor: grab;
+}
+
+.stack-controls-move:active {
+    background-color: lightgreen;
+    cursor: grabbing;
+    /* box-shadow: none !important; */
+
+}
+
+.stack-controls-common:hover {
+    box-shadow: 0 0 0pt 2pt lightgreen;
+}
+
+.stack-controls-add {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 0;
+    padding-right: 0;
+    height: 31px;
+    width: 50px;
+    
+}
+
+.stack-controls-add img {
+    height: 17px;
+}
+
+.stack-cards {
+    position: relative;
+    margin-left: 20px;
+    /* bottom: 150px; */
+    margin-bottom: -20px;
+    padding-bottom: 20px;
+    z-index: -20;
+    /* overflow: hidden; */
+}
+
+</style>
+
 .stack-controls {
     /* position: absolute; */ 
     /* margin-top: 30px; */
     /* margin-left: -25px; */
-    width: 240px;
+    width: 260px;
     height: 50px;
     /* outline: black solid -5px; */
     background-color: rgba(0, 0, 0, 0.30);
@@ -578,15 +755,21 @@ export default {
     line-height: 10px;
 }
 
+.stack-controls-add-wrapper {
+    max-height: 30px;
+    min-height: 30px;
+    max-width: 30px;
+    min-width: 30px;
+    padding: 0;
+    /* padding-bottom: 10px; */
+    /* padding-bottom: 15px; */
+    /* padding: 5px 5px 5px 5px !important; */
 
-.stack-cards {
-    position: relative;
-    margin-left: 20px;
-    /* bottom: 150px; */
-    margin-bottom: -20px;
-    padding-bottom: 20px;
-    z-index: -20;
-    /* overflow: hidden; */
 }
 
-</style>
+.stack-controls-add {
+    font-size: 30px;
+    padding-bottom: 20px;
+    width: 100%;
+    height: 100%;
+}
