@@ -1,6 +1,11 @@
 import Vue from 'vue'
 import Layr from './Layr.vue'
 
+import '@/globalComponents'
+
+// import ImageViewer from './components/programs/ImageViewer.vue'
+// Vue.component('ImageViewer', ImageViewer);
+
 Vue.config.productionTip = false
 
 new Vue({
