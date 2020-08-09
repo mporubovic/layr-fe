@@ -1,5 +1,6 @@
 <template>
-    <div class="text-editor">
+    <div class="text-editor"
+            :style="editorDynamicStyle">
         <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
 
         <div class="text-editor-toolbar" id="text-editor-toolbar">
@@ -23,12 +24,21 @@ export default {
         cardId: {
             type: Number,
             required: true,
+        },
+        
+        hasFocus: {
+            type: Boolean,
+            required: true,
         }
     },
 
     computed: {
         editorId() {
             return "text-editor-container-" + this.cardId
+        },
+
+        editorDynamicStyle() {
+            return this.hasFocus ? {'pointer-events': ''} : {'pointer-events': 'none'}
         }
     },
     
@@ -61,7 +71,7 @@ export default {
         this.$el.querySelector("#text-editor-toolbar").appendChild(this.$el.querySelector(".ql-toolbar"));
 
         this.quill = quill;
-        console.log (quill);
+        // console.log (quill);
     },
 
     data() {
@@ -83,6 +93,7 @@ export default {
     /* overflow: hidden; */
     display: flex;
     flex-direction: column;
+
 }
 
 .text-editor-container-wrapper {
@@ -99,6 +110,16 @@ export default {
 }
 
 .ql-container.ql-snow {
-  border: none !important;
+    border: none !important;
 }
+.ql-snow.ql-toolbar button {
+    height: 28px !important;
+}
+
+.ql-snow .ql-picker {
+    font-size: 18px !important;
+    height: 30px !important;
+}
+
+
 </style>
