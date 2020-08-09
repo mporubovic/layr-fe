@@ -1,41 +1,83 @@
+
 <template>
-  <div style="overflow-y: scroll">
-    <!-- <pdf
-      v-for="i in pagesNumber"
-      :key="i"
-      :src="src"
-      :page="i"
-      style="display: inline-block; width: 100%"></pdf> -->
+    <div>
+        <!-- <pdf
+            v-for="i in pagesNumber"
+            :key="i"
+            src="https://cdn.mozilla.net/pdfjs/tracemonkey.pdf"
+            :page="i"
+            style="display: inline-block; width: 100%"
+        ></pdf> -->
 
-      <iframe src="http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true" style="width:100%; height:1000px;" frameborder="0"></iframe>
-
-  </div>
+        <h2 v-if="contentLoading">Loading PDF</h2>
+        <iframe :src="iframes[0]" 
+                :style="ifrmDynamicStyle"
+                frameborder="0"
+                ></iframe>
+    </div>
 </template>
 
 <script>
-  // import pdf from 'vue-pdf'
+// import pdf from "vue-pdf";
 
-  export default {
-    props: ['content'],
+export default {
+    props: {
+        content: {
+            type: Array,
+            required: true,
+        },
 
+        hasFocus: {
+            type: Boolean,
+            required: true,
+        }
+    },
+
+    // components: {
+    //   pdf
+    // },
 
     data() {
-      return {
-        pagesNumber: []
-      }
+        return {
+            pagesNumber: [],
+            iframes: [],
+            contentLoading: true,
+        };
+    },
+
+    computed: {
+        ifrmDynamicStyle() {
+            return this.hasFocus ? {'pointer-events': ''} : {'pointer-events': 'none'}
+        }
     },
 
     mounted() {
-    }
-  }
+            this.content.forEach((element) => {
+                var ifrm = document.createElement("iframe");
+                ifrm.src = element.file.url;
+                setTimeout(() => {
+                    this.iframes.push(ifrm.src);
+                    this.contentLoading = false;
+                }, 1000);
+                
+        });
+    },
+};
 </script>
 
 <style scoped>
-  div, iframe {
+div {
     width: 100%;
     height: 100%;
+}
+iframe {
+    width: 100%;
+    height: 100%;
+
+
     /* z-index: -1; */
-    margin-right: 30px;
-  }
-  
+    /* margin-bottom: 30px; */
+    /* overflow-y: hidden; */
+
+}
 </style>
