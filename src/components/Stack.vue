@@ -16,11 +16,12 @@
                         :card=card
                         :stackSettings="stackSettings"
                         :index=index
-                        :hasFocus="cardHasFocus"
+                        :hasFocus="cardsHaveFocus"
                         @cardStackInteraction="stackRearrangeCards"
                         @cardInteractJsDrag="cardsSetFocus"
                         @cardInteractJsResize="cardsSetFocus"
                         @cardBringForward="cardBringForward"
+                        @cardProgramUpdatedContent="cardProgramUpdatedContent"
                         >
             </card>
         </div>
@@ -83,7 +84,7 @@ export default {
 
             cardContent: [],
 
-            cardHasFocus: false,
+            cardsHaveFocus: true,
         }
     },
     
@@ -250,6 +251,63 @@ export default {
                                     "url": 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
                                     "name": "NFX"
                                 }    
+                            }
+                        ],
+
+                    },
+
+                    {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "todo", 
+                            "title": "Todo List"
+                        },
+
+                        "content": [
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "todo": {
+                                    
+                                    "body": "First todo",
+                                    "position": 1,
+                                    "completed_at": null
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "todo": {
+                                    
+                                    "body": "Second todo",
+                                    "position": 2,
+                                    "completed_at": null
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "todo": {
+                                    
+                                    "body": "Third todo",
+                                    "position": 3,
+                                    "completed_at": null
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
                             }
                         ],
 
@@ -466,12 +524,12 @@ export default {
             // let crds = this.$children
             
             if (start) {
-                this.cardHasFocus = false
+                this.cardsHaveFocus = false
                 // crds.forEach(card => {
                 //     card.hasFocus = false;
                 // });
             } else {
-                this.cardHasFocus = true
+                this.cardsHaveFocus = true
                 // crds.forEach(card => {
                 //     card.hasFocus = true;
                 // });
@@ -512,6 +570,48 @@ export default {
 
 
 
+        },
+                
+        cardProgramUpdatedContent(programName, updateFunction, updatedContent, cardId) {
+            // console.log(programName, updateFunction, updatedContent, cardId)
+            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
+            let cardType = this.cardProgramNameToCardType(programName)
+
+            switch (updateFunction) {
+                case "update":
+                    this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)[cardType][0] = updatedContent.todo
+                    break;
+            
+                default:
+                    break;
+            }
+            
+            
+
+
+        },
+
+        cardProgramNameToFileType(program) {
+            switch (program) {
+                
+                case("image-viewer") :
+                    return "image";   
+                    
+                case("video-viewer") :
+                    return "video";                
+                
+                case("pdf-viewer") :
+                    return "pdf";                
+                
+                case("todo-list") :
+                    return "todo";                
+                
+                case("url") :
+                    return "UrlViewer";     
+                    
+                case("text-editor") :
+                    return "text";  
+            }
         }
 
     },
@@ -570,6 +670,8 @@ export default {
         // cardLoadContent(index) {
         //     this.cards[index].info
         // }
+
+
 
     },
 }

@@ -44,8 +44,8 @@ export default {
     padding: 0;
     outline: 0px solid red;
     border: 0;
-    appearance: none;
-    background: transparent;
+    /* appearance: none; */
+    /* background: transparent; */
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 

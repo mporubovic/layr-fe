@@ -50,6 +50,7 @@
                             :content="card.content"
                             :cardId="card.info.id"
                             :hasFocus="hasFocus"
+                            @programUpdatedContent="programUpdatedContent"
                             >
                 </component>        
 
@@ -207,7 +208,11 @@ export default {
                     return "pdf-viewer";                
                 
                 case("todo") :
-                    return "TodoViewer";                
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "white";
+                    }, 0);
+                    return "todo-list";                
                 
                 case("url") :
                     return "UrlViewer";     
@@ -601,6 +606,11 @@ export default {
         loadContent() {
             return !this.isInStack;
             
+        },
+        programUpdatedContent(programName, updateFunction, updatedContent) {
+            // console.log(programName, updateFunction, updatedContent)
+            this.$emit('cardProgramUpdatedContent', programName, updateFunction, updatedContent, this.id)
+
         }
     }
 }
@@ -617,7 +627,8 @@ export default {
     /* width: 100%; */
     opacity: 0; 
     background-color: white;
-    outline: 1px black solid;
+    /* outline: 1px black solid; */
+    border-bottom: 1px black solid;
 
 }
 
