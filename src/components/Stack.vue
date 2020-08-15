@@ -22,6 +22,8 @@
                         @cardInteractJsResize="cardsSetFocus"
                         @cardBringForward="cardBringForward"
                         @cardProgramUpdatedContent="cardProgramUpdatedContent"
+                        @cardProgramCreatedContent="cardProgramCreatedContent"
+                        @cardProgramDeletedContent="cardProgramDeletedContent"
                         >
             </card>
         </div>
@@ -90,28 +92,6 @@ export default {
     
     
     methods: {
-        cardProgram(card) {
-            switch (card.info.type) {
-                
-                case("image") :
-                    return "image-viewer";   
-                    
-                case("video") :
-                    return "VideoViewer";                
-                
-                case("pdf") :
-                    return "pdf-viewer";                
-                
-                case("todo") :
-                    return "TodoViewer";                
-                
-                case("url") :
-                    return "UrlViewer";     
-                    
-                case("text") :
-                    return "text-editor";  
-            }
-        },
 
         isCardInStack(index) {
             if ( this.cardsInStack[index] !== null ) {
@@ -138,6 +118,10 @@ export default {
                             "title": "NFX"
                         },
 
+                        "display": {
+                            "program": "single"
+                        },
+
                         "content": [
                             {
                                 "meta": {},
@@ -161,6 +145,10 @@ export default {
                             },
                             "type": "image", 
                             "title": "Andromeda"
+                        },
+
+                        "display": {
+                            "program": "gallery"
                         },
 
                         "content": [
@@ -244,13 +232,14 @@ export default {
                             "title": "Text editor"
                         },
 
+                        "display": {
+                            "program": "texteditor"
+                        },
+
                         "content": [
                             {
                                 "meta": {},
-                                "file": {
-                                    "url": 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-                                    "name": "NFX"
-                                }    
+                                "text": [{"insert":"Hello Wld!"},{"attributes":{"align":"center"},"insert":"\n\n"},{"attributes":{"underline":true,"bold":true},"insert":"OOOK"},{"attributes":{"align":"center"},"insert":"\n"}]
                             }
                         ],
 
@@ -269,9 +258,14 @@ export default {
                             "title": "Todo List"
                         },
 
+                        "display": {
+                            "program": "list"
+                        },
+
                         "content": [
                             {
                                 "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
                                 "todo": {
                                     
                                     "body": "First todo",
@@ -285,6 +279,7 @@ export default {
                             },
                             {
                                 "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
                                 "todo": {
                                     
                                     "body": "Second todo",
@@ -298,6 +293,7 @@ export default {
                             },
                             {
                                 "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
                                 "todo": {
                                     
                                     "body": "Third todo",
@@ -312,6 +308,87 @@ export default {
                         ],
 
                     },
+
+                    {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "url", 
+                            "title": "Url List"
+                        },
+
+                        "display": {
+                            "program": "list"
+                        },
+
+                        "content": [
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
+                                "url": {
+                                    "path": "https://www.nasa.gov/mission_pages/hubble/main/index.html",
+                                    "position": 1,
+                                    "ico": null,
+                                    "title": null,
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
+                                "url": {
+                                    
+                                    "path": "http://www.esa.int/",
+                                    "position": 2,
+                                    "ico": null,
+                                    "title": null,                                    
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
+                                "url": {
+                                    
+                                    "path": "https://www.youtube.com/user/destinws2",
+                                    "position": 3,
+                                    "ico": null,
+                                    "title": null,                                    
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
+                                "url": {
+                                    
+                                    "path": "https://codepen.io/chriscoyier/pen/uCwfB",
+                                    "position": 3,
+                                    "ico": null,
+                                    "title": null,                                   
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                        ],
+
+                    },
                 )
             
             }
@@ -319,6 +396,13 @@ export default {
         },
         
         initializeInteractJs() {
+            var angleScale = {
+                angle: 0,
+                scale: 1
+                }
+                // var gestureArea = document.getElementById('gesture-area')
+                var scaleElement = document.getElementById('stack')
+                var resetTimeout
             interact('.stack-draggable')
             // interact('.stack-controls')
                 .draggable({
@@ -371,7 +455,50 @@ export default {
                             target.classList.remove("stack-no-delay");
                         }
                     }
+                
                 })
+                
+                .gesturable({
+                        listeners: {
+                        start (event) {
+                            angleScale.angle -= event.angle
+
+                            clearTimeout(resetTimeout)
+                            scaleElement.classList.remove('reset')
+                        },
+                        move (event) {
+                            event.target.classList.add("stack-no-delay");
+                            
+                            // document.body.appendChild(new Text(event.scale))
+                            var currentAngle = event.angle + angleScale.angle
+                            var currentScale = event.scale * angleScale.scale
+
+                            scaleElement.style.webkitTransform =
+                            scaleElement.style.transform =
+                            'rotate(' + currentAngle + 'deg)' + 'scale(' + currentScale + ')'
+
+                            // uses the dragMoveListener from the draggable demo above
+                            // interact('.stack-draggable').draggable().move(event)
+                        },
+                        end (event) {
+                            angleScale.angle = angleScale.angle + event.angle
+                            angleScale.scale = angleScale.scale * event.scale
+
+                            // resetTimeout = setTimeout(reset, 1000)
+                            scaleElement.classList.add('reset')
+                            event.target.classList.remove("stack-no-delay");
+                        }
+                        }
+                    })
+
+                    // function reset () {
+                    //     scaleElement.style.webkitTransform =
+                    //         scaleElement.style.transform =
+                    //         'scale(1)'
+
+                    //     angleScale.angle = 0
+                    //     angleScale.scale = 1
+                    //     }
         },
         
         stackRearrangeCards(index, stackToBoard) {
@@ -463,7 +590,7 @@ export default {
                 let cards = this.cardsInStack.length < this.$children.length
                             ? this.cardsOnBoard.slice().reverse()
                             // ? this.$children
-                            : this.cardsInStack;
+                            : this.cardsInStack.slice().reverse();
                 
                 
                 cards.forEach((card, index) => {
@@ -572,42 +699,103 @@ export default {
 
         },
                 
-        cardProgramUpdatedContent(programName, updateFunction, updatedContent, cardId) {
-            // console.log(programName, updateFunction, updatedContent, cardId)
+        cardProgramUpdatedContent(programName, updatedContent, cardId) {
+            console.log("UPDATE", programName, updatedContent, cardId)
             // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
-            let cardType = this.cardProgramNameToCardType(programName)
+            let contentKey = this.cardProgramNameToKey(programName)
+            // console.log(contentKey)
 
-            switch (updateFunction) {
-                case "update":
-                    this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)[cardType][0] = updatedContent.todo
-                    break;
-            
-                default:
-                    break;
-            }
-            
-            
+            this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)[contentKey] = updatedContent[contentKey]
+
+        },
+
+        cardProgramCreatedContent(programName, cardId) {
+            // let contentKey = this.cardProgramNameToKey(programName)
+            console.log("CREATE", "FROM", programName, "CARD", cardId)
+            // console.log(contentKey, programName, newContent, cardId)
+            let newContent = this.contentTemplate(programName)
+            // Backend communication
+            // let contentMap = new Map()
+            console.log("RESULT", newContent)
+            this.cards.find(c => c.info.id === cardId).content.push(newContent)
+            // this.cards.find(c => c.info.id === cardId).content.push(
+            //     {
+            //         "id": Math.floor(Math.random()*1000),
+            //         newContent,
+            //         "meta": null
+                    
+            //     }
+            // )
 
 
         },
 
-        cardProgramNameToFileType(program) {
-            switch (program) {
-                
-                case("image-viewer") :
-                    return "image";   
-                    
-                case("video-viewer") :
-                    return "video";                
-                
-                case("pdf-viewer") :
-                    return "pdf";                
-                
+        cardProgramDeletedContent(programName, deletedContent, cardId) {
+            console.log("DELETE", programName, deletedContent, cardId)
+            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === deletedContent.id))
+            // let contentKey = this.cardProgramNameToKey(programName)
+            // console.log(contentKey)
+            let c = this.cards.find(c => c.info.id === cardId).content
+            let i = c.findIndex(c => c.id === deletedContent.id)
+            c.splice(i, 1)
+
+        },
+
+        cardProgramNameToKey(program) {
+            switch (program) {            
                 case("todo-list") :
                     return "todo";                
                 
-                case("url") :
-                    return "UrlViewer";     
+                case("url-list") :
+                    return "url";     
+                    
+                case("text-editor") :
+                    return "text";  
+            }
+        },
+
+        contentTemplate(type) {
+            switch (type) {
+                case("image-component") : {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 1000 ),
+                        "meta": {},
+                        "file": {
+                            "url": 'https://nasa.gov',
+                            "name": "NFX"
+                        }    
+                    }
+                    return obj
+
+                }            
+                
+                case("todo-list") : {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 1000 ),
+                        "isEditing": false,
+                        "meta": {},
+                        "todo": {
+                            "body": 'New todo',
+                        }    
+                    }
+                    return obj
+                }
+                    
+                case("url-list"): {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 1000 ),
+                        "isEditing": false,
+                        "meta": {},
+                        "url": {
+                            "path": '',
+                            "position": 1,
+                            "ico": 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
+                            "title": 'Right click to edit',
+                        }    
+                    }
+                    
+                    return obj;
+                }  
                     
                 case("text-editor") :
                     return "text";  
@@ -656,7 +844,8 @@ export default {
                 cardDimensions: {
                     width: 225,
                     height: 225,
-                }
+                },
+                autoSaveInterval: 5000,
                 // cardGap: -100,
             } 
             

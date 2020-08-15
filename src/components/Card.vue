@@ -48,9 +48,13 @@
                 <component v-if="loadContent()"
                             :is="cardProgram(card)" 
                             :content="card.content"
+                            :contentComponent="cardContentComponentName(card)"
                             :cardId="card.info.id"
                             :hasFocus="hasFocus"
                             @programUpdatedContent="programUpdatedContent"
+                            @programCreatedContent="programCreatedContent"
+                            @programDeletedContent="programDeletedContent"
+                            :autoSaveInterval="stackSettings.autoSaveInterval"
                             >
                 </component>        
 
@@ -215,7 +219,7 @@ export default {
                     return "todo-list";                
                 
                 case("url") :
-                    return "UrlViewer";     
+                    return "url-list";     
                     
                 case("text") :
                     this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
@@ -228,6 +232,58 @@ export default {
                     return "text-editor";  
             }
         },
+
+        cardContentComponentName(card) {
+            switch (card.info.type) {
+                
+                case("image") :
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
+
+                    }, 0);
+                    
+                    return "image-viewer";   
+                    
+                case("video") :
+                    return "video-component";                
+                
+                case("pdf") :
+                    this.$el.querySelector(".card-body").style.padding = "15px 15px 15px 15px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "#D1D1D1";
+                    }, 0);
+                    
+                    // this.$el.style["background-color"] = "#D1D1D1";
+
+                    return "pdf-component";                
+                
+                case("todo") :
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "white";
+                    }, 0);
+                    return "todo-list";                
+                
+                case("url") :
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "white";
+                    }, 0);
+                    return "url-component";     
+                    
+                case("text") :
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "white";
+                    }, 0);
+                    
+                    // this.$el.style["background-color"] = "white";
+
+                    return "text-component";  
+            }
+        },
+
+
         
         startupAnimation () {
             this.onCardMouseDown();
@@ -607,10 +663,20 @@ export default {
             return !this.isInStack;
             
         },
-        programUpdatedContent(programName, updateFunction, updatedContent) {
+        programUpdatedContent(programName, updatedContent) {
             // console.log(programName, updateFunction, updatedContent)
-            this.$emit('cardProgramUpdatedContent', programName, updateFunction, updatedContent, this.id)
+            this.$emit('cardProgramUpdatedContent', programName, updatedContent, this.id)
 
+        },
+
+        programCreatedContent(programName) {
+            // console.log(programName, updateFunction, updatedContent)
+            this.$emit('cardProgramCreatedContent', programName, this.id)
+
+        },
+
+        programDeletedContent(programName, deletedContent) {
+            this.$emit('cardProgramDeletedContent', programName, deletedContent, this.id)
         }
     }
 }
@@ -648,7 +714,7 @@ export default {
 .card-header-title h1 {
     font-size: 25px;
     margin: 0px;
-    padding-left: 10px;
+    padding-left: 15px;
     color: black;
 }
 

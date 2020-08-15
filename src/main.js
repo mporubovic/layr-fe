@@ -1,6 +1,10 @@
 import Vue from 'vue'
 import Layr from './Layr.vue'
 
+import Axios from 'axios'
+
+Vue.prototype.$http = Axios;
+
 import '@/globalComponents'
 
 // import ImageViewer from './components/programs/ImageViewer.vue'
