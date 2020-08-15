@@ -415,6 +415,9 @@ export default {
                     crd.children[0].style.opacity = 0;
                     this.$el.style.opacity = 0.15;
 
+                    this.$el.querySelector(".card-body").style.padding = "";
+
+
                     // this.$el.style["background-color"] = "white";
 
                     
