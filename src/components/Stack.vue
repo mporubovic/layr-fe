@@ -24,6 +24,7 @@
                         @cardProgramUpdatedContent="cardProgramUpdatedContent"
                         @cardProgramCreatedContent="cardProgramCreatedContent"
                         @cardProgramDeletedContent="cardProgramDeletedContent"
+                        @cardUpdatedItself="cardUpdatedItself"
                         >
             </card>
         </div>
@@ -36,7 +37,7 @@
                 <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">{{ toggleButtonText }}</button>
                 <button class="stack-controls-common stack-controls-move">Move</button>
                 <button class="stack-controls-common stack-controls-add">
-                    <img src="../assets/stack/controls/add.svg">
+                    <img src="../assets/common/add.svg">
                 </button>
             </div>
         </div>
@@ -800,6 +801,11 @@ export default {
                 case("text-editor") :
                     return "text";  
             }
+        },
+
+        cardUpdatedItself(cardId, updatedPropertyType, updatedPropertyKey, updatedPropertyValue) {
+            console.log("UPDATE", updatedPropertyType, updatedPropertyKey, "TO", updatedPropertyValue, "CARD", cardId)
+            this.cards.find(c => c.info.id === cardId)[updatedPropertyType][updatedPropertyKey] = updatedPropertyValue
         }
 
     },

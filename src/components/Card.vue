@@ -22,8 +22,20 @@
         <div class="card-header"
                 @mousedown="onCardHeaderMouseDown()"
             >
-            <div class="card-header-title card-header-drag-handle">
-                <h1>{{ card.info.title }}</h1>
+            <div class="card-header-title card-header-drag-handle"
+                    >
+                <h1 @click.right.prevent="onCardHeaderRightclick()"
+                        v-if="!isHeaderEditing">{{ card.info.title }}</h1>
+                <input
+                    @blur="cardUpdateTitle($event)"
+                    @keydown.enter="onCardHeaderInputKeydownEnter($event)"
+                    class="card-header-title-input"
+                    type="text"
+                    id="title-input"
+                    v-bind:value="card.info.title"
+                    v-if="isHeaderEditing"
+                    autocomplete="off" 
+                    >
             </div>
 
             <div class="card-header-controls "
@@ -137,9 +149,13 @@ export default {
 
             // hasFocus: false,
 
-            headerDoubleTap: 0,
+            headerTapCount: 0,
 
             indexAsData: this.index,
+
+            isHeaderEditing: false,
+
+            headerTimer: null,
 
 
         }
@@ -475,17 +491,65 @@ export default {
         },
 
         onCardHeaderMouseDown() {
-            this.headerDoubleTap++
+            this.headerTapCount++
+            // console.log(this.headerTapCount)
+            
+            // this.timer ? clearTimeout(this.timer) : this.timer = setTimeout(() => { this.headerTapCount = 0 }, 700);
 
             setTimeout(() => {
-                this.headerDoubleTap = 0;
+                if (this.headerTapCount === 2) {
+                    this.$emit('cardBringForward', this);
+                    // console.log('forward')
+
+
+                } else if (this.headerTapCount >= 2) {
+                    
+                    this.isHeaderEditing = true
+                    this.$nextTick(() => {
+                        this.$el.querySelector('#title-input').focus()
+                    })
+                    
+                    // console.log('editing')
+                }
+
+                this.headerTapCount = 0
+
             }, 400);
 
-            if (this.headerDoubleTap === 2) {
-                this.headerDoubleTap = 0;
-                this.$emit('cardBringForward', this);
-            }
+            // setTimeout(() => {
+            //     if (this.headerTapCount === 2) {
+            //         this.$emit('cardBringForward', this);
+            //         console.log('forward')
 
+
+            //     } else if (this.headerTapCount >= 2) {
+            //         this.isHeaderEditing = true
+
+            //         console.log('editing')
+            //     }
+
+            //     this.headerTapCount = 0
+
+            // }, 200);
+
+
+        },
+
+        onCardHeaderRightclick() {
+            this.isHeaderEditing = true
+            this.$nextTick(() => {
+                this.$el.querySelector('#title-input').focus()
+            })
+        },
+
+        cardUpdateTitle(event) {
+            this.isHeaderEditing = false
+            this.$emit('cardUpdatedItself', this.id, 'info', 'title', event.target.value)
+        },
+
+        onCardHeaderInputKeydownEnter(event) {
+            event.target.blur()
+            this.isHeaderEditing = false
         },
 
         setStackPosition(pos) {
@@ -711,14 +775,27 @@ export default {
 .card-header-title {
     /* padding-left: 10px; */
     flex: 1;
+    margin-left: 15px;
+    margin-right: 10px;
+    overflow: hidden;
+
 
 }
 
 .card-header-title h1 {
     font-size: 25px;
     margin: 0px;
-    padding-left: 15px;
     color: black;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.card-header-title-input {
+    font-size: 25px;
+    font-weight: bold;
+    font-style: italic;
+    width: 100%;
 }
 
 .card-body {
@@ -733,6 +810,7 @@ export default {
     /* overflow: hidden; */
     /* overflow: hidden; */
     overflow-y:auto;
+    overflow-x: hidden;
     touch-action: none;
     
 }
