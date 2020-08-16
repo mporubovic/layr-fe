@@ -7,23 +7,47 @@
             <div class="footer-content">{{ imageName }}</div>
 
             <div class="footer-controls">
-                <button
-                    :disabled="content.length < 1 && index === 0"
-                    @click="moveLeft"
-                    class="button-move move-left"
-                >←</button>
+                        
+                <div class="footer-controls-lr">
+                    <button
+                        :disabled="content.length < 1 && index === 0"
+                        @click="moveLeft"
+                        class="move-left footer-controls-common"
+                        >
+                            ←
+                    </button>
 
-                <button
-                    :disabled="content.length < 1 && index === content.length - 1"
-                    @click="moveRight"
-                    class="button-move move-right"
-                >→</button>
+                    <button
+                        :disabled="content.length < 1 && index === content.length - 1"
+                        @click="moveRight"
+                        class="move-right footer-controls-common"
+                        >
+                            →
+                    </button>
+                </div>
+
+                <div class="footer-controls-add">
+                    <button
+                        :disabled="content.length < 1 && index === 0"
+                        @click="addImage()"
+                        class="footer-controls-add-button footer-controls-common"
+                        >
+                            <img src="@/assets/common/add.svg">
+                    </button>
+                </div>
             </div>
+        </div>
+
+        <div class="image-selector" v-if="isFileSelectorOpen">
+            <file-selector >
+
+            </file-selector>
         </div>
     </div>
 </template>
 
 <script>
+
 export default {
     props: {
         content: {
@@ -36,6 +60,7 @@ export default {
         return {
             index: 0,
             images: [],
+            isFileSelectorOpen: false,
         };
     },
 
@@ -44,20 +69,25 @@ export default {
             const splitName = this.content[this.index].file.name.split("/");
             return splitName[splitName.length - 1];
         },
+
     },
 
     methods: {
         moveRight() {
-            if (this.index + 1 < this.content.length) {
+            if (this.index < this.content.length + 1) {
                 this.index++;
             }
         },
 
         moveLeft() {
-            if (this.index - 1 > -1) {
+            if (this.index > 0) {
                 this.index--;
             }
         },
+
+        addImage() {
+            this.isFileSelectorOpen = !this.isFileSelectorOpen;
+        }
     },
 
     mounted() {
@@ -100,15 +130,22 @@ img {
     /* align-items: center; */
     /* align-items: flex-start; */
     /* margin-bottom: 20px; */
-    /* opacity: 0; */
+    opacity: 0.15;
     transition: opacity 0.2s ease-in-out;
+    overflow: hidden;
 }
 
 .footer:hover {
     opacity: 1;
 }
 
-.button-move {
+.footer-controls {
+        display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.footer-controls-common {
     font-family: monospace;
     font-size: 40px;
     background-color: transparent;
@@ -116,6 +153,9 @@ img {
     cursor: pointer;
     padding-left: 10px;
     padding-right: 10px;
+    transition: background-color 0.4s,
+            box-shadow 0.1s;
+    
 }
 
 .button-move:not(:disabled):hover {
@@ -148,6 +188,8 @@ img {
     text-overflow: ellipsis;
     transition: max-width 0.8s;
     margin-right: 25px;
+        box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25),
+            inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
 
 }
 
@@ -158,7 +200,7 @@ img {
     /* max-width: 999px; */
 }
 
-.footer-controls {
+.footer-controls-lr {
     background-color: white;
     min-width: 100px;
     max-width: 100px;
@@ -169,5 +211,52 @@ img {
     align-items: center;
     border-radius: 99px;
     height: 35px;
+    margin-right: 10px;
+        box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25),
+            inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+
+}
+
+.footer-controls-add {
+
+    height: 100%;
+    
+    
+}
+
+.footer-controls-add-button {
+        box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 0;
+    padding-right: 0;
+    height: 35px;
+    min-width: 50px;
+    max-width: 50px;
+    border-radius: 99px;
+    background-color: white;    
+        box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25),
+            inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+}
+
+.footer-controls-add-button img {
+    height: 20px;
+    width: 20px;
+}
+
+.footer-controls-add-button:hover {
+    box-shadow: 0 0 0pt 2pt lightgreen;
+}
+
+.image-selector {
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 50px;
+    height: 100%;
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: center;
+    align-items: center;
 }
 </style>
