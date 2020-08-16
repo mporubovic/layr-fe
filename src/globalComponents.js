@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-import ImageViewer from './components/programs/ImageViewer.vue'
+import ImageViewer from './components/programs/image/ImageViewer.vue'
 import PdfViewer from './components/programs/PdfViewer.vue'
 import TextEditor from './components/programs/TextEditor.vue'
 
@@ -9,6 +9,8 @@ import TodoItem from './components/programs/todo/TodoItem.vue'
 
 import UrlList from './components/programs/url/UrlList.vue'
 import UrlItem from './components/programs/url/UrlItem.vue'
+
+import FileSelector from './components/programs/modal/FileSelector.vue'
 
 Vue.component('image-viewer', ImageViewer);
 Vue.component('pdf-viewer', PdfViewer);
@@ -19,3 +21,5 @@ Vue.component('todo-item', TodoItem);
 
 Vue.component('url-list', UrlList);
 Vue.component('url-item', UrlItem);
+
+Vue.component('file-selector', FileSelector);
