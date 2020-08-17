@@ -74,7 +74,7 @@ export default {
 
     methods: {
         moveRight() {
-            if (this.index < this.content.length + 1) {
+            if (this.index + 1 < this.content.length) {
                 this.index++;
             }
         },
