@@ -30,13 +30,51 @@
         </div>
 
         
+        <div class="stack-new-card-menu"
+                id="stack-new-card-menu"
+                v-if="isNewCardMenuVisible">
+            <!-- <div class="stack-new-card-menu-header">
+                <p>New card</p>
+            </div>
+            <hr class="stack-new-card-menu-header-line">   -->
 
+            <div class="stack-new-card-menu-cards">
+                <button class="stack-new-card-menu-card" 
+                            v-for="newCard in newCards" 
+                            :key="newCard.name"
+                            :disabled="!newCard.available"
+                            @click="createNewCard(newCard.type)"
+                            >
+                    <div class="stack-new-card-menu-card-primary">
+                        <img class="stack-new-card-menu-card-primary-icon" 
+                            :src="newCard.icon">
+                        
+                        <p class="stack-new-card-menu-card-primary-title">
+                            {{ newCard.title }}
+                        </p>
+                    </div>
+
+                    <div class="stack-new-card-menu-card-secondary">
+                        <p class="stack-new-card-menu-card-secondary-description">
+                            {{ newCard.description }}
+                        </p>
+                    </div>
+                
+                </button>    
+                    
+
+
+                
+
+            </div>
+        </div>  
 
         <div class="stack-controls-wrapper">
+            
             <div class="stack-controls">
                 <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">{{ toggleButtonText }}</button>
                 <button class="stack-controls-common stack-controls-move">Move</button>
-                <button class="stack-controls-common stack-controls-add">
+                <button class="stack-controls-common stack-controls-add" @click="openNewCardMenu">
                     <img src="../assets/common/add.svg">
                 </button>
             </div>
@@ -71,7 +109,7 @@ export default {
 
     data() {
         return {
-            cards: this.generateCards(2),
+            cards: this.generateCards(1),
             
             // stackSettings: {
             //     cardGap: this.calculateCardGap(),
@@ -88,7 +126,58 @@ export default {
             cardContent: [],
 
             cardsHaveFocus: true,
+
+            isNewCardMenuVisible: false,
+
+            newCards: [
+                {
+                    "type": "image",
+                    "available": true,
+                    "title": "Image",
+                    "icon": require('@/assets/stack/cardmenu/image.svg'),
+                    "description": "Upload images from your device"
+                },                
+                {
+                    "type": "video",
+                    "available": false,
+                    "title": "Video",
+                    "icon": require('@/assets/stack/cardmenu/video.svg'),
+                    "description": "Upload a video from your device"
+                },                
+                {
+                    "type": "todo",
+                    "available": true,
+                    "title": "Todo",
+                    "icon": require('@/assets/stack/cardmenu/todo.svg'),
+                    "description": "Create a todo list"
+                },                
+                {
+                    "type": "url",
+                    "title": "URL",
+                    "available": true,
+                    "icon": require('@/assets/stack/cardmenu/link.svg'),
+                    "description": "Create a list of URLs"
+                },                
+                {
+                    "type": "pdf",
+                    "available": true,
+                    "title": "PDF",
+                    "icon": require('@/assets/stack/cardmenu/pdf.svg'),
+                    "description": "Upload a PDF from your device"
+                },
+
+                {
+                    "type": "text",
+                    "available": true,
+                    "title": "Notes",
+                    "icon": require('@/assets/stack/cardmenu/text.svg'),
+                    "description": "Create a note with a text editor"
+                },
+            ],
+
+        backdoor: 0
         }
+        
     },
     
     
@@ -240,7 +329,7 @@ export default {
                         "content": [
                             {
                                 "meta": {},
-                                "text": [{"insert":"Hello Wld!"},{"attributes":{"align":"center"},"insert":"\n\n"},{"attributes":{"underline":true,"bold":true},"insert":"OOOK"},{"attributes":{"align":"center"},"insert":"\n"}]
+                                "text": [{"insert":"Hello World!"},{"attributes":{"align":"center"},"insert":"\n\n"}]
                             }
                         ],
 
@@ -624,10 +713,10 @@ export default {
                     return  Math.floor(Math.random() * 800 );
                     
                 case "width":
-                    return  225 + Math.floor(Math.random() * 500 );
+                    return  260 + Math.floor(Math.random() * 500 );
                     
                 case "height":
-                    return  225 + Math.floor(Math.random() * 200 );
+                    return  260 + Math.floor(Math.random() * 200 );
             
                 default:
                     break;
@@ -701,7 +790,7 @@ export default {
         },
                 
         cardProgramUpdatedContent(programName, updatedContent, cardId) {
-            console.log("UPDATE", programName, updatedContent, cardId)
+            console.log("UPDATE", programName, updatedContent, "CARD", cardId)
             // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
             let contentKey = this.cardProgramNameToKey(programName)
             // console.log(contentKey)
@@ -804,8 +893,240 @@ export default {
         },
 
         cardUpdatedItself(cardId, updatedPropertyType, updatedPropertyKey, updatedPropertyValue) {
-            console.log("UPDATE", updatedPropertyType, updatedPropertyKey, "TO", updatedPropertyValue, "CARD", cardId)
+            console.log("UPDATE", updatedPropertyType, updatedPropertyKey, "TO \"", updatedPropertyValue, "\" CARD", cardId)
             this.cards.find(c => c.info.id === cardId)[updatedPropertyType][updatedPropertyKey] = updatedPropertyValue
+        },
+
+        openNewCardMenu() {
+            if (this.isNewCardMenuVisible) {
+                this.$el.querySelector('#stack-cards').style.display = ''
+                setTimeout(() => {
+                    this.$el.querySelector('#stack-new-card-menu').style.height = 0 + 'px'
+                    this.$el.querySelector('#stack-cards').style.opacity = 1
+
+                }, 0)
+
+                setTimeout(() => {
+                    this.isNewCardMenuVisible = false
+                }, 500);
+                
+            } else {
+                this.isNewCardMenuVisible = true
+                setTimeout(() => {
+                    this.$el.querySelector('#stack-new-card-menu').style.height = 220 + 'px'
+                    this.$el.querySelector('#stack-cards').style.opacity = 0
+                }, 0)
+
+                setTimeout(() => {
+                this.$el.querySelector('#stack-cards').style.display = 'none'
+                }, 500);
+                
+            }
+            
+        },
+
+        createNewCard(type) {
+            this.$el.querySelector('#stack-cards').style.display = ''
+            setTimeout(() => {
+                this.$el.querySelector('#stack-new-card-menu').style.height = 0 + 'px'
+                this.$el.querySelector('#stack-cards').style.opacity = 1
+
+            }, 0)
+
+            setTimeout(() => {
+                this.isNewCardMenuVisible = false
+            }, 500);
+            
+            let newCard = this.cardTemplate(type)
+            // console.log(this.cardsInStack)
+            // console.log(this.stackSettings.cardGap)
+            
+            this.cards.push(newCard)
+            this.backdoor++
+            // console.log(this.$children, newCard.info.id)
+            
+            // console.log(this.stackSettings.cardGap)
+
+            // this.cardsInStack.find(c => c.id === newCard.id).$el.style.bottom = this.stackSettings.cardGap * (this.cardsInStack.length)  + 'px';
+            
+            
+            this.$nextTick(() => {
+                this.$children.find(c => c.id === newCard.info.id).onCardMouseUp()
+            })
+
+            this.$children.forEach(element => {
+                // console.log(element)
+                element.$el.style.bottom = this.stackSettings.cardGap * (element.stackPosition)  + 'px';
+            });
+
+        },
+
+        cardTemplate(type) {
+            switch(type) {
+                case("image"):
+                    return {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "image", 
+                            "title": "Andromeda"
+                        },
+
+                        "display": {
+                            "program": "gallery"
+                        },
+
+                        "content": [
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
+                                    "name": "AndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromeda"
+                                }
+
+                            },
+
+
+                        ]
+                    }
+
+                case("todo"): 
+                    return {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "todo", 
+                            "title": "Todo List"
+                        },
+
+                        "display": {
+                            "program": "list"
+                        },
+
+                        "content": [
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
+                                "todo": {
+                                    
+                                    "body": "First todo",
+                                    "position": 1,
+                                    "completed_at": null
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                        ],
+
+                    }
+
+                case("url"):
+                    return {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "url", 
+                            "title": "Url List"
+                        },
+
+                        "display": {
+                            "program": "list"
+                        },
+
+                        "content": [
+                            {
+                                "id": Math.floor(Math.random()*1000),
+                                "isEditing": false,
+                                "url": {
+                                    "path": 'layrstack.com',
+                                    "position": 1,
+                                    "ico": null,
+                                    "title": null,
+                                },
+                                "meta": {
+                                    "created_at": "2020-07-20T16:59:14.000000Z",
+                                    "updated_at": "2020-07-20T16:59:14.000000Z"
+                                }
+                            },
+                        ],
+
+                    }
+
+                case("text"):
+                    return {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "text", 
+                            "title": "Text editor"
+                        },
+
+                        "display": {
+                            "program": "texteditor"
+                        },
+
+                        "content": [
+                            {
+                                "meta": {},
+                                "text": [{"insert":"Hello World!"},{"attributes":{"align":"center"},"insert":"\n\n"}]
+                            }
+                        ],
+
+                    }
+
+                
+                case("pdf"):
+                    return {
+                        "info": {
+                            "id": Math.floor(Math.random()*1000),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": this.generateDimensions('width'),
+                                "height": this.generateDimensions('height'),
+                            },
+                            "type": "pdf", 
+                            "title": "NFX"
+                        },
+
+                        "display": {
+                            "program": "single"
+                        },
+
+                        "content": [
+                            {
+                                "meta": {},
+                                "file": {
+                                    "url": 'http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
+                                    "name": "NFX"
+                                }    
+                            }
+                        ],
+
+                    }
+            }
         }
 
     },
@@ -823,6 +1144,7 @@ export default {
 
     computed: {
         cardsInStack() {
+            this.backdoor
             return this.$children.filter(card => card.isInStack)
                                     .sort(function(a, b) {
                                         return a.indexAsData - b.indexAsData
@@ -865,8 +1187,6 @@ export default {
         // cardLoadContent(index) {
         //     this.cards[index].info
         // }
-
-
 
     },
 }
@@ -916,8 +1236,8 @@ export default {
     padding-top: 12px;
     padding-bottom: 12px;
     box-sizing: border-box;
-    /* display: flex;
-    flex-direction: column; */
+    display: flex;
+    flex-direction: column;
     
 }
 
@@ -952,7 +1272,7 @@ export default {
     outline
 } */
 
-.stack-controls-move {
+.stack-controls-move:not(:active) {
     cursor: grab;
 }
 
@@ -990,7 +1310,154 @@ export default {
     margin-bottom: -20px;
     padding-bottom: 20px;
     z-index: -20;
+    transition: opacity 0.5s;
     /* overflow: hidden; */
+}
+
+.stack-new-card-menu {
+    /* height: 250px; */
+    height: 0px;
+    width: 100%;
+    /* padding-left: 10px; */
+    /* background-color: white; */
+    background-color: rgba(0, 0, 0, 0.30);
+    position: absolute;
+    bottom: 65px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 15px;
+    overflow: hidden;
+    z-index: 100;
+    /* margin-left: 50px; */
+    transition: height 0.5s;
+    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
+            inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+
+}
+
+.stack-new-card-menu-header {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* background-color: white; */
+    /* background-color: rgba(0, 0, 0, 0.30); */
+
+}
+
+.stack-new-card-menu-header p {
+    font-size: 25px;
+    font-weight: bold;
+    color: white;
+}
+
+.stack-new-card-menu-header-line {
+    width: 100%;
+    /* margin-top: 1px; */
+    border-bottom: 1px solid black;
+}
+
+.stack-new-card-menu-cards {
+    /* position: absolute; */
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-evenly; */
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 15px;
+    /* margin-top: 10px; */
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.stack-new-card-menu-card {
+    display: flex;
+    min-height: 75px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
+            inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    user-select: none;
+    flex-wrap: nowrap;
+    background-color: white;
+    transition: box-shadow 0.1s,
+                
+                ;
+
+}
+
+.stack-new-card-menu-cards::-webkit-scrollbar {
+    width: 6px;
+}
+
+.stack-new-card-menu-cards::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+.stack-new-card-menu-cards::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 99px;
+}
+
+.stack-new-card-menu-cards::-webkit-scrollbar-thumb:hover {
+    box-shadow: inset 0 0 5px white;
+
+}
+
+.stack-new-card-menu-card:hover:enabled {
+    box-shadow: 0 0 0pt 2pt lightgreen;
+    cursor: pointer;
+
+}
+
+.stack-new-card-menu-card:not(:enabled) {
+    opacity: 0.4;
+    color: black;
+}
+
+.stack-new-card-menu-card-primary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    width: 80px;
+
+}
+
+.stack-new-card-menu-card-primary-icon {
+    width: 30px;
+}
+
+.stack-new-card-menu-card-primary-title {
+    font-weight: bold;
+    margin-top: -2px;
+    font-size: 16px;
+
+}
+
+.stack-new-card-menu-card-secondary {
+    width: 100%;
+    margin-left: 15px;
+    /* padding-left: 10px; */
+}
+
+.stack-new-card-menu-card-secondary-description {
+    text-align: center;
+    font-size: 16px;
 }
 
 </style>
