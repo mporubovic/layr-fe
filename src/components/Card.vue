@@ -649,7 +649,7 @@ export default {
 
                     // minimum size
                         interact.modifiers.restrictSize({
-                            min: { width: 225, height: 225 }
+                            min: { width: 260, height: 260 }
                         }),
 
                         // interact.modifiers.aspectRatio({ 
