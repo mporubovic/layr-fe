@@ -24,6 +24,10 @@
             >
             <div class="card-header-title card-header-drag-handle"
                     >
+                <img class="card-icon-onboard" 
+                    v-if="!isInStack"
+                    :src="card.display.icon">
+                
                 <h1 @click.right.prevent="onCardHeaderRightclick()"
                         v-if="!isHeaderEditing">{{ card.info.title }}</h1>
                 <input
@@ -54,21 +58,26 @@
                 :style="cardBodyDynamicStyle"
                 >
 
-            <div class="test">
+            <!-- <div class="test">
 
-            </div>
-                <component v-if="loadContent()"
-                            :is="cardProgram(card)" 
-                            :content="card.content"
-                            :contentComponent="cardContentComponentName(card)"
-                            :cardId="card.info.id"
-                            :hasFocus="hasFocus"
-                            @programUpdatedContent="programUpdatedContent"
-                            @programCreatedContent="programCreatedContent"
-                            @programDeletedContent="programDeletedContent"
-                            :autoSaveInterval="stackSettings.autoSaveInterval"
-                            >
-                </component>        
+            </div> -->
+            
+            <img class="card-icon-instack" 
+                    v-if="isInStack"
+                    :src="card.display.icon">
+
+            <component v-if="loadContent()"
+                        :is="cardProgram(card)" 
+                        :content="card.content"
+                        :contentComponent="cardContentComponentName(card)"
+                        :cardId="card.info.id"
+                        :hasFocus="hasFocus"
+                        @programUpdatedContent="programUpdatedContent"
+                        @programCreatedContent="programCreatedContent"
+                        @programDeletedContent="programDeletedContent"
+                        :autoSaveInterval="stackSettings.autoSaveInterval"
+                        >
+            </component>        
 
             
             <!-- <slot v-if="loadContent()"
@@ -79,7 +88,8 @@
             <!-- <h1>ix {{ indexAsData }}</h1>
             <h2>id {{ id }}</h2> -->
             <!-- <h1 v-if="isInStack">I {{ index }}</h1> -->
-            <h2 style="font-size: 60px; margin-left: 10px;" v-if="isInStack">{{ card.info.type }}</h2>
+            <!-- <h2 style="font-size: 60px; margin-left: 10px;" v-if="isInStack">{{ card.info.type }}</h2> -->
+
         
         </div>
 
@@ -207,12 +217,18 @@ export default {
             switch (card.info.type) {
                 
                 case("image") :
-                    setTimeout(() => {
-                        this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
-
-                    }, 0);
                     
-                    return "image-viewer";   
+                    switch (card.display.program) {
+                        case "gallery":
+                            setTimeout(() => {
+                                this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
+
+                            }, 0);
+                            
+                            return "image-viewer";  
+                    }
+                break
+ 
                     
                 case("video") :
                     return "VideoViewer";                
@@ -246,6 +262,19 @@ export default {
                     // this.$el.style["background-color"] = "white";
 
                     return "text-editor";  
+
+                case("embed") :
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "rgba(0, 0, 0, 0.5)";
+                    }, 0);
+                    
+                    // this.$el.style["background-color"] = "white";
+                    switch (card.display.program) {
+                        case "youtube":
+                            return "youtube-player"; 
+                    }
+                     
             }
         },
 
@@ -736,9 +765,9 @@ export default {
 
         },
 
-        programCreatedContent(programName) {
+        programCreatedContent(programName, mainContent) {
             // console.log(programName, updateFunction, updatedContent)
-            this.$emit('cardProgramCreatedContent', programName, this.id)
+            this.$emit('cardProgramCreatedContent', programName, mainContent ?? null, this.id)
 
         },
 
@@ -778,13 +807,20 @@ export default {
     margin-left: 15px;
     margin-right: 10px;
     overflow: hidden;
+    display: flex;
+    align-items: center;
 
 
 }
 
+.card-icon-onboard {
+    height: 30px;
+    /* margin-right: 10px; */
+}
+
 .card-header-title h1 {
     font-size: 25px;
-    margin: 0px;
+    margin-left: 10px;
     color: black;
     overflow: hidden;
     white-space: nowrap;
@@ -796,6 +832,7 @@ export default {
     font-weight: bold;
     font-style: italic;
     width: 100%;
+    margin-left: 10px;
 }
 
 .card-body {
@@ -813,6 +850,14 @@ export default {
     overflow-x: hidden;
     touch-action: none;
     
+}
+
+.card-icon-instack {
+    height: 50px;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    /* right: 20px; */
 }
 
 .test {
