@@ -141,9 +141,11 @@ export default {
     methods: {
         saveContent() {
             // console.log(this.change)
-            let newContent = {
-                text: this.quill.getContents().ops
-            }
+            let newContent = JSON.parse ( JSON.stringify ( this.content[0] ) )
+        
+            newContent.text = this.quill.getContents().ops
+
+            // console.log(newContent)
             
             // console.log('Saving text editor changes', change, newContent);
             this.$emit('programUpdatedContent', this.$options._componentTag, newContent)
