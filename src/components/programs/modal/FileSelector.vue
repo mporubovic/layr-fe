@@ -86,8 +86,14 @@ export default {
 
     methods: {
         dropFiles(event) {
-            this.$refs.file.files = event.dataTransfer.files
-            console.log(this.$refs.file.files)
+            if (this.sources.includes("link")) {
+                if (event.dataTransfer.types.includes("text/uri-list")) {
+                    // console.log(event.dataTransfer.getData("text/uri-list"))
+                    this.$emit('urlSubmitted', event.dataTransfer.getData("text/uri-list"))
+                }
+            } else if (this.sources.includes("device")) {
+                return
+            }
         },
         
         dragOver(event) {

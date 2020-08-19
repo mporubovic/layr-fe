@@ -1,34 +1,42 @@
 
 <template>
-    <div class="youtube-video-container"
+    <div class="youtube-video"
             :style="containerDynamicStyle"
             >
 
         <h2 v-if="contentLoading">Loading YouTube video...</h2>
-        <youtube :video-id="videoId"
-                @ready="videoReady"
-                @ended="videoReady"
-                @buffering="videoBuffering"
-                @cued="videoCued"
-                @error="videoError"
-                @playing="videoPlaying"
-                @paused="videoPaused"
-                v-if="!contentLoading && content.length !== 0"
-                class="youtube-video-player"
-                ref="youtube"
-                frameborder="0"
+        
+        <div class="video-selector" v-show="content.length === 0">
+            <file-selector :sources="contentSources"
+                            
+                            @urlSubmitted="fileSelectorUrlSubmitted">
+
+            </file-selector>
+        </div>        
+        
+        <div class="youtube-video-container"
+                v-if="content.length > 0 && !contentLoading"
                 >
+            <youtube :video-id="videoId"
+                    @ready="videoReady"
+                    @ended="videoReady"
+                    @buffering="videoBuffering"
+                    @cued="videoCued"
+                    @error="videoError"
+                    @playing="videoPlaying"
+                    @paused="videoPaused"
+                    class="youtube-video-player"
+                    ref="youtube"
+                    frameborder="0"
+                    >
+            </youtube>
+        </div>
+
 
         <!-- <div class="video-selector" v-show="content.length === 0"> -->
 
                 
-        </youtube>
-        <div class="video-selector">
-            <file-selector :sources="contentSources"
-                            @urlSubmitted="fileSelectorUrlSubmitted">
 
-            </file-selector>
-        </div>
 
     </div>
 </template>
@@ -72,11 +80,16 @@ export default {
         }
     },
 
-    created() {
+    mounted() {
             
         if (this.content.length !== 0) {
-            this.contentLoading = true
+            this.contentLoading = true        
+            setTimeout(() => {
+                this.contentLoading = false
+            }, 500);
         }
+
+
             
     },
 
@@ -108,6 +121,11 @@ export default {
         
         videoError() {
             console.log("VIDEO ", this.content[0].id, " error")
+            this.$nextTick(() => {
+                this.$emit('programDeletedContent', 'youtube-player', this.content[0])
+            })
+            
+            // console.log(this.content.length)
         },
         
         videoPaused() {
@@ -124,19 +142,26 @@ export default {
 </script>
 
 <style scoped>
-.youtube-video-container {
+.youtube-video {
     width: 100%;
     height: 100%;
     border-radius: 10px;
     overflow: hidden;
     white-space:nowrap;
 }
+
+.youtube-video-container {
+    overflow: hidden;
+    height: 100%;
+
+
+}
 .youtube-video-player {
     width: 100%;
     height: 100%;
 }
 
-.youtube-video-container h2 {
+.youtube-video h2 {
     color:white;
 }
 
