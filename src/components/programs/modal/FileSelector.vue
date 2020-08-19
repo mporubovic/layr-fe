@@ -3,7 +3,7 @@
             @drop.prevent="dropFiles($event)"
             @dragover="dragOver($event)">
         <div class="file-selector-header">
-            <p>File selector</p>
+            <p>Content selector</p>
         </div>
         <hr class="file-selector-body-line">
 
@@ -12,16 +12,16 @@
                 <button class="file-selector-button-common file-selector-button-drag-n-drop"
                         >
                     <img src="@/assets/modal/fileselector/drag.svg" class="file-selector-device-upload-icon">
-                    <p class="file-selector-device-upload-text">Drag and drop files here</p>
+                    <p class="file-selector-device-upload-text">Drag and drop content here</p>
                 </button>
                 
             </div>
-            <div class="file-selector-device">
+            <div class="file-selector-device" v-if="localSources.device">
                 <button class="file-selector-button-common file-selector-button-upload"
                         @click="openFileExplorer"
                         >
                     <img src="@/assets/modal/fileselector/file-upload.svg" class="file-selector-device-upload-icon">
-                    <p class="file-selector-device-upload-text">Upload files from this device</p>
+                    <p class="file-selector-device-upload-text">Upload content from this device</p>
                     <input class="file-selector-device-upload-input" 
                             id="file-input" 
                             type="file" 
@@ -33,11 +33,11 @@
                 
             </div>
 
-            <div class="file-selector-link file-selector-button-common">
+            <div class="file-selector-link file-selector-button-common" v-if="localSources.link">
                 <div class="file-selector-link-div"
                         >
                     <img src="@/assets/modal/fileselector/link.svg" class="file-selector-link-icon">
-                    <p class="file-selector-link-text">Link a file from a URL</p>
+                    <p class="file-selector-link-text">Link content from a URL</p>
 
                     
 
@@ -48,6 +48,8 @@
                             placeholder="Type in URL"
                             @mouseover="urlInputMouseOver($event)"
                             @mouseleave="urlInputMouseLeave($event)"
+                            @blur="urlInputBlur($event)"
+                            @keydown.enter="urlInputEnter($event)"
                             >
                 </div>
             </div>
@@ -63,12 +65,22 @@
 
 <script>
 export default {
-    // mounted() {
-    // },
+
+    props: {
+        sources: {
+            type: Array,
+            required: true
+        }
+    },
 
     data() {
         return {
             d: null,
+            localSources: {
+                dragndrop: true,
+                device: this.sources.includes('device') ? true : false,
+                link: this.sources.includes('link') ? true : false,
+            }
         }
     },
 
@@ -96,7 +108,17 @@ export default {
             event.target.focus()
         },
 
-        urlInputMouseLeave(event) {
+        urlInputMouseLeave() {
+            // event.target.blur()
+        },
+
+        urlInputBlur(event) {
+            let val = event.target.value.trim()
+            if (val) this.$emit('urlSubmitted', val)
+
+        },
+
+        urlInputEnter(event) {
             event.target.blur()
         }
     },
@@ -109,8 +131,10 @@ export default {
     background: white;
     /* position: relative; */
     z-index: 99;
-    height: 410px;
-    width: 550px;
+    max-height: 410px;
+    min-height: 210px;
+    max-width: 550px;
+    min-width: 550px;
     border-radius: 15px;
     box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25);
     overflow: hidden;
