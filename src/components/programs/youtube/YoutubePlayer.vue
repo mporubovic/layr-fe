@@ -1,0 +1,159 @@
+
+<template>
+    <div class="youtube-video-container"
+            :style="containerDynamicStyle"
+            >
+
+        <h2 v-if="contentLoading">Loading YouTube video...</h2>
+        <youtube :video-id="videoId"
+                @ready="videoReady"
+                @ended="videoReady"
+                @buffering="videoBuffering"
+                @cued="videoCued"
+                @error="videoError"
+                @playing="videoPlaying"
+                @paused="videoPaused"
+                v-if="!contentLoading && content.length !== 0"
+                class="youtube-video-player"
+                ref="youtube"
+                frameborder="0"
+                >
+
+        <!-- <div class="video-selector" v-show="content.length === 0"> -->
+
+                
+        </youtube>
+        <div class="video-selector">
+            <file-selector :sources="contentSources"
+                            @urlSubmitted="fileSelectorUrlSubmitted">
+
+            </file-selector>
+        </div>
+
+    </div>
+</template>
+
+<script>
+export default {
+    props: {
+        content: {
+            type: Array,
+            required: true,
+        },
+
+        hasFocus: {
+            type: Boolean,
+            required: true,
+        }
+    },
+
+    // components: {
+    //   pdf
+    // },
+
+    data() {
+        return {
+            contentLoading: false,
+            contentSources: ['link'],
+        };
+    },
+
+    computed: {
+        containerDynamicStyle() {
+            return this.hasFocus ? {'pointer-events': ''} : {'pointer-events': 'none'}
+        },
+
+        videoId() {
+            return this.$youtube.getIdFromUrl(this.content[0].url.path)
+        },
+
+        player() {
+            return this.$refs.youtube.player
+        }
+    },
+
+    created() {
+            
+        if (this.content.length !== 0) {
+            this.contentLoading = true
+        }
+            
+    },
+
+    methods: {
+        videoReady() {
+            console.log("VIDEO ", this.content[0].id, " ready")
+        },
+
+        videoPlaying() {
+            console.log("VIDEO ", this.content[0].id, " playing")
+            // this.player.pauseVideo()
+            // setTimeout(() => {
+            //     this.player.playVideo()
+                
+            // }, 3000);
+        },
+        
+        videoEnded() {
+            console.log("VIDEO ", this.content[0].id, " ended")
+        },        
+        
+        videoBuffering() {
+            console.log("VIDEO ", this.content[0].id, " buffering")
+        },        
+        
+        videoCued() {
+            console.log("VIDEO ", this.content[0].id, " cued")
+        },        
+        
+        videoError() {
+            console.log("VIDEO ", this.content[0].id, " error")
+        },
+        
+        videoPaused() {
+            console.log("VIDEO ", this.content[0].id, " paused")
+            this.player.getCurrentTime().then(time => console.log("PAUSED AT ", time))
+        },
+
+        fileSelectorUrlSubmitted(url) {
+            // this.contentLoading = true
+            this.$emit('programCreatedContent', 'youtube-player', url)
+        }
+    },
+};
+</script>
+
+<style scoped>
+.youtube-video-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    white-space:nowrap;
+}
+.youtube-video-player {
+    width: 100%;
+    height: 100%;
+}
+
+.youtube-video-container h2 {
+    color:white;
+}
+
+/deep/ iframe {
+    width: 100%;
+    height: 100%;
+
+}
+
+.video-selector {
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 50px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+</style>
