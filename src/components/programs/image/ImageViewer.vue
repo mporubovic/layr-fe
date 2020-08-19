@@ -39,7 +39,7 @@
         </div>
 
         <div class="image-selector" v-if="isFileSelectorOpen">
-            <file-selector >
+            <file-selector :sources="contentSources">
 
             </file-selector>
         </div>
@@ -61,6 +61,7 @@ export default {
             index: 0,
             images: [],
             isFileSelectorOpen: false,
+            contentSources: ['device', 'link']
         };
     },
 
@@ -255,7 +256,6 @@ img {
     padding: 50px;
     height: 100%;
     display: flex;
-    /* flex-direction: column; */
     justify-content: center;
     align-items: center;
 }
