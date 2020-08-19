@@ -1,16 +1,17 @@
 
 <template>
     <div>
-        <!-- <pdf
-            v-for="i in pagesNumber"
-            :key="i"
-            src="https://cdn.mozilla.net/pdfjs/tracemonkey.pdf"
-            :page="i"
-            style="display: inline-block; width: 100%"
-        ></pdf> -->
+        <h2 v-if="contentLoading">Loading PDF</h2>        
+        
+        <div class="pdf-selector" v-if="content.length === 0">
+            <file-selector :sources="contentSources"
+                            @urlSubmitted="fileSelectorUrlSubmitted">
 
-        <h2 v-if="contentLoading">Loading PDF</h2>
+            </file-selector>
+        </div>
+
         <iframe :src="iframes[0]" 
+                v-if="content.length !== 0"
                 :style="ifrmDynamicStyle"
                 frameborder="0"
                 ></iframe>
@@ -33,15 +34,12 @@ export default {
         }
     },
 
-    // components: {
-    //   pdf
-    // },
-
     data() {
         return {
             pagesNumber: [],
             iframes: [],
             contentLoading: true,
+            contentSources: ['device', 'link']
         };
     },
 
@@ -62,6 +60,13 @@ export default {
                 
         });
     },
+
+    methods: {
+        fileSelectorUrlSubmitted() {
+            // this.contentLoading = true
+            // this.$emit('programCreatedContent', 'youtube-player', url)
+        }
+    },
 };
 </script>
 
@@ -80,4 +85,15 @@ iframe {
     /* overflow-y: hidden; */
 
 }
+
+.pdf-selector {
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 50px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 </style>
