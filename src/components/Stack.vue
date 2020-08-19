@@ -43,7 +43,7 @@
                             v-for="newCard in newCards" 
                             :key="newCard.name"
                             :disabled="!newCard.available"
-                            @click="createNewCard(newCard.type)"
+                            @click="createNewCard(newCard)"
                             >
                     <div class="stack-new-card-menu-card-primary">
                         <img class="stack-new-card-menu-card-primary-icon" 
@@ -74,7 +74,7 @@
             <div class="stack-controls">
                 <button class="stack-controls-common stack-controls-toggle" id= "stack-controls-toggle" @click="toggleCardStack">{{ toggleButtonText }}</button>
                 <button class="stack-controls-common stack-controls-move">Move</button>
-                <button class="stack-controls-common stack-controls-add" @click="openNewCardMenu">
+                <button class="stack-controls-common stack-controls-add" @click="toggleNewCardMenu">
                     <img src="../assets/common/add.svg">
                 </button>
             </div>
@@ -89,6 +89,7 @@
 <script>
 import Card from './Card.vue';
 import interact from 'interactjs';
+
 
 // import ImageViewer from './programs/ImageViewer.vue'
 // import VideoViewer from './programs/VideoViewer.vue'
@@ -109,7 +110,64 @@ export default {
 
     data() {
         return {
-            cards: this.generateCards(1),
+            cards:
+            this.generateCards(
+                [
+                    {
+                        "info" : {
+                            "type": "image"
+                        },
+                        "display": {
+                            "program": "gallery"
+                        }
+                    },
+
+                    {
+                        "info" : {
+                            "type": "embed"
+                        },
+                        "display": {
+                            "program": "youtube"
+                        }
+                    },
+                    {
+                        "info" : {
+                            "type": "text"
+                        },
+                        "display": {
+                            "program": "text-editor"
+                        }
+                    },
+
+                    {
+                        "info" : {
+                            "type": "todo"
+                        },
+                        "display": {
+                            "program": "todo-list"
+                        }
+                    },
+
+                    {
+                        "info" : {
+                            "type": "url"
+                        },
+                        "display": {
+                            "program": "url-list"
+                        }
+                    },
+
+                    {
+                        "info" : {
+                            "type": "pdf"
+                        },
+                        "display": {
+                            "program": "pdf-viewer"
+                        }
+                    },
+
+                ]
+                ),
             
             // stackSettings: {
             //     cardGap: this.calculateCardGap(),
@@ -134,45 +192,47 @@ export default {
                     "type": "image",
                     "available": true,
                     "title": "Image",
-                    "icon": require('@/assets/stack/cardmenu/image.svg'),
+                    "icon": require('@/assets/cards/icons/image.svg'),
                     "description": "Upload images from your device"
                 },                
                 {
-                    "type": "video",
-                    "available": false,
+                    "type": "embed",
+                    "program": "youtube",
+                    "available": true,
                     "title": "Video",
-                    "icon": require('@/assets/stack/cardmenu/video.svg'),
-                    "description": "Upload a video from your device"
+                    "icon": require('@/assets/cards/icons/youtube.svg'),
+                    "description": "Play a video from YouTube"
+                },                
+                {
+                    "type": "text",
+                    "available": true,
+                    "title": "Notes",
+                    "icon": require('@/assets/cards/icons/text.svg'),
+                    "description": "Create a note with a text editor"
                 },                
                 {
                     "type": "todo",
                     "available": true,
                     "title": "Todo",
-                    "icon": require('@/assets/stack/cardmenu/todo.svg'),
+                    "icon": require('@/assets/cards/icons/todo.svg'),
                     "description": "Create a todo list"
                 },                
                 {
                     "type": "url",
                     "title": "URL",
                     "available": true,
-                    "icon": require('@/assets/stack/cardmenu/link.svg'),
+                    "icon": require('@/assets/cards/icons/link.svg'),
                     "description": "Create a list of URLs"
                 },                
                 {
                     "type": "pdf",
                     "available": true,
                     "title": "PDF",
-                    "icon": require('@/assets/stack/cardmenu/pdf.svg'),
+                    "icon": require('@/assets/cards/icons/pdf.svg'),
                     "description": "Upload a PDF from your device"
                 },
 
-                {
-                    "type": "text",
-                    "available": true,
-                    "title": "Notes",
-                    "icon": require('@/assets/stack/cardmenu/text.svg'),
-                    "description": "Create a note with a text editor"
-                },
+
             ],
 
         backdoor: 0
@@ -191,298 +251,16 @@ export default {
             }
         },
 
-        generateCards(count) {
-            let cards = [];
-            for (let index = 0; index < count; index++) {
-                cards.push(
-                    {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
-                            },
-                            "type": "pdf", 
-                            "title": "NFX"
-                        },
-
-                        "display": {
-                            "program": "single"
-                        },
-
-                        "content": [
-                            {
-                                "meta": {},
-                                "file": {
-                                    "url": 'http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
-                                    "name": "NFX"
-                                }    
-                            }
-                        ],
-
-                    },
-                    
-                    {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
-                            },
-                            "type": "image", 
-                            "title": "Andromeda"
-                        },
-
-                        "display": {
-                            "program": "gallery"
-                        },
-
-                        "content": [
-                            {
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
-                                    "name": "AndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromeda"
-                                }
-
-                            },
-
-
-                            {
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/ne0213-last-hubble-mission.jpg',
-                                    "name": "Hubble"
-                                }
-
-                            },
-
-                            {
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2005a.jpg',
-                                    "name": "Hubble"
-                                }
-
-                            },
-
-                            {
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2006a.jpg',
-                                    "name": "Hubble"
-                                }
-
-                            },
-                            {
-
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2004a.jpg',
-                                    "name": "Hubble"
-                                }
-
-                            },
-
-                            {
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2003a.jpg',
-                                    "name": "Hubble"
-                                }
-
-                            },
-
-                            {
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2002a.jpg',
-                                    "name": "Hubble"
-                                }
-
-                            },
-
-
-                        ]
-                    },
-                    {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
-                            },
-                            "type": "text", 
-                            "title": "Text editor"
-                        },
-
-                        "display": {
-                            "program": "texteditor"
-                        },
-
-                        "content": [
-                            {
-                                "meta": {},
-                                "text": [{"insert":"Hello World!"},{"attributes":{"align":"center"},"insert":"\n\n"}]
-                            }
-                        ],
-
-                    },
-
-                    {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
-                            },
-                            "type": "todo", 
-                            "title": "Todo List"
-                        },
-
-                        "display": {
-                            "program": "list"
-                        },
-
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "todo": {
-                                    
-                                    "body": "First todo",
-                                    "position": 1,
-                                    "completed_at": null
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "todo": {
-                                    
-                                    "body": "Second todo",
-                                    "position": 2,
-                                    "completed_at": null
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "todo": {
-                                    
-                                    "body": "Third todo",
-                                    "position": 3,
-                                    "completed_at": null
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            }
-                        ],
-
-                    },
-
-                    {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
-                            },
-                            "type": "url", 
-                            "title": "Url List"
-                        },
-
-                        "display": {
-                            "program": "list"
-                        },
-
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "url": {
-                                    "path": "https://www.nasa.gov/mission_pages/hubble/main/index.html",
-                                    "position": 1,
-                                    "ico": null,
-                                    "title": null,
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "url": {
-                                    
-                                    "path": "http://www.esa.int/",
-                                    "position": 2,
-                                    "ico": null,
-                                    "title": null,                                    
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "url": {
-                                    
-                                    "path": "https://www.youtube.com/user/destinws2",
-                                    "position": 3,
-                                    "ico": null,
-                                    "title": null,                                    
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "url": {
-                                    
-                                    "path": "https://codepen.io/chriscoyier/pen/uCwfB",
-                                    "position": 3,
-                                    "ico": null,
-                                    "title": null,                                   
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                        ],
-
-                    },
-                )
-            
+        generateCards(cards) {
+            let crds = []
+            for (let index = 0; index < 1; index++) {
+                cards.forEach(card => {
+                    crds.push(this.cardTemplate(card))
+                });
             }
-            return cards;
+            
+
+            return crds;
         },
         
         initializeInteractJs() {
@@ -536,6 +314,8 @@ export default {
                             // update the posiion attributes
                             target.setAttribute('data-x', x)
                             target.setAttribute('data-y', y)
+
+
                         },
 
                         // end (event) {
@@ -543,6 +323,7 @@ export default {
                             var target = event.target
                             // var target = document.getElementById('stack')
                             target.classList.remove("stack-no-delay");
+
                         }
                     }
                 
@@ -672,6 +453,8 @@ export default {
 
         toggleCardStack() {
                 if (!this.controls.toggleActive) return;
+                if (this.isNewCardMenuVisible) this.toggleNewCardMenu()
+                
                 document.getElementById("stack-controls-toggle").style.opacity = 0.5;
                 
                 
@@ -701,16 +484,15 @@ export default {
                     // this.controls.toggleExpand = !this.controls.toggleExpand;
 
                 }, 700 + 100*cards.length);
-
         },
 
         generateDimensions(d) {
             switch (d) {
                 case "x":
-                    return  Math.floor(Math.random() * 1200 );
+                    return  200;
                 
                 case "y":
-                    return  Math.floor(Math.random() * 800 );
+                    return  200;
                     
                 case "width":
                     return  260 + Math.floor(Math.random() * 500 );
@@ -794,29 +576,18 @@ export default {
             // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
             let contentKey = this.cardProgramNameToKey(programName)
             // console.log(contentKey)
+            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
 
             this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)[contentKey] = updatedContent[contentKey]
 
         },
 
-        cardProgramCreatedContent(programName, cardId) {
-            // let contentKey = this.cardProgramNameToKey(programName)
-            console.log("CREATE", "FROM", programName, "CARD", cardId)
-            // console.log(contentKey, programName, newContent, cardId)
-            let newContent = this.contentTemplate(programName)
-            // Backend communication
-            // let contentMap = new Map()
+        cardProgramCreatedContent(programName, mainContent, cardId) {
+            console.log("CREATE", "FROM", programName, "MAIN CONTENT", mainContent ?? null, "CARD", cardId)
+            let newContent = this.contentTemplate(programName, mainContent ?? null)
+            
             console.log("RESULT", newContent)
             this.cards.find(c => c.info.id === cardId).content.push(newContent)
-            // this.cards.find(c => c.info.id === cardId).content.push(
-            //     {
-            //         "id": Math.floor(Math.random()*1000),
-            //         newContent,
-            //         "meta": null
-                    
-            //     }
-            // )
-
 
         },
 
@@ -844,7 +615,7 @@ export default {
             }
         },
 
-        contentTemplate(type) {
+        contentTemplate(type, mainContent) {
             switch (type) {
                 case("image-component") : {
                     let obj = {
@@ -889,6 +660,19 @@ export default {
                     
                 case("text-editor") :
                     return "text";  
+
+                case("youtube-player"): {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 1000 ),
+                        "isEditing": false,
+                        "meta": {},
+                        "url": {
+                            "path": mainContent ?? '',
+                        }    
+                    }
+                    
+                    return obj;
+                }
             }
         },
 
@@ -897,7 +681,9 @@ export default {
             this.cards.find(c => c.info.id === cardId)[updatedPropertyType][updatedPropertyKey] = updatedPropertyValue
         },
 
-        openNewCardMenu() {
+        toggleNewCardMenu() {
+            // screenfull.toggle();
+            
             if (this.isNewCardMenuVisible) {
                 this.$el.querySelector('#stack-cards').style.display = ''
                 setTimeout(() => {
@@ -913,19 +699,21 @@ export default {
             } else {
                 this.isNewCardMenuVisible = true
                 setTimeout(() => {
-                    this.$el.querySelector('#stack-new-card-menu').style.height = 220 + 'px'
+                    this.$el.querySelector('#stack-new-card-menu').style.height = 400 + 'px'
                     this.$el.querySelector('#stack-cards').style.opacity = 0
                 }, 0)
 
                 setTimeout(() => {
-                this.$el.querySelector('#stack-cards').style.display = 'none'
+                    if (this.isNewCardMenuVisible) {
+                        this.$el.querySelector('#stack-cards').style.display = 'none'
+                    }
                 }, 500);
                 
             }
             
         },
 
-        createNewCard(type) {
+        createNewCard(card) {
             this.$el.querySelector('#stack-cards').style.display = ''
             setTimeout(() => {
                 this.$el.querySelector('#stack-new-card-menu').style.height = 0 + 'px'
@@ -937,7 +725,16 @@ export default {
                 this.isNewCardMenuVisible = false
             }, 500);
             
-            let newCard = this.cardTemplate(type)
+            let newCard = this.cardTemplate(
+                {
+                    "info": {
+                        "type": card.type
+                    },
+                    "display": {
+                        "program": card.program ?? null
+                    }
+                }
+            )
             // console.log(this.cardsInStack)
             // console.log(this.stackSettings.cardGap)
             
@@ -961,8 +758,8 @@ export default {
 
         },
 
-        cardTemplate(type) {
-            switch(type) {
+        cardTemplate(card) {
+            switch(card.info.type) {
                 case("image"):
                     return {
                         "info": {
@@ -970,23 +767,26 @@ export default {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
+                                "width": 780,
+                                "height": 550,
                             },
                             "type": "image", 
                             "title": "Andromeda"
                         },
 
                         "display": {
-                            "program": "gallery"
+                            "program": "gallery",
+                            "icon": require('@/assets/cards/icons/image.svg'),
+
                         },
 
                         "content": [
                             {
+                                "id": Math.floor(Math.random()*1000),
                                 "meta": {},
                                 "file": {
                                     "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
-                                    "name": "AndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromedaAndromeda"
+                                    "name": "The Andromeda Galaxy"
                                 }
 
                             },
@@ -1002,15 +802,17 @@ export default {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
+                                "width": 600,
+                                "height": 340,
                             },
                             "type": "todo", 
                             "title": "Todo List"
                         },
 
                         "display": {
-                            "program": "list"
+                            "program": "list",
+                            "icon": require('@/assets/cards/icons/todo.svg'),
+
                         },
 
                         "content": [
@@ -1039,15 +841,16 @@ export default {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
+                                "width": 710,
+                                "height": 260,
                             },
                             "type": "url", 
                             "title": "Url List"
                         },
 
                         "display": {
-                            "program": "list"
+                            "program": "list",
+                            "icon": require('@/assets/cards/icons/link.svg'),
                         },
 
                         "content": [
@@ -1076,21 +879,23 @@ export default {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
+                                "width": 600,
+                                "height": 320,
                             },
                             "type": "text", 
                             "title": "Text editor"
                         },
 
                         "display": {
-                            "program": "texteditor"
+                            "program": "texteditor",
+                            "icon": require('@/assets/cards/icons/text.svg'),
                         },
 
                         "content": [
                             {
+                                "id": Math.floor(Math.random()*1000),
                                 "meta": {},
-                                "text": [{"insert":"Hello World!"},{"attributes":{"align":"center"},"insert":"\n\n"}]
+                                "text": [{"insert":"Hello World!"},{"insert":"\n\n"}]
                             }
                         ],
 
@@ -1104,19 +909,22 @@ export default {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
-                                "width": this.generateDimensions('width'),
-                                "height": this.generateDimensions('height'),
+                                "width": 490,
+                                "height": 710,
                             },
                             "type": "pdf", 
                             "title": "NFX"
                         },
 
                         "display": {
-                            "program": "single"
+                            "program": "single",
+                            "icon": require('@/assets/cards/icons/pdf.svg'),
+
                         },
 
                         "content": [
                             {
+                                "id": Math.floor(Math.random()*1000),
                                 "meta": {},
                                 "file": {
                                     "url": 'http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
@@ -1126,6 +934,41 @@ export default {
                         ],
 
                     }
+                case("embed"):
+                    switch(card.display.program) {
+                        case("youtube"):                            
+                            return {
+                                "info": {
+                                    "id": Math.floor(Math.random()*1000),
+                                    "dimensions": {
+                                        "x": this.generateDimensions('x'),
+                                        "y": this.generateDimensions('y'),
+                                        "width": 580,
+                                        "height": 380,
+                                    },
+                                    "type": "embed", 
+                                    "title": "YouTube video"
+                                },
+
+                                "display": {
+                                    "program": "youtube",
+                                    "icon": require('@/assets/cards/icons/youtube.svg'),
+
+                                },
+
+                                "content": [
+                                    // {
+                                    //     "id": Math.floor(Math.random()*1000),
+                                    //     "meta": {},
+                                    //     "url": {
+                                    //         "path": 'https://www.youtube.com/watch?v=0pZ8PVRauDU',
+                                    //         "name": "NFX"
+                                    //     }    
+                                    // }
+                                ],
+
+                            }
+                        }
             }
         }
 
@@ -1161,6 +1004,7 @@ export default {
         stackSettings() {
             
             let cardCount = this.cards.length;
+            // console.log(cardCount)
             // alert(cardCount);
             // alert (cardCount > 45) ? 25 : (50 - cardCount);
             // return (cardCount > 45) ? 25 : (50 - cardCount);
@@ -1168,7 +1012,8 @@ export default {
             // return {cardGap: 50 - this.cards.length * 1};
             // return cardCount <= 45 ? console.log(50 - cardCount) : console.log(5);
             return {
-                cardGap: (cardCount <= 65 ? 75 - cardCount - 20 : 7),
+                cardGap: (cardCount <= 45 ? 75 - cardCount - 20 : 7),
+                // cardGap: 45,
                 cardDimensions: {
                     width: 225,
                     height: 225,
@@ -1461,79 +1306,3 @@ export default {
 }
 
 </style>
-
-.stack-controls {
-    /* position: absolute; */ 
-    /* margin-top: 30px; */
-    /* margin-left: -25px; */
-    width: 260px;
-    height: 50px;
-    /* outline: black solid -5px; */
-    background-color: rgba(0, 0, 0, 0.30);
-    /* display: table-row; */
-    /* position: absolute; */
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 99px;
-    /* box-sizing: border-box; */
-    /* bottom: 20px; */
-}
-
-.stack-controls-common {
-    background-color: white;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 15px;
-    /* height: 30px; */
-    padding: 5px 15px 5px 15px;
-    border-radius: 99px;
-    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
-                inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
-    transition: all 0.5s;
-}
-
-.stack-controls-drag:active {
-    cursor: grabbing;
-    background-color: lightgreen;
-}
-
-.stack-controls-s {
-    background-color:orange;
-    color: white;
-    text-decoration: none;
-    /* cursor: none; */
-    font-size: 20px;
-    height: 30px;
-    width: 30px;
-    padding: 5px 10px 5px 9px;
-    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
-                inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
-    border-radius: 99px;
-    /* text-align: center;  */
-    /* box-sizing: border-box; */
-    line-height: 10px;
-}
-
-.stack-controls-add-wrapper {
-    max-height: 30px;
-    min-height: 30px;
-    max-width: 30px;
-    min-width: 30px;
-    padding: 0;
-    /* padding-bottom: 10px; */
-    /* padding-bottom: 15px; */
-    /* padding: 5px 5px 5px 5px !important; */
-
-}
-
-.stack-controls-add {
-    font-size: 30px;
-    padding-bottom: 20px;
-    width: 100%;
-    height: 100%;
-}
