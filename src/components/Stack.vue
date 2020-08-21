@@ -489,10 +489,10 @@ export default {
         generateDimensions(d) {
             switch (d) {
                 case "x":
-                    return  200;
+                    return  100;
                 
                 case "y":
-                    return  200;
+                    return  100;
                     
                 case "width":
                     return  260 + Math.floor(Math.random() * 500 );
@@ -648,10 +648,10 @@ export default {
                         "isEditing": false,
                         "meta": {},
                         "url": {
-                            "path": '',
+                            "path": mainContent ?? '',
                             "position": 1,
-                            "ico": 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
-                            "title": 'Right click to edit',
+                            "ico": mainContent ? null : 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
+                            "title": mainContent ? null : 'Right click to edit',
                         }    
                     }
                     
@@ -767,7 +767,7 @@ export default {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
-                                "width": 780,
+                                "width": 777,
                                 "height": 550,
                             },
                             "type": "image", 
