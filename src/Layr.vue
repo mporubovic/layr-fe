@@ -166,7 +166,11 @@ export default {
     height: 19px;
     position:absolute;
     /* right: 0px; */
-    right: 45%;
+    /* right: 45%; */
+    right: 0;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
     bottom: -19px;
     background-color: rgba(0, 0, 0, 0.50);
     border-bottom-left-radius: 5px;
