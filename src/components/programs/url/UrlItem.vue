@@ -111,7 +111,7 @@ export default {
 
             return urlFormatted
 
-        }
+        },
 
     },
 
@@ -194,7 +194,7 @@ export default {
 
         fetchSiteTitle: function(targetUrl) {
             let titleApi = 'http://textance.herokuapp.com/title/'
-            targetUrl = targetUrl.split("//")[1] ? targetUrl.split("//")[1] : targetUrl
+            targetUrl = encodeURIComponent(targetUrl.split("//")[1] ? targetUrl.split("//")[1] : targetUrl)
 
             let titleEndpoint = titleApi + targetUrl
             return this.$http.get(titleEndpoint)
