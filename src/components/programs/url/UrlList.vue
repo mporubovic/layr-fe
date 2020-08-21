@@ -5,7 +5,10 @@
 
                             
 <template>
-    <div class="list-container">
+    <div class="list-container"
+            @drop.prevent="dropUrl($event)"
+            @dragover="dragOver($event)"
+        >
         <div class="list-items">
             <div class="list-item" v-for="(item) in content" :key="item.id"
                 :style="listDynamicStyle">
@@ -100,6 +103,20 @@ export default {
 
         deleteUrl(deletedUrl) {
             this.$emit('programDeletedContent', 'url-list', deletedUrl)
+        },
+
+        dropUrl(event) {
+            if (event.dataTransfer.types.includes("text/uri-list")) {
+                // console.log(event.dataTransfer.getData("text/uri-list"))
+                // this.$emit('urlSubmitted', event.dataTransfer.getData("text/uri-list"))
+                this.$emit('programCreatedContent', 'url-list', event.dataTransfer.getData("text/uri-list"))
+
+            }
+        },
+        
+        dragOver(event) {
+            event.preventDefault();
+            
         },
     }
         
