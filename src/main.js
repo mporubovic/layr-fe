@@ -12,6 +12,9 @@ import '@/globalComponents'
 
 Vue.config.productionTip = false
 
-new Vue({
-  render: h => h(Layr),
-}).$mount('#app')
+  new Vue({
+    el: '#layr',
+    render: h => h(Layr),
+    
+  })
+
