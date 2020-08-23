@@ -19,6 +19,8 @@ import YoutubePlayer from './components/programs/youtube/YoutubePlayer.vue'
 
 import FileSelector from './components/programs/modal/FileSelector.vue'
 
+import MenuBoards from './components/board/menu/Boards.vue'
+
 Vue.component('image-viewer', ImageViewer);
 Vue.component('pdf-viewer', PdfViewer);
 Vue.component('text-editor', TextEditor);
@@ -32,3 +34,5 @@ Vue.component('url-item', UrlItem);
 Vue.component('youtube-player', YoutubePlayer);
 
 Vue.component('file-selector', FileSelector);
+
+Vue.component('menu-boards', MenuBoards);

@@ -155,7 +155,7 @@ export default {
             mouseDown: false,
 
 
-            id: this.card.info.id,
+            // id: this.card.info.id,
 
             // hasFocus: false,
 
@@ -187,7 +187,9 @@ export default {
         //     return !this.isInStack;
         // }
 
-
+        id() {
+            return this.card.info.id  
+        },
     },
     
     mounted() {

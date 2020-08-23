@@ -108,66 +108,16 @@ export default {
 
     },
 
+    props: {
+        stackData: {
+            required: true,
+            type: Object,
+        }
+    },
+
     data() {
         return {
-            cards:
-            this.generateCards(
-                [
-                    {
-                        "info" : {
-                            "type": "image"
-                        },
-                        "display": {
-                            "program": "gallery"
-                        }
-                    },
-
-                    {
-                        "info" : {
-                            "type": "embed"
-                        },
-                        "display": {
-                            "program": "youtube"
-                        }
-                    },
-                    {
-                        "info" : {
-                            "type": "text"
-                        },
-                        "display": {
-                            "program": "text-editor"
-                        }
-                    },
-
-                    {
-                        "info" : {
-                            "type": "todo"
-                        },
-                        "display": {
-                            "program": "todo-list"
-                        }
-                    },
-
-                    {
-                        "info" : {
-                            "type": "url"
-                        },
-                        "display": {
-                            "program": "url-list"
-                        }
-                    },
-
-                    {
-                        "info" : {
-                            "type": "pdf"
-                        },
-                        "display": {
-                            "program": "pdf-viewer"
-                        }
-                    },
-
-                ]
-                ),
+            // cards: this.stackData.cards,
             
             // stackSettings: {
             //     cardGap: this.calculateCardGap(),
@@ -725,21 +675,7 @@ export default {
                 this.isNewCardMenuVisible = false
             }, 500);
             
-            let newCard = this.cardTemplate(
-                {
-                    "info": {
-                        "type": card.type
-                    },
-                    "display": {
-                        "program": card.program ?? null
-                    }
-                }
-            )
-            // console.log(this.cardsInStack)
-            // console.log(this.stackSettings.cardGap)
-            
-            this.cards.push(newCard)
-            this.backdoor++
+            this.$emit("createNewCard", card)
             // console.log(this.$children, newCard.info.id)
             
             // console.log(this.stackSettings.cardGap)
@@ -747,9 +683,9 @@ export default {
             // this.cardsInStack.find(c => c.id === newCard.id).$el.style.bottom = this.stackSettings.cardGap * (this.cardsInStack.length)  + 'px';
             
             
-            this.$nextTick(() => {
-                this.$children.find(c => c.id === newCard.info.id).onCardMouseUp()
-            })
+            // this.$nextTick(() => {
+            //     this.$children.find(c => c.id === newCard.info.id).onCardMouseUp()
+            // })
 
             this.$children.forEach(element => {
                 // console.log(element)
@@ -1023,6 +959,11 @@ export default {
             } 
             
         },
+
+        cards() { 
+           return this.stackData.cards
+        },
+
 
         toggleButtonText() {
             // return this.controls.toggleExpand ? "Expand" : "Collapse";
