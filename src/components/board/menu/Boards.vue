@@ -1,6 +1,8 @@
 <template>
     <div class="boards-menu-carousel">
-        <div class="boards-menu-carousel-board-new">
+        <div class="boards-menu-carousel-board-new"
+                @click="newBoard"
+                >
             <div class="boards-menu-carousel-board-new-icon">
                 <h3>Create a <br> new board</h3>
             </div>
@@ -36,6 +38,10 @@ export default {
     methods: {
         boardClicked(id) {
             this.$emit('subMenuBoardClicked', id)
+        },
+
+        newBoard() {
+            this.$emit('subMenuBoardNewBoard')
         }
     }
 }
@@ -93,6 +99,7 @@ margin-left: 5px;
 
 .boards-menu-carousel-board-new {
     min-width: 150px;
+    max-width: 150px;
     padding: 5px;
     box-sizing: border-box;
     /* height: 100%; */
@@ -101,6 +108,7 @@ margin-left: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    cursor: pointer;
 }
 
 .boards-menu-carousel-board-new-icon {
@@ -124,12 +132,14 @@ margin-left: 5px;
 
 .boards-menu-carousel-board {
     min-width: 190px;
+    max-width: 190px;
     padding: 2px;
     margin-right: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 .boards-menu-carousel-board-title {

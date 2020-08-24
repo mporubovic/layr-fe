@@ -11,8 +11,10 @@
     <div class="stack stack-draggable" id="stack">
 
         <div class="stack-cards" id="stack-cards">
+            <!-- <card v-for="(card, index) in cards"  -->
             <card v-for="(card, index) in cards" 
-                        :key="card.id" 
+                        :key="card.info.id"
+                        :ref="'card-' + index"
                         :card=card
                         :stackSettings="stackSettings"
                         :index=index
@@ -418,6 +420,7 @@ export default {
                 
                 cards.forEach((card, index) => {
                     setTimeout(() => {
+                            // console.log(card)
                             requestAnimationFrame(function() {
                                 card.onCardMouseUp();
                         })
@@ -486,7 +489,7 @@ export default {
         },
         
         cardBringForward(crd) {
-            
+            console.log( "1", this.localCards)
             let originalIndex = crd.indexAsData
             let higherCardsOnBoard = this.cardsOnBoard.filter(card => card.indexAsData > originalIndex)
             
@@ -503,7 +506,7 @@ export default {
 
             let newIndex = highestCardOnBoard.indexAsData
 
-            let cardsToBeAdjusted = this.$children.filter(card => (card.indexAsData <= newIndex && card.indexAsData > originalIndex))
+            let cardsToBeAdjusted = this.localCards.filter(card => (card.indexAsData <= newIndex && card.indexAsData > originalIndex))
 
             crd.indexAsData = newIndex;
             // crd.stackPosition = newIndex;
@@ -517,38 +520,30 @@ export default {
                 // card.stackPosition = card.indexAsData -1 
             });
 
+            console.log("2", this.localCards)
+
+
+            setTimeout(() => {
+            console.log("3", this.localCards)
+
+            }, 1000);
+
 
 
         },
                 
         cardProgramUpdatedContent(programName, updatedContent, cardId) {
-            console.log("UPDATE", programName, updatedContent, "CARD", cardId)
-            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
-            let contentKey = this.cardProgramNameToKey(programName)
-            // console.log(contentKey)
-            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
-
-            this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)[contentKey] = updatedContent[contentKey]
+            this.$emit("stackCardProgramUpdatedContent", programName, updatedContent, cardId)
 
         },
 
         cardProgramCreatedContent(programName, mainContent, cardId) {
-            console.log("CREATE", "FROM", programName, "MAIN CONTENT", mainContent ?? null, "CARD", cardId)
-            let newContent = this.contentTemplate(programName, mainContent ?? null)
-            
-            console.log("RESULT", newContent)
-            this.cards.find(c => c.info.id === cardId).content.push(newContent)
+            this.$emit("stackCardProgramCreatedContent", programName, mainContent, cardId)
 
         },
 
         cardProgramDeletedContent(programName, deletedContent, cardId) {
-            console.log("DELETE", programName, deletedContent, cardId)
-            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === deletedContent.id))
-            // let contentKey = this.cardProgramNameToKey(programName)
-            // console.log(contentKey)
-            let c = this.cards.find(c => c.info.id === cardId).content
-            let i = c.findIndex(c => c.id === deletedContent.id)
-            c.splice(i, 1)
+            this.$emit("stackCardProgramDeletedContent", programName, deletedContent, cardId)
 
         },
 
@@ -565,70 +560,8 @@ export default {
             }
         },
 
-        contentTemplate(type, mainContent) {
-            switch (type) {
-                case("image-component") : {
-                    let obj = {
-                        "id": Math.floor(Math.random() * 1000 ),
-                        "meta": {},
-                        "file": {
-                            "url": 'https://nasa.gov',
-                            "name": "NFX"
-                        }    
-                    }
-                    return obj
-
-                }            
-                
-                case("todo-list") : {
-                    let obj = {
-                        "id": Math.floor(Math.random() * 1000 ),
-                        "isEditing": false,
-                        "meta": {},
-                        "todo": {
-                            "body": 'New todo',
-                        }    
-                    }
-                    return obj
-                }
-                    
-                case("url-list"): {
-                    let obj = {
-                        "id": Math.floor(Math.random() * 1000 ),
-                        "isEditing": false,
-                        "meta": {},
-                        "url": {
-                            "path": mainContent ?? '',
-                            "position": 1,
-                            "ico": mainContent ? null : 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
-                            "title": mainContent ? null : 'Right click to edit',
-                        }    
-                    }
-                    
-                    return obj;
-                }  
-                    
-                case("text-editor") :
-                    return "text";  
-
-                case("youtube-player"): {
-                    let obj = {
-                        "id": Math.floor(Math.random() * 1000 ),
-                        "isEditing": false,
-                        "meta": {},
-                        "url": {
-                            "path": mainContent ?? '',
-                        }    
-                    }
-                    
-                    return obj;
-                }
-            }
-        },
-
-        cardUpdatedItself(cardId, updatedPropertyType, updatedPropertyKey, updatedPropertyValue) {
-            console.log("UPDATE", updatedPropertyType, updatedPropertyKey, "TO \"", updatedPropertyValue, "\" CARD", cardId)
-            this.cards.find(c => c.info.id === cardId)[updatedPropertyType][updatedPropertyKey] = updatedPropertyValue
+        cardUpdatedItself(cardId, path, value) {
+            this.$emit("stackCardUpdatedItself", cardId, path, value)
         },
 
         toggleNewCardMenu() {
@@ -694,220 +627,6 @@ export default {
 
         },
 
-        cardTemplate(card) {
-            switch(card.info.type) {
-                case("image"):
-                    return {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 777,
-                                "height": 550,
-                            },
-                            "type": "image", 
-                            "title": "Andromeda"
-                        },
-
-                        "display": {
-                            "program": "gallery",
-                            "icon": require('@/assets/cards/icons/image.svg'),
-
-                        },
-
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
-                                    "name": "The Andromeda Galaxy"
-                                }
-
-                            },
-
-
-                        ]
-                    }
-
-                case("todo"): 
-                    return {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 600,
-                                "height": 340,
-                            },
-                            "type": "todo", 
-                            "title": "Todo List"
-                        },
-
-                        "display": {
-                            "program": "list",
-                            "icon": require('@/assets/cards/icons/todo.svg'),
-
-                        },
-
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "todo": {
-                                    
-                                    "body": "First todo",
-                                    "position": 1,
-                                    "completed_at": null
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                        ],
-
-                    }
-
-                case("url"):
-                    return {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 710,
-                                "height": 260,
-                            },
-                            "type": "url", 
-                            "title": "Url List"
-                        },
-
-                        "display": {
-                            "program": "list",
-                            "icon": require('@/assets/cards/icons/link.svg'),
-                        },
-
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "isEditing": false,
-                                "url": {
-                                    "path": 'layrstack.com',
-                                    "position": 1,
-                                    "ico": null,
-                                    "title": null,
-                                },
-                                "meta": {
-                                    "created_at": "2020-07-20T16:59:14.000000Z",
-                                    "updated_at": "2020-07-20T16:59:14.000000Z"
-                                }
-                            },
-                        ],
-
-                    }
-
-                case("text"):
-                    return {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 600,
-                                "height": 320,
-                            },
-                            "type": "text", 
-                            "title": "Text editor"
-                        },
-
-                        "display": {
-                            "program": "texteditor",
-                            "icon": require('@/assets/cards/icons/text.svg'),
-                        },
-
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "meta": {},
-                                "text": [{"insert":"Hello World!"},{"insert":"\n\n"}]
-                            }
-                        ],
-
-                    }
-
-                
-                case("pdf"):
-                    return {
-                        "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 490,
-                                "height": 710,
-                            },
-                            "type": "pdf", 
-                            "title": "NFX"
-                        },
-
-                        "display": {
-                            "program": "single",
-                            "icon": require('@/assets/cards/icons/pdf.svg'),
-
-                        },
-
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*1000),
-                                "meta": {},
-                                "file": {
-                                    "url": 'http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
-                                    "name": "NFX"
-                                }    
-                            }
-                        ],
-
-                    }
-                case("embed"):
-                    switch(card.display.program) {
-                        case("youtube"):                            
-                            return {
-                                "info": {
-                                    "id": Math.floor(Math.random()*1000),
-                                    "dimensions": {
-                                        "x": this.generateDimensions('x'),
-                                        "y": this.generateDimensions('y'),
-                                        "width": 580,
-                                        "height": 380,
-                                    },
-                                    "type": "embed", 
-                                    "title": "YouTube video"
-                                },
-
-                                "display": {
-                                    "program": "youtube",
-                                    "icon": require('@/assets/cards/icons/youtube.svg'),
-
-                                },
-
-                                "content": [
-                                    // {
-                                    //     "id": Math.floor(Math.random()*1000),
-                                    //     "meta": {},
-                                    //     "url": {
-                                    //         "path": 'https://www.youtube.com/watch?v=0pZ8PVRauDU',
-                                    //         "name": "NFX"
-                                    //     }    
-                                    // }
-                                ],
-
-                            }
-                        }
-            }
-        }
-
     },
 
     mounted() {
@@ -923,18 +642,35 @@ export default {
 
     computed: {
         cardsInStack() {
-            this.backdoor
-            return this.$children.filter(card => card.isInStack)
-                                    .sort(function(a, b) {
-                                        return a.indexAsData - b.indexAsData
-                                    });
+            // this.stackData
+            // console.log(this.$refs)
+            return   this.$refs
+                    ? Object.values(this.$refs).map(c => c[0])
+                    .filter(card => card.isInStack)
+                    .sort(function(a, b) {
+                        return a.indexAsData - b.indexAsData
+                    })
+                    : null
         },
         
         cardsOnBoard() {
-            return this.$children.filter(card => !card.isInStack)
-                                    .sort(function(a, b) {
-                                        return a.indexAsData - b.indexAsData
-                                    });
+            // return this.$children.filter(card => !card.isInStack)
+            //                         .sort(function(a, b) {
+            //                             return a.indexAsData - b.indexAsData
+            //                         });
+
+            // this.$refs
+            // this.stackData
+            // console.log(this.$refs)
+            return   this.$refs
+                    ? Object.values(this.$refs).map(c => c[0])
+                    .filter(card => !card.isInStack)
+                    .sort(function(a, b) {
+                        return a.indexAsData - b.indexAsData
+                    })
+                    : null
+            // return this.cards
+                    
         },
         
         stackSettings() {
@@ -964,6 +700,15 @@ export default {
            return this.stackData.cards
         },
 
+        localCards() {
+            return   this.$refs
+                    ? Object.values(this.$refs).map(c => c[0])
+                    .sort(function(a, b) {
+                        return a.indexAsData - b.indexAsData
+                    })
+                    : null
+        },
+
 
         toggleButtonText() {
             // return this.controls.toggleExpand ? "Expand" : "Collapse";
@@ -974,6 +719,18 @@ export default {
         //     this.cards[index].info
         // }
 
+    },
+
+    watch: {
+        // 'stackData.cards': {
+        //     // deep: true,
+        //     // handler(all) {
+        //     handler() {
+        //         // console.log(this.$children.find(c => c.cardId === all[all.length -1].info.id))
+        //         // console.log("ok")
+        //     }
+            
+        // }
     },
 }
 </script>

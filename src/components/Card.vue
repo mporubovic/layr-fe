@@ -31,7 +31,7 @@
                 <h1 @click.right.prevent="onCardHeaderRightclick()"
                         v-if="!isHeaderEditing">{{ card.info.title }}</h1>
                 <input
-                    @blur="cardUpdateTitle($event)"
+                    @blur="cardUpdateProperty('info.title', $event.target.value)"
                     @keydown.enter="onCardHeaderInputKeydownEnter($event)"
                     class="card-header-title-input"
                     type="text"
@@ -149,7 +149,7 @@ export default {
                 y: null,
             },
 
-            dimensions: this.card.info.dimensions,
+            // dimensions: this.card.display.dimensions,
 
             isInStack: true,
             mouseDown: false,
@@ -166,7 +166,6 @@ export default {
             isHeaderEditing: false,
 
             headerTimer: null,
-
 
         }
     },
@@ -189,6 +188,10 @@ export default {
 
         id() {
             return this.card.info.id  
+        },
+
+        dimensions() {
+            return this.card.display.dimensions
         },
     },
     
@@ -573,10 +576,12 @@ export default {
             })
         },
 
-        cardUpdateTitle(event) {
+        cardUpdateProperty(path, value) {
             this.isHeaderEditing = false
-            this.$emit('cardUpdatedItself', this.id, 'info', 'title', event.target.value)
+            this.$emit('cardUpdatedItself', this.id, path, value)
         },
+
+
 
         onCardHeaderInputKeydownEnter(event) {
             event.target.blur()
@@ -619,7 +624,7 @@ export default {
                     enabled: false,
                     // resize from all edges and corners
                     edges: { left: true, right: true, bottom: true, top: false },
-
+                    // margin: 10,
                     allowFrom: '.card-body-resize-handle',
                     ratio: 1,
                     // ratio: 800/526,
@@ -659,15 +664,22 @@ export default {
                             // console.log(self.boardPosition.x);
                             // console.log(event.rect.left);
                             
-                            self.dimensions.x = event.rect.left;
-                            self.dimensions.y = event.rect.top;
+                            // self.dimensions.x = event.rect.left;
+                            // self.dimensions.y = event.rect.top;
+
+                            // self.cardUpdateProperty('display.dimensions.x', event.rect.left)
+                            // self.cardUpdateProperty('display.dimensions.y', event.rect.top)
                         },
 
                         end (event) {
                             event.target.classList.remove("card-no-delay");
                             // alert('uwaga');
-                            self.dimensions.width = event.rect.width;
-                            self.dimensions.height = event.rect.height;
+                            // self.dimensions.width = event.rect.width;
+                            // self.dimensions.height = event.rect.height;
+                            self.cardUpdateProperty('display.dimensions.x', event.rect.left)
+                            self.cardUpdateProperty('display.dimensions.y', event.rect.top)
+                            self.cardUpdateProperty('display.dimensions.width', event.rect.width)
+                            self.cardUpdateProperty('display.dimensions.height', event.rect.height)
                             self.$emit('cardInteractJsResize', self.id, false)
                             
                         }
@@ -747,8 +759,10 @@ export default {
                                 // console.log(event);
                                 // console.log(self.boardPosition.x);
                                 // console.log(event.rect.left);
-                                self.dimensions.x = event.rect.left;
-                                self.dimensions.y = event.rect.top;
+                                // self.dimensions.x = event.rect.left;
+                                // self.dimensions.y = event.rect.top;
+                                self.cardUpdateProperty('display.dimensions.x', event.rect.left)
+                                self.cardUpdateProperty('display.dimensions.y', event.rect.top)
                                 // alert(self.card.id);
                                 self.$emit('cardInteractJsDrag', self.id, false)
 
@@ -776,7 +790,7 @@ export default {
         programDeletedContent(programName, deletedContent) {
             this.$emit('cardProgramDeletedContent', programName, deletedContent, this.id)
         }
-    }
+    },
 }
 </script>
 

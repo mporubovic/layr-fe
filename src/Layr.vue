@@ -1,5 +1,5 @@
 <template>
-    <div id="app">
+    <div id="layr">
         <!-- <debug></debug> -->
         <div class="menu" id="menu">
             <div class="menu-container" id="menu-container">
@@ -16,7 +16,8 @@
 
                     <div class="menu-content-board-title">
                         <!-- <hr class="menu-content-line-left">     -->
-                        <h1>My Board</h1>
+                        <h1 v-if="!boardDataLoaded">Loading...</h1>
+                        <h1 v-if="boardDataLoaded">{{ currentBoard.info.title }}</h1>
                         <!-- <hr class="menu-content-line-right"> -->
                     </div>
                     <div class="menu-content-controls-secondary">
@@ -38,6 +39,7 @@
                             <component :is="subMenu" 
                                         v-bind="subMenuContent"
                                         @subMenuBoardClicked="openBoard"
+                                        @subMenuBoardNewBoard="createNewBoard"
                                         >
                                         
                             </component>
@@ -61,7 +63,13 @@
             
             <stack :stackData="stackData" 
                     v-if="stackDataLoaded"
-                    @createNewCard="createNewCard">
+                    @createNewCard="createNewCard"
+                    :ref="'stack'"
+                    @stackCardProgramUpdatedContent="stackCardProgramUpdatedContent"
+                    @stackCardProgramCreatedContent="stackCardProgramCreatedContent"
+                    @stackCardProgramDeletedContent="stackCardProgramDeletedContent"
+                    @stackCardUpdatedItself="stackCardUpdatedItself"
+                        >
             
             </stack>
 
@@ -82,7 +90,7 @@ import { loremIpsum } from "lorem-ipsum";
 
 export default {
     
-    name: 'app',
+    name: 'layr',
 
 
     components: {
@@ -94,10 +102,11 @@ export default {
             isMenuOpen: true,
             isFullscreen: false,
             subMenu: null,
-            boards: this.generateBoards(10),
-            currentBoard: null,
+            boards: null,
+            currentBoardId: 0,
+            boardDataLoaded: false,
             stackDataLoaded: false,
-            stackData: null,
+            // stackData: null,
         }
     },
 
@@ -111,10 +120,22 @@ export default {
                 return null
             }
         },
+        
+        currentBoard() {
+            return this.boards.find(b => b.info.id === this.currentBoardId)
+        },
+
+        stackData() {
+            return this.currentBoard.stacks[0]
+        }
+
     },
 
     mounted() {
+        this.boards = this.generateBoards(3)
         this.openBoard(this.boards[0].info.id)
+
+
     },
 
     methods: {
@@ -197,10 +218,10 @@ export default {
             for (let index = 0; index < count; index++) {
                 let board = {
                     info: {
-                        id: Math.floor(Math.random() * 1000),
+                        id: Math.floor(Math.random() * 10000),
                         title: loremIpsum(
                                 {
-                                    count: 5, 
+                                    count: 4, 
                                     units: "words"
                                 }
                             )
@@ -208,7 +229,7 @@ export default {
                     stacks: [
                         {
                             info: {
-                                id: Math.floor(Math.random() * 1000),
+                                id: Math.floor(Math.random() * 10000),
                             },
                             cards: this.generateCards(
                 [
@@ -275,7 +296,6 @@ export default {
                 boards.push(board)
                 
             }
-
             return boards;
         },
 
@@ -288,7 +308,7 @@ export default {
             }
             
 
-            return crds;
+            return this.shuffleArray(crds);
         },
 
         cardTemplate(card) {
@@ -296,13 +316,8 @@ export default {
                 case("image"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 777,
-                                "height": 550,
-                            },
+                            "id": Math.floor(Math.random()*10000),
+
                             "type": "image", 
                             "title": "Andromeda"
                         },
@@ -310,12 +325,17 @@ export default {
                         "display": {
                             "program": "gallery",
                             "icon": require('@/assets/cards/icons/image.svg'),
-
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": 777,
+                                "height": 550,
+                            },
                         },
 
                         "content": [
                             {
-                                "id": Math.floor(Math.random()*1000),
+                                "id": Math.floor(Math.random()*10000),
                                 "meta": {},
                                 "file": {
                                     "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
@@ -331,13 +351,8 @@ export default {
                 case("todo"): 
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 600,
-                                "height": 340,
-                            },
+                            "id": Math.floor(Math.random()*10000),
+
                             "type": "todo", 
                             "title": "Todo List"
                         },
@@ -345,12 +360,17 @@ export default {
                         "display": {
                             "program": "list",
                             "icon": require('@/assets/cards/icons/todo.svg'),
-
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": 600,
+                                "height": 340,
+                            },
                         },
 
                         "content": [
                             {
-                                "id": Math.floor(Math.random()*1000),
+                                "id": Math.floor(Math.random()*10000),
                                 "isEditing": false,
                                 "todo": {
                                     
@@ -370,13 +390,8 @@ export default {
                 case("url"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 710,
-                                "height": 260,
-                            },
+                            "id": Math.floor(Math.random()*10000),
+
                             "type": "url", 
                             "title": "Url List"
                         },
@@ -384,11 +399,17 @@ export default {
                         "display": {
                             "program": "list",
                             "icon": require('@/assets/cards/icons/link.svg'),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": 710,
+                                "height": 260,
+                            },                        
                         },
 
                         "content": [
                             {
-                                "id": Math.floor(Math.random()*1000),
+                                "id": Math.floor(Math.random()*10000),
                                 "isEditing": false,
                                 "url": {
                                     "path": 'layrstack.com',
@@ -408,13 +429,8 @@ export default {
                 case("text"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 600,
-                                "height": 320,
-                            },
+                            "id": Math.floor(Math.random()*10000),
+
                             "type": "text", 
                             "title": "Text editor"
                         },
@@ -422,11 +438,17 @@ export default {
                         "display": {
                             "program": "texteditor",
                             "icon": require('@/assets/cards/icons/text.svg'),
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": 600,
+                                "height": 320,
+                            },                        
                         },
 
                         "content": [
                             {
-                                "id": Math.floor(Math.random()*1000),
+                                "id": Math.floor(Math.random()*10000),
                                 "meta": {},
                                 "text": [{"insert":"Hello World!"},{"insert":"\n\n"}]
                             }
@@ -438,13 +460,8 @@ export default {
                 case("pdf"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*1000),
-                            "dimensions": {
-                                "x": this.generateDimensions('x'),
-                                "y": this.generateDimensions('y'),
-                                "width": 490,
-                                "height": 710,
-                            },
+                            "id": Math.floor(Math.random()*10000),
+
                             "type": "pdf", 
                             "title": "NFX"
                         },
@@ -452,12 +469,17 @@ export default {
                         "display": {
                             "program": "single",
                             "icon": require('@/assets/cards/icons/pdf.svg'),
-
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": 490,
+                                "height": 710,
+                            },
                         },
 
                         "content": [
                             {
-                                "id": Math.floor(Math.random()*1000),
+                                "id": Math.floor(Math.random()*10000),
                                 "meta": {},
                                 "file": {
                                     "url": 'http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
@@ -472,13 +494,8 @@ export default {
                         case("youtube"):                            
                             return {
                                 "info": {
-                                    "id": Math.floor(Math.random()*1000),
-                                    "dimensions": {
-                                        "x": this.generateDimensions('x'),
-                                        "y": this.generateDimensions('y'),
-                                        "width": 580,
-                                        "height": 380,
-                                    },
+                                    "id": Math.floor(Math.random()*10000),
+
                                     "type": "embed", 
                                     "title": "YouTube video"
                                 },
@@ -486,12 +503,17 @@ export default {
                                 "display": {
                                     "program": "youtube",
                                     "icon": require('@/assets/cards/icons/youtube.svg'),
-
+                                    "dimensions": {
+                                        "x": this.generateDimensions('x'),
+                                        "y": this.generateDimensions('y'),
+                                        "width": 580,
+                                        "height": 380,
+                                    },
                                 },
 
                                 "content": [
                                     // {
-                                    //     "id": Math.floor(Math.random()*1000),
+                                    //     "id": Math.floor(Math.random()*10000),
                                     //     "meta": {},
                                     //     "url": {
                                     //         "path": 'https://www.youtube.com/watch?v=0pZ8PVRauDU',
@@ -524,11 +546,43 @@ export default {
         },
         
         openBoard(id) {
+            // this.$nextTick(() => {
+            //     if (this.$refs.stack.cardsOnBoard.length > 0) {
+            //         this.$refs.stack.toggleCardStack()
+            //     }
+                
+            // })
+            this.boardDataLoaded = false       
+
             console.log("API GET RESPONSE for BOARD ID ", id)
-            let board = this.boards.find(b => b.info.id === id)
-            this.currentBoard = board
-            this.stackData = board.stacks[0]
-            this.stackDataLoaded = true
+                this.$nextTick(() => {
+                    if (this.$refs.stack) {
+                        console.log(this.$refs.stack.cardsOnBoard.length)
+                        console.log(this.$refs.stack.$children)
+                        if (this.$refs.stack.cardsOnBoard.length > 0) {
+                            this.$refs.stack.toggleCardStack()
+                        }                        
+                    }
+                })
+                setTimeout(() => {
+                // let board = this.boards.find(b => b.info.id === id)
+                
+                // this.currentBoard = board
+                this.currentBoardId = id
+                this.boardDataLoaded = true        
+
+                // this.stackData = board.stacks[0]
+                // this.stackData = this.currentBoard.stacks[0]
+                this.stackDataLoaded = true
+
+
+            }, 1200);
+        },
+
+        createNewBoard() {
+            let board = this.generateBoards(1)[0]
+            this.boards.push(board)
+            this.openBoard(board.info.id)
         },
 
         createNewCard(card) {
@@ -543,8 +597,163 @@ export default {
                 }
             )
             this.currentBoard.stacks[0].cards.push(newCard)
-            this.stackData = this.currentBoard.stacks[0]
-        }
+            // this.stackData = this.currentBoard.stacks[0]
+            
+            this.$nextTick(() => {
+                this.$refs.stack.$refs["card-" + newCard.info.id][0].onCardMouseUp()
+            })
+        },
+
+        stackCardProgramUpdatedContent(programName, updatedContent, cardId) {
+            console.log("UPDATE", programName, updatedContent, "CARD", cardId)
+            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
+            let contentKey = this.cardProgramNameToKey(programName)
+            // console.log(contentKey)
+            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
+
+            this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)[contentKey] = updatedContent[contentKey]
+
+        },
+
+        stackCardProgramCreatedContent(programName, mainContent, cardId) {
+            console.log("CREATE", "FROM", programName, "MAIN CONTENT", mainContent ?? null, "CARD", cardId)
+            let newContent = this.contentTemplate(programName, mainContent ?? null)
+            
+            console.log("RESULT", newContent)
+            this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content.push(newContent)
+
+        },
+
+        stackCardProgramDeletedContent(programName, deletedContent, cardId) {
+            console.log("DELETE", programName, deletedContent, cardId)
+            // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === deletedContent.id))
+            // let contentKey = this.cardProgramNameToKey(programName)
+            // console.log(contentKey)
+            let c = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content
+            let i = c.findIndex(c => c.id === deletedContent.id)
+            c.splice(i, 1)
+
+        },
+
+        cardProgramNameToKey(program) {
+            switch (program) {            
+                case("todo-list") :
+                    return "todo";                
+                
+                case("url-list") :
+                    return "url";     
+                    
+                case("text-editor") :
+                    return "text";  
+            }
+        },
+        
+        contentTemplate(type, mainContent) {
+            switch (type) {
+                case("image-component") : {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 10000 ),
+                        "meta": {},
+                        "file": {
+                            "url": 'https://nasa.gov',
+                            "name": "NFX"
+                        }    
+                    }
+                    return obj
+
+                }            
+                
+                case("todo-list") : {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 10000 ),
+                        "isEditing": false,
+                        "meta": {},
+                        "todo": {
+                            "body": 'New todo',
+                            "completed_at": null,
+                        }    
+                    }
+                    return obj
+                }
+                    
+                case("url-list"): {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 10000 ),
+                        "isEditing": false,
+                        "meta": {},
+                        "url": {
+                            "path": mainContent ?? '',
+                            "position": 1,
+                            "ico": mainContent ? null : 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
+                            "title": mainContent ? null : 'Right click to edit',
+                        }    
+                    }
+                    
+                    return obj;
+                }  
+                    
+                case("text-editor") :
+                    return "text";  
+
+                case("youtube-player"): {
+                    let obj = {
+                        "id": Math.floor(Math.random() * 10000 ),
+                        "isEditing": false,
+                        "meta": {},
+                        "url": {
+                            "path": mainContent ?? '',
+                        }    
+                    }
+                    
+                    return obj;
+                }
+            }
+        },
+
+        stackCardUpdatedItself(cardId, path, value) {
+            console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
+            var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
+            // console.log(card)
+            this.setNestedObjectValue(card, path, value)
+        },
+
+        setNestedObjectValue(obj, path, value) {
+            var schema = obj;  // a moving reference to internal objects within obj
+            var pList = path.split('.');
+            var len = pList.length;
+            for(var i = 0; i < len-1; i++) {
+                var elem = pList[i];
+                if( !schema[elem] ) schema[elem] = {}
+                schema = schema[elem];
+            }
+
+            schema[pList[len-1]] = value;
+        },
+
+        shuffleArray(array) {
+            var currentIndex = array.length, temporaryValue, randomIndex;
+
+            // While there remain elements to shuffle...
+            while (0 !== currentIndex) {
+
+                // Pick a remaining element...
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex -= 1;
+
+                // And swap it with the current element.
+                temporaryValue = array[currentIndex];
+                array[currentIndex] = array[randomIndex];
+                array[randomIndex] = temporaryValue;
+            }
+
+            return array;
+            }
+
+    
+    
+    
+    
+    
     },
 
 
