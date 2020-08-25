@@ -25,7 +25,7 @@
             <div class="card-header-title card-header-drag-handle"
                     >
                 <img class="card-icon-onboard" 
-                    v-if="!isInStack"
+                    v-if="loadContent"
                     :src="card.display.icon">
                 
                 <h1 @click.right.prevent="onCardHeaderRightclick()"
@@ -63,10 +63,12 @@
             </div> -->
             
             <img class="card-icon-instack" 
-                    v-if="isInStack"
+                    v-if="!loadContent"
                     :src="card.display.icon">
 
-            <component v-if="loadContent()"
+            <!-- <h1>{{ card.display.position }}</h1> -->
+
+            <component v-if="loadContent"
                         :is="cardProgram(card)" 
                         :content="card.content"
                         :contentComponent="cardContentComponentName(card)"
@@ -85,7 +87,7 @@
                     >
             </slot>  -->
             
-            <!-- <h1>ix {{ indexAsData }}</h1>
+            <!-- <h1>ix {{ index }}</h1>
             <h2>id {{ id }}</h2> -->
             <!-- <h1 v-if="isInStack">I {{ index }}</h1> -->
             <!-- <h2 style="font-size: 60px; margin-left: 10px;" v-if="isInStack">{{ card.info.type }}</h2> -->
@@ -102,6 +104,7 @@
 
 <script>
 import interact from 'interactjs';
+// import { nextTick } from 'vue/types/umd';
 
 export default {
     
@@ -111,10 +114,10 @@ export default {
             type: Object,
             required: true,
         },
-        index: {
-            type: Number,
-            required: true, 
-        },
+        // index: {
+        //     type: Number,
+        //     required: true, 
+        // },
         stackSettings: {
             type: Object,
             required: true, 
@@ -142,7 +145,7 @@ export default {
                 height: 0,
             },
 
-            stackPosition: 0,
+            // stackPosition: 0,
 
             boardPosition: {
                 x: null,
@@ -151,7 +154,7 @@ export default {
 
             // dimensions: this.card.display.dimensions,
 
-            isInStack: true,
+            // isInStack: true,
             mouseDown: false,
 
 
@@ -161,11 +164,14 @@ export default {
 
             headerTapCount: 0,
 
-            indexAsData: this.index,
+            // index: this.index,
+            // index: this.card.display.position,
 
             isHeaderEditing: false,
 
             headerTimer: null,
+
+            loadContent: false,
 
         }
     },
@@ -174,7 +180,7 @@ export default {
     computed: {
         cardDynamicStyle() {
             
-                return this.isInStack ? { 'z-index': this.indexAsData} : {'z-index': this.indexAsData};
+                return this.isInStack ? { 'z-index': this.index} : {'z-index': this.index};
 
         },
 
@@ -193,12 +199,26 @@ export default {
         dimensions() {
             return this.card.display.dimensions
         },
+
+        isInStack() {
+            return !this.card.display.open
+        },
+
+        index() {
+            return this.card.display.position
+        },
+
+        stackPosition() {
+            return this.card.local.display.stackPosition
+        }
+
     },
     
     mounted() {
         this.calcBoundingRect();
-        // this.stackPosition = (this.indexAsData -1 );
-        this.stackPosition = (this.indexAsData);
+        // this.stackPosition = (this.index -1 );
+        // this.stackPosition = (this.index);
+        // this.$el.style.bottom = this.index * this.stackSettings.cardGap + 'px'
         this.$el.style.bottom = this.stackPosition * this.stackSettings.cardGap + 'px'
         this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
     
@@ -212,9 +232,15 @@ export default {
         this.initializeInteractJsResizable();
         this.initializeInteractJsDraggable();
 
+        if (!this.isInStack) this.cardToBoard()
+
 
         // this.$el.classList.remove();
  
+    },
+
+    beforeDestroy() {
+        this.$el.remove()
     },
 
     methods: {
@@ -374,15 +400,13 @@ export default {
 
         },
 
-        onCardMouseUp() {
-            
-
-            this.mouseDown = true;
-            
-            
-            if (this.isInStack) {
+        cardToBoard() {
                 // alert('GO TO BOARD');
-                this.$emit('cardStackInteraction', this.indexAsData, true);
+                setTimeout(() => {
+                    this.loadContent = true
+                }, 1000);
+
+                this.$emit('cardStackInteraction', this.id, true);
                 
                 this.$el.classList.remove("card-in-stack");
                 this.$el.classList.add("card-on-board");
@@ -398,7 +422,7 @@ export default {
             
 
                 setTimeout(() => {
-                    
+                // this.$nextTick(() => {
                     
                     this.$el.style.left = this.dimensions.x + 'px';
                     this.$el.style.top = this.dimensions.y + 'px';
@@ -412,18 +436,27 @@ export default {
 
 
                     this.$el.style.transform = "";
-                }, 0);
+                }, 50);
+                // });
+
+                // setTimeout(() => {
+                //     this.loadContent = true
+                // }, 1500);
 
                 interact(this.$refs['card'+this.id]).draggable(true).resizable(true);
                 
                 this.$el.classList.add('draggable');
                 this.$el.classList.add('resizable');
-                this.isInStack = false;
-            } else {
+                // this.isInStack = false;
+                // this.cardUpdateProperty('display.open', true)
+        },
+
+        cardToStack() {
                 // alert('GO TO STACK');
+                this.loadContent = false
 
                 let brStack = this.$parent.calculateBoundingRectangle();
-                this.$emit('cardStackInteraction', this.indexAsData, false);
+                this.$emit('cardStackInteraction', this.id, false);
                 
                 
                 // this.$el.offsetHeight;
@@ -470,8 +503,12 @@ export default {
 
                     // this.$el.style["background-color"] = "white";
 
+                    // this.loadContent = false
+
+
                     
-                }, 0);
+                }, 50);
+
                 this.$el.classList.add("card-in-stack");
                 
                 // interact('.resizable').resizable(false);
@@ -482,10 +519,22 @@ export default {
                 crd.classList.remove('resizable');
                 
                 
-                this.isInStack = true;
+                // this.isInStack = true;
+                // this.cardUpdateProperty('display.open', false)
+        },
 
+        onCardMouseUp() {
+            
+            if (this.isInStack) {
+                // this.cardToBoard()
+                this.cardUpdateProperty('display.open', true)
+
+            } else {
+                // this.cardToStack()
+                this.cardUpdateProperty('display.open', false)
+    
             }
-        
+
         },
 
         onCardMouseDown() {
@@ -532,7 +581,7 @@ export default {
 
             setTimeout(() => {
                 if (this.headerTapCount === 2) {
-                    this.$emit('cardBringForward', this);
+                    this.$emit('cardBringForward', this.card.info.id);
                     // console.log('forward')
 
 
@@ -771,10 +820,10 @@ export default {
                     })
         },
                 
-        loadContent() {
-            return !this.isInStack;
+        // loadContent() {
+        //     return !this.isInStack;
             
-        },
+        // },
         programUpdatedContent(programName, updatedContent) {
             // console.log(programName, updateFunction, updatedContent)
             this.$emit('cardProgramUpdatedContent', programName, updatedContent, this.id)
@@ -789,6 +838,50 @@ export default {
 
         programDeletedContent(programName, deletedContent) {
             this.$emit('cardProgramDeletedContent', programName, deletedContent, this.id)
+        }
+    },
+
+    watch: {
+        isInStack: {
+            // console.log(o, n)
+            // console.log(this.isInStack)
+            // this.$nextTick(() => {
+            //     console.log(this.isInStack)
+            handler(n) {
+                // console.log(o, "->", n)
+                // if (n) this.loadContent = false
+                
+                // setTimeout(() => {
+                    // console.log(o, "->", n)
+                    // this.$nextTick(() => this.onCardMouseUp())
+                    if (n === true) {
+                        // this.loadContent = false
+                        this.cardToStack()
+                        
+                    } else {
+                        // this.loadContent = true
+                        this.cardToBoard()
+                        
+                    }
+                    // this.onCardMouseUp()
+                // }, 100 + 100*this.index);
+                // }, 1);
+            }
+            // })
+
+        },
+
+        stackPosition: {
+            handler(n) {
+                // this.$el.style.bottom = this.stackSettings.cardGap * (this.stackPosition)  + 'px';
+                // console.log(n, o)
+                // if (n > o) {
+                    this.$el.style.bottom = this.stackSettings.cardGap * n  + 'px';
+
+                // } else {
+                    // this.$el.style.bottom = this.stackSettings.cardGap * n  + 'px';
+                // }
+            }
         }
     },
 }
@@ -873,7 +966,7 @@ export default {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    /* right: 20px; */
+    /* right: 0; */
 }
 
 .test {

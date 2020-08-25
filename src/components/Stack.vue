@@ -14,7 +14,7 @@
             <!-- <card v-for="(card, index) in cards"  -->
             <card v-for="(card, index) in cards" 
                         :key="card.info.id"
-                        :ref="'card-' + index"
+                        :ref="'card-' + card.info.id"
                         :card=card
                         :stackSettings="stackSettings"
                         :index=index
@@ -130,8 +130,6 @@ export default {
                 toggleActive: true, 
                 toggleExpand: true
             },
-
-            cardLoadContent: false,
 
             cardContent: [],
 
@@ -324,61 +322,45 @@ export default {
                     //     }
         },
         
-        stackRearrangeCards(index, stackToBoard) {
+        stackRearrangeCards(id, stackToBoard) {
             let crds = this.cardsInStack
-            // console.log(crds)
-            if (stackToBoard) {
-                let bottomCardIndex = crds.findIndex(function(card) {
-                    return card.indexAsData === index;
-                });
-                
-                let crdsAbove = crds.slice(bottomCardIndex, crds.length);
-                
-                crdsAbove.forEach(element => {
-                    element.$el.style.bottom = this.stackSettings.cardGap * (element.stackPosition - 1)  + 'px';
+            let card = this.cards.find(c => c.info.id === id)
 
-                    element.stackPosition -= 1
+            if (stackToBoard) {
+                let crdsAbove = crds.slice(card.local.display.stackPosition);
+                
+                crdsAbove.forEach(card => {
+                    this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', card.local.display.stackPosition - 1)
                 });
 
                 if (this.cardsOnBoard.length === 0) {
                     this.controls.toggleExpand = false;
                 }
             } else {
-                
-                let cardAbovePosition = crds.findIndex(function(card) {
-                    return card.indexAsData > index;
-                });
+                let crdsAbove = crds.filter(c => c.display.position > card.display.position)
+                let crdsBelow = crds.filter(c => c.display.position < card.display.position)
+                // console.log("STACK", crds)
+                // console.log("ABOVE", crdsAbove)
+                // console.log("BELOW", crdsBelow)
 
-                if (cardAbovePosition !== -1) {
+                if (crdsAbove.length > 0) {
+                    let cardAbove = crdsAbove.reduce((min, card) => min.local.display.stackPosition < card.local.display.stackPosition ? min : card)
+                    this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', cardAbove.local.display.stackPosition)
                     
-                    let crdsAbove = crds.slice(cardAbovePosition, crds.length);
-                    // console.log(crdsAbove)
-                    crdsAbove.forEach(element => {
-                        element.$el.style.bottom = this.stackSettings.cardGap * (element.stackPosition + 1)  + 'px';
-                        element.stackPosition += 1
-                        // this.$children[index].setStackPosition(cardAbovePosition);
-                        // element.setStackPosition(cardAbovePosition);
-                    });
-                    // console.log(cardAbovePosition)
-                    this.$children.filter(card => card.indexAsData === index)[0].setStackPosition(cardAbovePosition)
+                    
+                    crdsAbove.forEach(card => {
+                        this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', card.local.display.stackPosition + 1)
+                    }) 
 
+
+                } else if (crdsBelow.length > 0) {
+                    let cardBelow = crdsBelow.reduce((max, card) => max.local.display.stackPosition > card.local.display.stackPosition ? max : card)
+                    this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', cardBelow.local.display.stackPosition + 1)
                 } else {
-                    // console.log(this.$children[index])
-                    // console.log(this.$children.filter(card => card.indexAsData === index)[0])
-                    this.$children.filter(card => card.indexAsData === index)[0].setStackPosition(crds.length);
+                    this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', 0)
                 }
-
-                if (this.cardsOnBoard.length === 1) {
-                    
-                    this.controls.toggleExpand = true;
-                }
-
-
             }
 
-            setTimeout(() => {
-                this.cardLoadContent = true;
-            }, 1000);
 
             
 
@@ -412,20 +394,33 @@ export default {
                 
                 this.controls.toggleActive = false;
                 
-                let cards = this.cardsInStack.length < this.$children.length
-                            ? this.cardsOnBoard.slice().reverse()
+                // let cards = []
+
+                // if (onlyOpen) {
+                //     let cards = this.cardsInStack.filter(c => c.display.open)
+                // } else {
+                    let cards = this.cardsInStack.length < this.stackData.cards.length
+                            ? this.cardsOnBoard
                             // ? this.$children
-                            : this.cardsInStack.slice().reverse();
-                
+                            : this.cardsInStack
+                // }
+
+
+                // console.log(cards)
                 
                 cards.forEach((card, index) => {
+                    // setTimeout(() => {
+                    //         // console.log(card)
+                    //         requestAnimationFrame(function() {
+                    //             card.onCardMouseUp()
+                    //             // if (!onlyOpen) this.cardUpdatedItself()
+                    //     })
+                    // }, 100 + 100*index); 
+                    // console.log(card)
                     setTimeout(() => {
-                            // console.log(card)
-                            requestAnimationFrame(function() {
-                                card.onCardMouseUp();
-                        })
-                    }, 100 + 100*index); 
-
+                        this.cardUpdatedItself(card.info.id, 'display.open', !card.display.open)
+                    }, 100 + 100*(index));
+                    
 
                 
                 });
@@ -434,9 +429,9 @@ export default {
                 setTimeout(() => {
                     document.getElementById("stack-controls-toggle").style.opacity = 1;
                     this.controls.toggleActive = true;
-                    // this.controls.toggleExpand = !this.controls.toggleExpand;
+                    this.controls.toggleExpand = !this.controls.toggleExpand;
 
-                }, 700 + 100*cards.length);
+                }, 1000 + 200*cards.length);
         },
 
         generateDimensions(d) {
@@ -488,48 +483,26 @@ export default {
             }
         },
         
-        cardBringForward(crd) {
-            console.log( "1", this.localCards)
-            let originalIndex = crd.indexAsData
-            let higherCardsOnBoard = this.cardsOnBoard.filter(card => card.indexAsData > originalIndex)
+        cardBringForward(id) {
+            // console.log( "1", this.cards)
+            let card = this.cards.find(c => c.info.id === id)
+            let originalIndex = card.display.position
+            let higherCardsOnBoard = this.cardsOnBoard.filter(card => card.display.position > originalIndex)
             
             if (!higherCardsOnBoard.length) {
                 return null
             }
 
             let highestCardOnBoard = higherCardsOnBoard[higherCardsOnBoard.length - 1]
-
-
-            // let higherCardsInStack = this.cardsInStack.filter(card => card.index > highestCardOnBoard.index)
-
-            // let lowerCardsOnBoard = 
-
-            let newIndex = highestCardOnBoard.indexAsData
-
-            let cardsToBeAdjusted = this.localCards.filter(card => (card.indexAsData <= newIndex && card.indexAsData > originalIndex))
-
-            crd.indexAsData = newIndex;
-            // crd.stackPosition = newIndex;
-
-            // console.log(cardsToBeAdjusted)
-            // console.log(higherCardsOnBoard)
-
-            cardsToBeAdjusted.forEach((card) => {
-                // alert(index)
-                card.indexAsData--
-                // card.stackPosition = card.indexAsData -1 
+            let newIndex = highestCardOnBoard.display.position
+            // console.log(newIndex)
+            
+            let cardsToBeAdjusted = this.cards.filter(c => (c.display.position <= newIndex && c.display.position > originalIndex))           
+            cardsToBeAdjusted.forEach((c) => {
+                this.cardUpdatedItself(c.info.id, 'display.position', c.display.position - 1)
             });
-
-            console.log("2", this.localCards)
-
-
-            setTimeout(() => {
-            console.log("3", this.localCards)
-
-            }, 1000);
-
-
-
+            
+            this.cardUpdatedItself(card.info.id, 'display.position', newIndex)
         },
                 
         cardProgramUpdatedContent(programName, updatedContent, cardId) {
@@ -644,31 +617,55 @@ export default {
         cardsInStack() {
             // this.stackData
             // console.log(this.$refs)
-            return   this.$refs
-                    ? Object.values(this.$refs).map(c => c[0])
-                    .filter(card => card.isInStack)
-                    .sort(function(a, b) {
-                        return a.indexAsData - b.indexAsData
-                    })
-                    : null
+            // console.log(this.$children)
+
+            // return this.$children.filter(card => card.isInStack)
+            //                         .sort(function(a, b) {
+            //                             return a.display.position - b.display.position
+            //                         })
+            return this.stackData.cards.filter(card => !card.display.open)
+                                    .sort(function(a, b) {
+                                        return a.display.position - b.display.position
+                                    });
+
+
+            // return   this.$refs
+            //         ? Object.values(this.$refs)
+            //         .filter(c => c[0])
+            //         .map(c => c[0])
+            //         .filter(c => c.isInStack)
+            //         .sort(function(a, b) {
+            //             return a.display.position - b.display.position
+            //         })
+            //         : null
         },
         
         cardsOnBoard() {
+            // this.stackData
+            // console.log(this.$children)
+            
+            
             // return this.$children.filter(card => !card.isInStack)
             //                         .sort(function(a, b) {
-            //                             return a.indexAsData - b.indexAsData
+            //                             return a.display.position - b.display.position
             //                         });
 
+            return this.stackData.cards.filter(card => card.display.open)
+                                    .sort(function(a, b) {
+                                        return a.display.position - b.display.position
+                                    });
             // this.$refs
             // this.stackData
             // console.log(this.$refs)
-            return   this.$refs
-                    ? Object.values(this.$refs).map(c => c[0])
-                    .filter(card => !card.isInStack)
-                    .sort(function(a, b) {
-                        return a.indexAsData - b.indexAsData
-                    })
-                    : null
+            // return   this.$refs
+            //         ? Object.values(this.$refs)
+            //         .filter(c => c[0])
+            //         .map(c => c[0])
+            //         .filter(card => !card.isInStack)
+            //         .sort(function(a, b) {
+            //             return a.display.position - b.display.position
+            //         })
+            //         : null
             // return this.cards
                     
         },
@@ -700,19 +697,22 @@ export default {
            return this.stackData.cards
         },
 
-        localCards() {
-            return   this.$refs
-                    ? Object.values(this.$refs).map(c => c[0])
-                    .sort(function(a, b) {
-                        return a.indexAsData - b.indexAsData
-                    })
-                    : null
-        },
+        // localCards() {
+        //     // return   this.$refs
+        //     //         ? Object.values(this.$refs).map(c => c[0])
+        //     //         .sort(function(a, b) {
+        //     //             return a.display.position - b.display.position
+        //     //         })
+        //     //         : null
+        //     return this.stackData.cards.filter(c => c)
+        //                             .sort(function(a, b) {
+        //                                 return a.display.position - b.display.position
+        //                             });
+        // },
 
 
         toggleButtonText() {
-            // return this.controls.toggleExpand ? "Expand" : "Collapse";
-            return this.controls.toggleExpand ? "Open" : "Close";
+            return this.cardsOnBoard.length === 0 ? "Open" : "Close";
         },
 
         // cardLoadContent(index) {

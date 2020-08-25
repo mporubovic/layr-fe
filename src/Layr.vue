@@ -132,7 +132,7 @@ export default {
     },
 
     mounted() {
-        this.boards = this.generateBoards(3)
+        this.boards = this.generateBoards(4)
         this.openBoard(this.boards[0].info.id)
 
 
@@ -238,7 +238,13 @@ export default {
                             "type": "image"
                         },
                         "display": {
-                            "program": "gallery"
+                            "program": "gallery",
+                            "position": 0,
+                        },
+                        "local": {
+                            "display": {
+                                "stackPosition": 0,
+                            }
                         }
                     },
 
@@ -247,7 +253,13 @@ export default {
                             "type": "embed"
                         },
                         "display": {
-                            "program": "youtube"
+                            "program": "youtube",
+                            "position": 1,
+                        },
+                        "local": {
+                            "display": {
+                                "stackPosition": 1,
+                            }
                         }
                     },
                     {
@@ -255,7 +267,13 @@ export default {
                             "type": "text"
                         },
                         "display": {
-                            "program": "text-editor"
+                            "program": "text-editor",
+                            "position": 2,
+                        },
+                        "local": {
+                            "display": {
+                                "stackPosition": 2,
+                            }
                         }
                     },
 
@@ -264,7 +282,13 @@ export default {
                             "type": "todo"
                         },
                         "display": {
-                            "program": "todo-list"
+                            "program": "todo-list",
+                            "position": 3,
+                        },
+                        "local": {
+                            "display": {
+                                "stackPosition": 3,
+                            }
                         }
                     },
 
@@ -273,7 +297,13 @@ export default {
                             "type": "url"
                         },
                         "display": {
-                            "program": "url-list"
+                            "program": "url-list",
+                            "position": 4,
+                        },
+                        "local": {
+                            "display": {
+                                "stackPosition": 4,
+                            }
                         }
                     },
 
@@ -282,7 +312,13 @@ export default {
                             "type": "pdf"
                         },
                         "display": {
-                            "program": "pdf-viewer"
+                            "program": "pdf-viewer",
+                            "position": 5,
+                        },
+                        "local": {
+                            "display": {
+                                "stackPosition": 5,
+                            }
                         }
                     },
 
@@ -308,7 +344,8 @@ export default {
             }
             
 
-            return this.shuffleArray(crds);
+            // return this.shuffleArray(crds);
+            return crds
         },
 
         cardTemplate(card) {
@@ -331,6 +368,14 @@ export default {
                                 "width": 777,
                                 "height": 550,
                             },
+                            "open": false,
+                            "position": card.display.position
+                        },
+
+                        "local": {
+                            "display": {
+                                "stackPosition": card.local.display.stackPosition 
+                            }
                         },
 
                         "content": [
@@ -366,6 +411,14 @@ export default {
                                 "width": 600,
                                 "height": 340,
                             },
+                            "open": false,
+                            "position": card.display.position
+                        },
+
+                        "local": {
+                            "display": {
+                                "stackPosition": card.local.display.stackPosition 
+                            }
                         },
 
                         "content": [
@@ -404,7 +457,15 @@ export default {
                                 "y": this.generateDimensions('y'),
                                 "width": 710,
                                 "height": 260,
-                            },                        
+                            },          
+                            "open": false,
+                            "position": card.display.position              
+                        },
+
+                        "local": {
+                            "display": {
+                                "stackPosition": card.local.display.stackPosition 
+                            }
                         },
 
                         "content": [
@@ -443,7 +504,15 @@ export default {
                                 "y": this.generateDimensions('y'),
                                 "width": 600,
                                 "height": 320,
-                            },                        
+                            },          
+                            "open": false,
+                            "position": card.display.position              
+                        },
+
+                        "local": {
+                            "display": {
+                                "stackPosition": card.local.display.stackPosition 
+                            }
                         },
 
                         "content": [
@@ -475,6 +544,14 @@ export default {
                                 "width": 490,
                                 "height": 710,
                             },
+                            "open": false,
+                            "position": card.display.position
+                        },
+
+                        "local": {
+                            "display": {
+                                "stackPosition": card.local.display.stackPosition 
+                            }
                         },
 
                         "content": [
@@ -509,6 +586,14 @@ export default {
                                         "width": 580,
                                         "height": 380,
                                     },
+                                    "open": false,
+                                    "position": card.display.position
+                                },
+
+                                "local": {
+                                    "display": {
+                                        "stackPosition": card.local.display.stackPosition 
+                                    }
                                 },
 
                                 "content": [
@@ -553,17 +638,22 @@ export default {
                 
             // })
             this.boardDataLoaded = false       
+            this.stackDataLoaded = false
+
 
             console.log("API GET RESPONSE for BOARD ID ", id)
-                this.$nextTick(() => {
-                    if (this.$refs.stack) {
-                        console.log(this.$refs.stack.cardsOnBoard.length)
-                        console.log(this.$refs.stack.$children)
-                        if (this.$refs.stack.cardsOnBoard.length > 0) {
-                            this.$refs.stack.toggleCardStack()
-                        }                        
-                    }
-                })
+                // this.$nextTick(() => {
+                //     if (this.$refs.stack) {
+                // console.log(this.$refs.stack.cardsOnBoard.length)
+                // console.log(this.$refs.stack.$refs)
+                // console.log(this.$refs.stack.$children)
+                // if (this.$refs.stack.cardsOnBoard.length > 0) {
+                //     this.$refs.stack.toggleCardStack(true)
+                // }                        
+                //     }
+                // })
+
+                
                 setTimeout(() => {
                 // let board = this.boards.find(b => b.info.id === id)
                 
@@ -573,10 +663,12 @@ export default {
 
                 // this.stackData = board.stacks[0]
                 // this.stackData = this.currentBoard.stacks[0]
+                // if (this.$refs.stack) this.$refs.stack.$forceUpdate
+                
                 this.stackDataLoaded = true
 
 
-            }, 1200);
+            }, 100);
         },
 
         createNewBoard() {
@@ -586,22 +678,38 @@ export default {
         },
 
         createNewCard(card) {
+            let cards = this.currentBoard.stacks[0].cards
+            let cardsInStack = this.currentBoard.stacks[0].cards.filter(c => !c.display.open)
+            console.log(cardsInStack)
+            let lastCard = cards.reduce((max, card) => max.display.position > card.display.position ? max : card)
+            let lastCardInStack = cardsInStack.reduce((max, card) => max.local.display.stackPosition > card.local.display.stackPosition ? max : card)
+            console.log(lastCardInStack)
             let newCard = this.cardTemplate(
                 {
                     "info": {
                         "type": card.type
                     },
                     "display": {
-                        "program": card.program ?? null
+                        "program": card.program ?? null,
+                        "position": lastCard.display.position + 1,
+                    },
+                    "local": {
+                        "display": {
+                            "stackPosition": lastCardInStack.local.display.stackPosition + 1
+                        }
                     }
                 }
             )
-            this.currentBoard.stacks[0].cards.push(newCard)
+            newCard.display.open = true
+            // this.setNestedObjectValue(newCard, 'local.display.stackPosition', lastCardInStack.local.display.stackPosition + 1)
+            console.log(newCard)
+            cards.push(newCard)
             // this.stackData = this.currentBoard.stacks[0]
             
-            this.$nextTick(() => {
-                this.$refs.stack.$refs["card-" + newCard.info.id][0].onCardMouseUp()
-            })
+            // this.$nextTick(() => {
+            //     // this.$refs.stack.$refs["card-" + newCard.info.id][0].onCardMouseUp()
+
+            // })
         },
 
         stackCardProgramUpdatedContent(programName, updatedContent, cardId) {
@@ -709,9 +817,10 @@ export default {
                 }
             }
         },
-
+        
         stackCardUpdatedItself(cardId, path, value) {
-            console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
+            // console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
+            // console.log(this.currentBoard.stacks[0].cards)
             var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
             // console.log(card)
             this.setNestedObjectValue(card, path, value)
@@ -749,11 +858,6 @@ export default {
             return array;
             }
 
-    
-    
-    
-    
-    
     },
 
 
@@ -863,6 +967,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     background-color: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
     border-bottom-left-radius: 10px;
     transition: top 0.4s,
                 height 0.4s
@@ -960,6 +1065,7 @@ export default {
     /* display: block; */
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.40);
+    backdrop-filter: blur(10px);
     transition: margin-top 0.2s,
                 height 0.4s ease-in-out
                 ;

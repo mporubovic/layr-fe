@@ -63,7 +63,7 @@ export default {
                         [{ 'color': [] }, { 'background': [] }],
                     ];
         
-        setTimeout(() => {
+        // setTimeout(() => {
             this.Delta = Quill.import('delta');
             this.change = new this.Delta();
             // console.log(this.change.compose(delta))
@@ -110,7 +110,7 @@ export default {
             // console.log (quill);
             this.$el.querySelector("#text-editor-toolbar").appendChild(this.$el.querySelector(".ql-toolbar"));
             this.contentLoading = false
-        }, 1000);
+        // }, 1000);
 
     },
 

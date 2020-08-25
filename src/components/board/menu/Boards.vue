@@ -1,9 +1,9 @@
 <template>
     <div class="boards-menu-carousel">
         <div class="boards-menu-carousel-board-new"
-                @click="newBoard"
                 >
-            <div class="boards-menu-carousel-board-new-icon">
+            <div class="boards-menu-carousel-board-new-icon"
+                    @click="newBoard">
                 <h3>Create a <br> new board</h3>
             </div>
             <div class="boards-menu-carousel-board-title">
@@ -108,7 +108,6 @@ margin-left: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
 }
 
 .boards-menu-carousel-board-new-icon {
@@ -122,6 +121,8 @@ margin-left: 5px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    cursor: pointer;
+
 
 }
 
