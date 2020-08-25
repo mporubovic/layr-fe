@@ -62,11 +62,11 @@
 
             </div> -->
             
-            <img class="card-icon-instack" 
+            <!-- <img class="card-icon-instack" 
                     v-if="!loadContent"
-                    :src="card.display.icon">
+                    :src="card.display.icon"> -->
 
-            <!-- <h1>{{ card.display.position }}</h1> -->
+            <h1>{{ card.display.position }}</h1>
 
             <component v-if="loadContent"
                         :is="cardProgram(card)" 
@@ -221,6 +221,7 @@ export default {
         // this.$el.style.bottom = this.index * this.stackSettings.cardGap + 'px'
         this.$el.style.bottom = this.stackPosition * this.stackSettings.cardGap + 'px'
         this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
+        console.log(this.stackPosition)
     
         // let r = Math.floor(Math.random()* 254) ;
         // let g = Math.floor(Math.random()* 254) ;
@@ -233,6 +234,11 @@ export default {
         this.initializeInteractJsDraggable();
 
         if (!this.isInStack) this.cardToBoard()
+        // if (!this.isInStack) {
+        //     setTimeout(() => {
+        //         this.cardToBoard()
+        //     }, 100 + 100*this.index);
+        // }
 
 
         // this.$el.classList.remove();
@@ -240,7 +246,10 @@ export default {
     },
 
     beforeDestroy() {
+        this.cardUpdateProperty('local.display.stackPosition', this.index)
+        // this.cardUpdateProperty('display.', this.index)
         this.$el.remove()
+
     },
 
     methods: {
@@ -407,6 +416,7 @@ export default {
                 }, 1000);
 
                 this.$emit('cardStackInteraction', this.id, true);
+
                 
                 this.$el.classList.remove("card-in-stack");
                 this.$el.classList.add("card-on-board");

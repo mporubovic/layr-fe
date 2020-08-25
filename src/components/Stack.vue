@@ -327,7 +327,11 @@ export default {
             let card = this.cards.find(c => c.info.id === id)
 
             if (stackToBoard) {
-                let crdsAbove = crds.slice(card.local.display.stackPosition);
+                // let stackPos = crds.findIndex(c => c.info.id === id)
+                console.log(card.local.display.stackPosition)
+                // let crdsAbove = crds.slice(card.local.display.stackPosition);
+                let crdsAbove = this.cards.slice(card.display.position);
+                console.log(crdsAbove)
                 
                 crdsAbove.forEach(card => {
                     this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', card.local.display.stackPosition - 1)
@@ -418,7 +422,10 @@ export default {
                     // }, 100 + 100*index); 
                     // console.log(card)
                     setTimeout(() => {
+                        // console.log(card.display.open)
                         this.cardUpdatedItself(card.info.id, 'display.open', !card.display.open)
+                        // console.log(card.display.open)
+
                     }, 100 + 100*(index));
                     
 
