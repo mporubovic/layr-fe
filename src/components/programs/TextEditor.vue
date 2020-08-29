@@ -82,8 +82,11 @@ export default {
                 },
                 theme: "snow",
             })
+            console.log(this.content)
+            let parsedText = JSON.parse(this.content[0].text.text)
             
-            quill.setContents(this.content[0].text)
+            console.log(parsedText)
+            // quill.setContents(parsedText)
             
             // quill.on('text-change', function(delta) {
             quill.on('text-change', (delta) => {

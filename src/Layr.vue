@@ -38,7 +38,7 @@
                             <!-- <component :is="subMenuComponent"></component> -->
                             <component :is="subMenu" 
                                         v-bind="subMenuContent"
-                                        @subMenuBoardClicked="openBoard"
+                                        @subMenuBoardClicked="requestBoard"
                                         @subMenuBoardNewBoard="createNewBoard"
                                         >
                                         
@@ -132,8 +132,21 @@ export default {
     },
 
     mounted() {
-        this.boards = this.generateBoards(4)
-        this.openBoard(this.boards[0].info.id)
+        // this.boards = this.generateBoards(4)
+
+        // this.$http.get('/sanctum/csrf-cookie').then(response => {
+            // console.log(response)
+            this.$http.get('/api/boards')
+                .then(response => {
+                    this.boards = response.data.boards
+                    // this.$set(boards, response.data.boards)
+                    // this.openBoard(this.boards[0].info.id)
+                } )
+
+        // })
+        
+        
+        
 
 
     },
@@ -339,7 +352,9 @@ export default {
             let crds = []
             for (let index = 0; index < 1; index++) {
                 cards.forEach(card => {
-                    crds.push(this.cardTemplate(card))
+                    let c = this.cardTemplate(card)
+                    this.setNestedObjectValue(c, 'local.display.stackPosition', card.display.position)
+                    crds.push(this.cardTemplate(c))
                 });
             }
             
@@ -353,14 +368,10 @@ export default {
                 case("image"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*10000),
-
-                            "type": "image", 
-                            "title": "Andromeda"
+                            "title": "New Image Card"
                         },
 
                         "display": {
-                            "program": "gallery",
                             "icon": require('@/assets/cards/icons/image.svg'),
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
@@ -368,14 +379,6 @@ export default {
                                 "width": 777,
                                 "height": 550,
                             },
-                            "open": false,
-                            "position": card.display.position
-                        },
-
-                        "local": {
-                            "display": {
-                                "stackPosition": card.local.display.stackPosition 
-                            }
                         },
 
                         "content": [
@@ -396,14 +399,10 @@ export default {
                 case("todo"): 
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*10000),
-
-                            "type": "todo", 
                             "title": "Todo List"
                         },
 
                         "display": {
-                            "program": "list",
                             "icon": require('@/assets/cards/icons/todo.svg'),
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
@@ -411,20 +410,12 @@ export default {
                                 "width": 600,
                                 "height": 340,
                             },
-                            "open": false,
-                            "position": card.display.position
-                        },
-
-                        "local": {
-                            "display": {
-                                "stackPosition": card.local.display.stackPosition 
-                            }
                         },
 
                         "content": [
                             {
                                 "id": Math.floor(Math.random()*10000),
-                                "isEditing": false,
+                                // "isEditing": false,
                                 "todo": {
                                     
                                     "body": "First todo",
@@ -443,40 +434,28 @@ export default {
                 case("url"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*10000),
-
-                            "type": "url", 
                             "title": "Url List"
                         },
 
                         "display": {
-                            "program": "list",
                             "icon": require('@/assets/cards/icons/link.svg'),
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
                                 "width": 710,
                                 "height": 260,
-                            },          
-                            "open": false,
-                            "position": card.display.position              
-                        },
-
-                        "local": {
-                            "display": {
-                                "stackPosition": card.local.display.stackPosition 
-                            }
+                            },                      
                         },
 
                         "content": [
                             {
                                 "id": Math.floor(Math.random()*10000),
-                                "isEditing": false,
+                                // "isEditing": false,
                                 "url": {
                                     "path": 'layrstack.com',
                                     "position": 1,
                                     "ico": null,
-                                    "title": null,
+                                    "name": null,
                                 },
                                 "meta": {
                                     "created_at": "2020-07-20T16:59:14.000000Z",
@@ -490,29 +469,17 @@ export default {
                 case("text"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*10000),
-
-                            "type": "text", 
                             "title": "Text editor"
                         },
 
                         "display": {
-                            "program": "texteditor",
                             "icon": require('@/assets/cards/icons/text.svg'),
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
                                 "width": 600,
                                 "height": 320,
-                            },          
-                            "open": false,
-                            "position": card.display.position              
-                        },
-
-                        "local": {
-                            "display": {
-                                "stackPosition": card.local.display.stackPosition 
-                            }
+                            },               
                         },
 
                         "content": [
@@ -529,14 +496,10 @@ export default {
                 case("pdf"):
                     return {
                         "info": {
-                            "id": Math.floor(Math.random()*10000),
-
-                            "type": "pdf", 
                             "title": "NFX"
                         },
 
                         "display": {
-                            "program": "single",
                             "icon": require('@/assets/cards/icons/pdf.svg'),
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
@@ -544,14 +507,6 @@ export default {
                                 "width": 490,
                                 "height": 710,
                             },
-                            "open": false,
-                            "position": card.display.position
-                        },
-
-                        "local": {
-                            "display": {
-                                "stackPosition": card.local.display.stackPosition 
-                            }
                         },
 
                         "content": [
@@ -571,14 +526,10 @@ export default {
                         case("youtube"):                            
                             return {
                                 "info": {
-                                    "id": Math.floor(Math.random()*10000),
-
-                                    "type": "embed", 
                                     "title": "YouTube video"
                                 },
 
                                 "display": {
-                                    "program": "youtube",
                                     "icon": require('@/assets/cards/icons/youtube.svg'),
                                     "dimensions": {
                                         "x": this.generateDimensions('x'),
@@ -586,26 +537,9 @@ export default {
                                         "width": 580,
                                         "height": 380,
                                     },
-                                    "open": false,
-                                    "position": card.display.position
                                 },
 
-                                "local": {
-                                    "display": {
-                                        "stackPosition": card.local.display.stackPosition 
-                                    }
-                                },
-
-                                "content": [
-                                    // {
-                                    //     "id": Math.floor(Math.random()*10000),
-                                    //     "meta": {},
-                                    //     "url": {
-                                    //         "path": 'https://www.youtube.com/watch?v=0pZ8PVRauDU',
-                                    //         "name": "NFX"
-                                    //     }    
-                                    // }
-                                ],
+                                "content" : [],
 
                             }
                         }
@@ -629,6 +563,52 @@ export default {
                     break;
             }
         },
+
+        requestBoard(id) {
+            this.$http.get('/api/boards/' + id)
+                .then(response => {
+                    console.log("API GET RESPONSE for BOARD ID ", id)
+                    console.log(response.data)
+                    let boardIndex = this.boards.findIndex(b => b.info.id === id)
+                    let r = response.data.board
+                    this.processRequestedBoard(r)
+                    // console.log(response.data.board)
+                    // this.boards[boardIndex] = response.data.board
+                    this.$set(this.boards, boardIndex, r)
+                    this.openBoard(this.boards[boardIndex].info.id)
+                } )           
+        },
+
+        processRequestedBoard(board) {
+            board.stacks.forEach(stack => {
+                stack.cards.forEach(card => {
+                    // this.setNestedObjectValue(card, 'local.display.stackPosition', card.display.position)
+                    this.processRequestedCards(card)
+                });
+            });
+        },
+
+        processRequestedCards(card) {
+            this.setNestedObjectValue(card, 'local.display.stackPosition', card.display.position)
+            if (!card.content) return
+            switch (card.info.type) {
+                case 'todo':
+                    card.content.forEach(content => {
+                        this.setNestedObjectValue(content, 'local.isEditing', false)
+                    })
+                    
+                    break;
+                case 'url':
+                    card.content.forEach(content => {
+                        this.setNestedObjectValue(content, 'local.isEditing', false)
+                    })
+                    
+                    break;
+            
+                default:
+                    break;
+            }
+        },
         
         openBoard(id) {
             // this.$nextTick(() => {
@@ -641,7 +621,7 @@ export default {
             this.stackDataLoaded = false
 
 
-            console.log("API GET RESPONSE for BOARD ID ", id)
+            // console.log("API GET RESPONSE for BOARD ID ", id)
                 // this.$nextTick(() => {
                 //     if (this.$refs.stack) {
                 // console.log(this.$refs.stack.cardsOnBoard.length)
@@ -654,7 +634,7 @@ export default {
                 // })
 
                 
-                setTimeout(() => {
+                // setTimeout(() => {
                 // let board = this.boards.find(b => b.info.id === id)
                 
                 // this.currentBoard = board
@@ -668,7 +648,7 @@ export default {
                 this.stackDataLoaded = true
 
 
-            }, 100);
+            // }, 100);
         },
 
         createNewBoard() {
@@ -678,32 +658,53 @@ export default {
         },
 
         createNewCard(card) {
-            let cards = this.currentBoard.stacks[0].cards
-            let cardsInStack = this.currentBoard.stacks[0].cards.filter(c => !c.display.open)
-            console.log(cardsInStack)
-            let lastCard = cards.reduce((max, card) => max.display.position > card.display.position ? max : card)
-            let lastCardInStack = cardsInStack.reduce((max, card) => max.local.display.stackPosition > card.local.display.stackPosition ? max : card)
-            console.log(lastCardInStack)
-            let newCard = this.cardTemplate(
+            let newCardDefaults = this.cardTemplate(
                 {
                     "info": {
                         "type": card.type
                     },
                     "display": {
-                        "program": card.program ?? null,
-                        "position": lastCard.display.position + 1,
+                        "program": card.program,
+                        // "position": lastCard.display.position + 1,
                     },
-                    "local": {
-                        "display": {
-                            "stackPosition": lastCardInStack.local.display.stackPosition + 1
-                        }
-                    }
                 }
-            )
-            newCard.display.open = true
+            )            
+
+            let requestPayload = {
+                type: card.type,
+                program: card.program,
+                stackId: this.currentBoard.stacks[0].info.id,
+                open: true,
+                title: newCardDefaults.info.title,
+                dimensions: newCardDefaults.display.dimensions,
+                content: newCardDefaults.content,
+
+            }      
+            
+            console.log(requestPayload)
+            let cards = this.currentBoard.stacks[0].cards
+
+            this.$http.post('/api/cards', requestPayload)
+                        .then(response => {
+                            let newCard = response.data.card
+                            console.log("API CARD RESPONSE", response.status)
+                            // this.setNestedObjectValue(newCard, 'local.display.stackPosition', newCard.display.position)
+                            this.processRequestedCards(newCard)
+                            this.$nextTick(() => {cards.push(newCard)})
+                        })
+            
+            
+            // let cards = this.currentBoard.stacks[0].cards
+            // let cardsInStack = this.currentBoard.stacks[0].cards.filter(c => !c.display.open)
+            // console.log(cardsInStack)
+            // let lastCard = cards.reduce((max, card) => max.display.position > card.display.position ? max : card)
+            // let lastCardInStack = cardsInStack.reduce((max, card) => max.local.display.stackPosition > card.local.display.stackPosition ? max : card)
+            // console.log(lastCardInStack)
+
+            // newCard.display.open = true
             // this.setNestedObjectValue(newCard, 'local.display.stackPosition', lastCardInStack.local.display.stackPosition + 1)
-            console.log(newCard)
-            cards.push(newCard)
+            // console.log(newCard)
+            // cards.push(newCard)
             // this.stackData = this.currentBoard.stacks[0]
             
             // this.$nextTick(() => {
@@ -715,20 +716,66 @@ export default {
         stackCardProgramUpdatedContent(programName, updatedContent, cardId) {
             console.log("UPDATE", programName, updatedContent, "CARD", cardId)
             // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
+            let c = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)
+            
+            if (updatedContent.local.update) {
+                c.local = updatedContent.local
+                if (updatedContent.local.update === "terminate") {
+                    c.local.update = null
+                    return
+                }
+            }
             let contentKey = this.cardProgramNameToKey(programName)
+            let content = {[contentKey]: updatedContent[contentKey]}
+            let requestPayload = {
+                cardId: cardId,
+                content: content
+            }
+            this.$http.patch('/api/content/' + updatedContent.id, requestPayload)
+                        .then(response => {
+                            // let receivedContent = response.data
+                            console.log("API CARD RESPONSE", response.status)
+                            // card.content.find(c => c.id === tempId).id = response.data[0].id
+                            // this.$nextTick(() => {cards.push(newCard)})
+                        })
+
+            c[contentKey] = updatedContent[contentKey]
+            // console.log("c", c)
+            
+
             // console.log(contentKey)
             // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
 
-            this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)[contentKey] = updatedContent[contentKey]
 
         },
 
         stackCardProgramCreatedContent(programName, mainContent, cardId) {
             console.log("CREATE", "FROM", programName, "MAIN CONTENT", mainContent ?? null, "CARD", cardId)
             let newContent = this.contentTemplate(programName, mainContent ?? null)
+            let contentKey = this.cardProgramNameToKey(programName)
+            let content = [{[contentKey]: newContent[contentKey]}]
+            console.log(newContent)
+            let requestPayload = {
+                cardId: cardId,
+                content: content
+            }
+
+            console.log("REQUEST PAYLOAD", requestPayload)
+            let card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
+            // this.processRequestedCards
+            card.content ? card.content.push(newContent) : card.content = [newContent]
+            // card.content.push(newContent)
+            let tempId = newContent.id
+            this.$http.post('/api/content', requestPayload)
+                        .then(response => {
+                            // let receivedContent = response.data
+                            console.log("API CARD RESPONSE", response.status)
+                            card.content.find(c => c.id === tempId).id = response.data[0].id
+                            // this.$nextTick(() => {cards.push(newCard)})
+                        })
             
-            console.log("RESULT", newContent)
-            this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content.push(newContent)
+            // console.log("RESULT", requestPayload)
+            
 
         },
 
@@ -738,8 +785,26 @@ export default {
             // let contentKey = this.cardProgramNameToKey(programName)
             // console.log(contentKey)
             let c = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content
+            // let i = c.findIndex(c => c.id === deletedContent.id)
+
+            
             let i = c.findIndex(c => c.id === deletedContent.id)
             c.splice(i, 1)
+            
+            let requestPayload = {
+                cardId: cardId
+            }            
+            
+            console.log("DELETE REQUEST PAYLOAD", requestPayload)
+            this.$http.delete('/api/content/' + deletedContent.id, { data: requestPayload })
+            .then(response => {
+                // let receivedContent = response.data
+                console.log("API CARD RESPONSE", response.status)
+                // card.content[card.content.length -1].id = response.data[0].id
+
+                // this.$nextTick(() => {cards.push(newCard)})
+            })
+            
 
         },
 
@@ -753,6 +818,9 @@ export default {
                     
                 case("text-editor") :
                     return "text";  
+                
+                case("youtube-player") :
+                    return "embed";  
             }
         },
         
@@ -760,7 +828,7 @@ export default {
             switch (type) {
                 case("image-component") : {
                     let obj = {
-                        "id": Math.floor(Math.random() * 10000 ),
+                        "id": Math.floor(Math.random() * 1000000000000 ),
                         "meta": {},
                         "file": {
                             "url": 'https://nasa.gov',
@@ -773,28 +841,38 @@ export default {
                 
                 case("todo-list") : {
                     let obj = {
-                        "id": Math.floor(Math.random() * 10000 ),
-                        "isEditing": false,
+                        "id": Math.floor(Math.random() * 1000000000000 ),
                         "meta": {},
                         "todo": {
                             "body": 'New todo',
                             "completed_at": null,
-                        }    
+                        },
+                        "local": {
+                            "isEditing": false,
+                        }
                     }
                     return obj
                 }
                     
                 case("url-list"): {
                     let obj = {
-                        "id": Math.floor(Math.random() * 10000 ),
-                        "isEditing": false,
+                        "id": Math.floor(Math.random() * 1000000000000 ),
                         "meta": {},
                         "url": {
-                            "path": mainContent ?? '',
+                            "path": mainContent ?? 'placeholder',
                             "position": 1,
                             "ico": mainContent ? null : 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
-                            "title": mainContent ? null : 'Right click to edit',
-                        }    
+                            "name": mainContent ? null : 'Right click to edit',
+                        },
+                        "local": {
+                            "isEditing": false,
+                            "url": {
+                                "name": mainContent ? null : 'Right click to edit',
+                                "ico": 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
+
+                            }
+                            
+                        }
                     }
                     
                     return obj;
@@ -805,10 +883,10 @@ export default {
 
                 case("youtube-player"): {
                     let obj = {
-                        "id": Math.floor(Math.random() * 10000 ),
+                        "id": Math.floor(Math.random() * 1000000000000 ),
                         "isEditing": false,
                         "meta": {},
-                        "url": {
+                        "embed": {
                             "path": mainContent ?? '',
                         }    
                     }
@@ -819,25 +897,13 @@ export default {
         },
         
         stackCardUpdatedItself(cardId, path, value) {
-            // console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
+            console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
             // console.log(this.currentBoard.stacks[0].cards)
             var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
             // console.log(card)
             this.setNestedObjectValue(card, path, value)
         },
 
-        setNestedObjectValue(obj, path, value) {
-            var schema = obj;  // a moving reference to internal objects within obj
-            var pList = path.split('.');
-            var len = pList.length;
-            for(var i = 0; i < len-1; i++) {
-                var elem = pList[i];
-                if( !schema[elem] ) schema[elem] = {}
-                schema = schema[elem];
-            }
-
-            schema[pList[len-1]] = value;
-        },
 
         shuffleArray(array) {
             var currentIndex = array.length, temporaryValue, randomIndex;
@@ -940,6 +1006,7 @@ export default {
     transition: background-color 0.4s;
     cursor: pointer;
     user-select: none;
+    backdrop-filter: blur(5px);
 }
 
 .menu-pull-line {
@@ -967,7 +1034,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     background-color: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(4px);
     border-bottom-left-radius: 10px;
     transition: top 0.4s,
                 height 0.4s
@@ -1065,7 +1132,7 @@ export default {
     /* display: block; */
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.40);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(6px);
     transition: margin-top 0.2s,
                 height 0.4s ease-in-out
                 ;

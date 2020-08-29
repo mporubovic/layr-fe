@@ -1,4 +1,4 @@
-                        v-if="urlTitleReuqestCompleted"
+                        v-if="urlNameReuqestCompleted"
                                 v-if="urlFaviconReuqestCompleted"
 
 v-bind:href="content.url.path"
@@ -14,7 +14,7 @@ v-bind:href="content.url.path"
 
                     <div class="url-list-item-favicon-wrapper">
                             <img class="url-list-item-favicon" 
-                                    :src="content.url.ico"
+                                    :src="urlFavicon"
                                     >
                     </div>
                     
@@ -24,9 +24,9 @@ v-bind:href="content.url.path"
                         @keydown.enter="onUrlInputKeydownEnter($event)"
                         class="url-list-item-input"
                         type="url"
-                        v-bind:value="content.url.path"
+                        v-bind:value="urlInput"
                         id="url-input"
-                        v-if="content.isEditing"
+                        v-if="content.local.isEditing"
                         autocomplete="off" 
                         >
 
@@ -37,11 +37,11 @@ v-bind:href="content.url.path"
                         target="_blank"
                         rel="noopener noreferrer"
                         v-bind:href="urlPathFormat"
-                        v-if="!content.isEditing"
+                        v-if="!content.local.isEditing"
                         @contextmenu.prevent="hrefContextmenu()"
                         >
                         <!-- {{ url.url.path }} -->
-                        {{ content.url.title }}
+                        {{ urlName }}
                         
                         </a>
                         
@@ -82,8 +82,8 @@ export default {
 
     data() {
         return {
-            urlInput: "New url",
-            urlTitleReuqestCompleted: false,
+            // urlInput: "New url",
+            urlNameReuqestCompleted: false,
             urlFaviconReuqestCompleted: false,
         };
     },
@@ -94,11 +94,14 @@ export default {
         },
 
         urlFavicon() {
-            return this.content.url.ico ?? null
+            this.content.local
+            return this.content.local.url ? this.content.local.url.ico : null
         },
 
-        urlTitle() {
-            return this.content.title ?? null
+        urlName() {
+            this.content.local
+            return this.content.local.url ? this.content.local.url.name : null
+
         },
 
         urlPathFormat() {
@@ -113,6 +116,10 @@ export default {
 
         },
 
+        urlInput() {
+            return this.content.url.path === "placeholder" ? '' : this.content.url.path
+        }
+
     },
 
     
@@ -121,13 +128,62 @@ export default {
     // },
     
     created() {
-        if (this.content.url.title === null) {
-            this.fetchSiteTitle(this.content.url.path).then(response => {
-                response ? this.content.url.title = response : this.content.url.title = this.content.url.path
-            } )
-            // response ? this.content.url.title = response : this.content.url.title = 'Unable to load title')
-            this.fetchSiteFavicon(this.content.url.path).then(response => this.content.url.ico = response)
+        console.log("// CONTENT", this.content)
+        if(this.content.url.path === "placeholder") {
+            let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+
+            // updatedUrl.url.path = event.target.value   
+        
+            this.setNestedObjectValue(updatedUrl, 'local.url.ico', "https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png")
+            this.setNestedObjectValue(updatedUrl, 'local.url.name', "Right click to edit")
+            this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
+            this.$emit('urlItemUpdated', updatedUrl)
+
+        } else if (this.content.url.name === null) {
+            // this.content.url.name = "Loading..."
+            console.log("FETCH")
+            let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+
+            // updatedUrl.url.path = event.target.value   
+        
+            this.setNestedObjectValue(updatedUrl, 'local.url.name', "Loading...")
+            this.setNestedObjectValue(updatedUrl, 'local.update', "continue")  
+            console.log("EMIT 276", updatedUrl)
+            this.$emit('urlItemUpdated', updatedUrl)
+
+            this.fetchSiteTitle(this.content.url.path)
+            this.fetchSiteFavicon(this.content.url.path)
+            
+            // .then(response => {
+            //     // response ? this.content.url.name = response : this.content.url.name = this.content.url.path
+            //     let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+
+            //     // updatedUrl.url.path = event.target.value   
+                
+            //     this.setNestedObjectValue(updatedUrl, 'local.url.name', response)
+            //     this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")     
+            //     console.log(updatedUrl)  
+                
+            //     this.$emit('urlItemUpdated', updatedUrl)
+
+
+            // } )
+            // } ).catch(error => console.log("E", error))
+            // response ? this.content.url.name = response : this.content.url.name = 'Unable to load title')
+            // this.fetchSiteFavicon(this.content.url.path).then( response => {
+            //     let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+
+            //     // updatedUrl.url.path = event.target.value   
+                
+            //     this.setNestedObjectValue(updatedUrl, 'local.url.ico', response)
+            //     this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")       
+                
+            //     this.$emit('urlItemUpdated', updatedUrl)
+
+            // })
         }
+
+
         
     },
     
@@ -142,8 +198,9 @@ export default {
             let faviconEndpoint = figApi + targetUrl
             // let ico = null
 
-            return this.$http.get(faviconEndpoint)
+            this.$httpCross.get(faviconEndpoint)
                             .then(response => {
+                                console.log("FETCH ICON RESPONSE", response.data)
                                 
                                 // console.log(response.data)
                                 let icons = response.data.icons
@@ -185,24 +242,62 @@ export default {
                                 }
                                 
                                 
-                                return icon
+                                let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
 
-                            }).catch(() =>  {
-                                // console.log(error)
+                                // updatedUrl.url.path = event.target.value   
+                                
+                                this.setNestedObjectValue(updatedUrl, 'local.url.ico', icon)
+                                this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
+                                this.$emit('urlItemUpdated', updatedUrl)
+                                console.log("EMIT 225", updatedUrl)
+
+
+                            }).catch((error) =>  {
+                                console.log(error)
+                                let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+
+                                // updatedUrl.url.path = event.target.value   
+                            
+                                this.setNestedObjectValue(updatedUrl, 'local.url.ico', "https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png")
+                                this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
+                                this.$emit('urlItemUpdated', updatedUrl)
                                 })
         },
 
         fetchSiteTitle: function(targetUrl) {
-            let titleApi = 'http://textance.herokuapp.com/title/'
+            let titleApi = '/api/services/sitetitle/'
             targetUrl = encodeURIComponent(targetUrl.split("//")[1] ? targetUrl.split("//")[1] : targetUrl)
 
             let titleEndpoint = titleApi + targetUrl
-            return this.$http.get(titleEndpoint)
+            this.$http.get(titleEndpoint)
                         .then(response => {
                             // console.log(response.data)
-                            return response.data
+                            // return response.data
+                            console.log("FETCH TITLE RESPONSE", response.data)
+
+                            let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+
+                            // updatedUrl.url.path = event.target.value   
                             
-                        }).catch(()=>  {
+                            this.setNestedObjectValue(updatedUrl, 'local.url.name', response.data)
+                            this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
+                            this.$emit('urlItemUpdated', updatedUrl)
+                            console.log("EMIT 249", updatedUrl)
+
+                            
+                        }).catch((error)=>  {
+                                // return console.log(error)
+                                console.log(error)
+                                let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+
+                                // updatedUrl.url.path = event.target.value   
+                            
+                                // this.setNestedObjectValue(updatedUrl, 'local.url.name', updatedUrl.url.path + " (Unable to load site title)" )
+                                this.setNestedObjectValue(updatedUrl, 'local.url.name', updatedUrl.url.path )
+                                this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
+                                this.$emit('urlItemUpdated', updatedUrl)
+                                console.log("EMIT 260", updatedUrl)
+
 
                                 })
         },
@@ -210,22 +305,47 @@ export default {
         updateUrlContent(url) {
             // url.isEditing = false
             // url.url.path = event.target.value
-            console.log(url)
+            // console.log(url)
             // url.url.path = ( url.url.path.search("http://") || url.url.path.search("https://") ) ? '//' + url.url.path : url.url.path
-            this.$emit('urlItemUpdated', url)
-            this.content.url.title = "Loading..."
-            this.fetchSiteTitle(url.url.path).then(response => response ? this.content.url.title = response : this.content.url.title = this.content.url.path)
-            this.fetchSiteFavicon(url.url.path).then(response => { 
-                                                                            response ? this.content.url.ico = response : this.content.url.ico = 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png';
-                                                                            
-                                                                            this.content.isEditing = false})
+            let updatedUrl = JSON.parse ( JSON.stringify ( url) )
+
+            this.setNestedObjectValue(updatedUrl, 'local.url.name', "Loading...")
+            this.setNestedObjectValue(updatedUrl, 'local.update', "continue")       
+
+            // updatedUrl.url.path = event.target.value   
+        
+            // this.setNestedObjectValue(updatedUrl, 'local.url.name', "Loading...")
+            // this.setNestedObjectValue(updatedUrl, 'local.update', "continue")  
+            console.log("EMIT 276", updatedUrl)
+            this.$emit('urlItemUpdated', updatedUrl)
+            
+            // this.content.url.name = "Loading..."
+            this.fetchSiteTitle(url.url.path)
+            this.fetchSiteFavicon(url.url.path)
 
         },
 
         onUrlInputBlur(event) {
+            // if (this.content.url.path === "placeholder") return
             let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+            this.setNestedObjectValue(updatedUrl, 'local.isEditing', false)
+            console.log("va", event.target.value)
+            // if (event.target.value === null && this.content.url.path === "placeholder") {
+            if (event.target.value === "") {
+                this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
+                this.$emit('urlItemUpdated', updatedUrl)
+                return
 
-            updatedUrl.url.path = event.target.value          
+            }
+            
+            // let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
+            // console.log("UUEE", updatedUrl)
+
+            updatedUrl.url.path = event.target.value
+
+               
+            this.setNestedObjectValue(updatedUrl, 'local.isEditing', false)
+            // this.setNestedObjectValue(updatedUrl, 'local.isEditing', false)
             
             this.updateUrlContent(updatedUrl)
             // this.$nextTick(() => {
@@ -260,13 +380,14 @@ export default {
         },
 
         hrefContextmenu() {
-            if (!this.contextMenu) {
-                this.content.isEditing = !this.content.isEditing
+            let updatedUrl = JSON.parse ( JSON.stringify ( this.content ) )
 
-                this.$nextTick(() => {
-                    this.$el.querySelector("#url-input").focus()
-                })
-            }
+            this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")
+            this.setNestedObjectValue(updatedUrl, 'local.isEditing', true)
+            console.log("EMIT 335", updatedUrl)
+            this.$emit('urlItemUpdated', updatedUrl)
+            
+
             
         },
 
@@ -276,19 +397,18 @@ export default {
         
     },
 
-    // watch: {
-    //     content: {
-    //         deep: true,
+    watch: {
+        'content.local.isEditing': {
+            handler(n) {
+                if (n) {
+                    this.$nextTick(() => {
+                        this.$el.querySelector("#url-input").focus()
+                    })
+                }
+            }
             
-    //         handler() {
-    //             if (this.$el.getElementsByClassName(".url-list-item-input").activeElement) {
-    //                 console.log("// ACTIVE")
-    //             }
-    //             console.log("// CONTENT", this.content.isEditing)
-    //         }
-            
-    //     }
-    // },
+        }
+    },
 };
 </script>
 

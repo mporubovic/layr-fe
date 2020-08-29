@@ -62,15 +62,15 @@
 
             </div> -->
             
-            <!-- <img class="card-icon-instack" 
+            <img class="card-icon-instack" 
                     v-if="!loadContent"
-                    :src="card.display.icon"> -->
+                    :src="card.display.icon">
 
-            <h1>{{ card.display.position }}</h1>
+            <!-- <h1 v-if="loadContent">{{ card.display.position }}</h1> -->
 
             <component v-if="loadContent"
                         :is="cardProgram(card)" 
-                        :content="card.content"
+                        :content="cardContent"
                         :contentComponent="cardContentComponentName(card)"
                         :cardId="card.info.id"
                         :hasFocus="hasFocus"
@@ -210,6 +210,11 @@ export default {
 
         stackPosition() {
             return this.card.local.display.stackPosition
+            // return this.card.local ? this.card.local.display.stackPosition : this.index
+        },
+
+        cardContent() {
+            return (this.card.content) ? this.card.content : []
         }
 
     },
@@ -411,8 +416,11 @@ export default {
 
         cardToBoard() {
                 // alert('GO TO BOARD');
+                // console.log(this.loadContent)
                 setTimeout(() => {
                     this.loadContent = true
+                    // console.log(this.loadContent)
+
                 }, 1000);
 
                 this.$emit('cardStackInteraction', this.id, true);
@@ -735,10 +743,10 @@ export default {
                             // alert('uwaga');
                             // self.dimensions.width = event.rect.width;
                             // self.dimensions.height = event.rect.height;
-                            self.cardUpdateProperty('display.dimensions.x', event.rect.left)
-                            self.cardUpdateProperty('display.dimensions.y', event.rect.top)
-                            self.cardUpdateProperty('display.dimensions.width', event.rect.width)
-                            self.cardUpdateProperty('display.dimensions.height', event.rect.height)
+                            self.cardUpdateProperty('display.dimensions.x', Math.round(event.rect.left))
+                            self.cardUpdateProperty('display.dimensions.y', Math.round(event.rect.top))
+                            self.cardUpdateProperty('display.dimensions.width', Math.round(event.rect.width))
+                            self.cardUpdateProperty('display.dimensions.height', Math.round(event.rect.height))
                             self.$emit('cardInteractJsResize', self.id, false)
                             
                         }
@@ -820,8 +828,8 @@ export default {
                                 // console.log(event.rect.left);
                                 // self.dimensions.x = event.rect.left;
                                 // self.dimensions.y = event.rect.top;
-                                self.cardUpdateProperty('display.dimensions.x', event.rect.left)
-                                self.cardUpdateProperty('display.dimensions.y', event.rect.top)
+                                self.cardUpdateProperty('display.dimensions.x', Math.round(event.rect.left))
+                                self.cardUpdateProperty('display.dimensions.y', Math.round(event.rect.top))
                                 // alert(self.card.id);
                                 self.$emit('cardInteractJsDrag', self.id, false)
 
@@ -892,6 +900,10 @@ export default {
                     // this.$el.style.bottom = this.stackSettings.cardGap * n  + 'px';
                 // }
             }
+        },
+
+        card(n ,o) {
+            console.log(n, o)
         }
     },
 }
@@ -909,7 +921,7 @@ export default {
     opacity: 0; 
     background-color: white;
     /* outline: 1px black solid; */
-    border-bottom: 1px black solid;
+    border-bottom: 2px black solid;
 
 }
 

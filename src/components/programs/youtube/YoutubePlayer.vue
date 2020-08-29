@@ -72,7 +72,7 @@ export default {
         },
 
         videoId() {
-            return this.$youtube.getIdFromUrl(this.content[0].url.path)
+            return this.$youtube.getIdFromUrl(this.content[0].embed.path)
         },
 
         player() {
@@ -135,6 +135,8 @@ export default {
 
         fileSelectorUrlSubmitted(url) {
             // this.contentLoading = true
+            // let updatedEmbed = JSON.parse ( JSON.stringify ( this.content) )
+
             this.$emit('programCreatedContent', 'youtube-player', url)
         }
     },

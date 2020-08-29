@@ -140,6 +140,7 @@ export default {
             newCards: [
                 {
                     "type": "image",
+                    "program": "gallery",
                     "available": true,
                     "title": "Image",
                     "icon": require('@/assets/cards/icons/image.svg'),
@@ -155,6 +156,7 @@ export default {
                 },                
                 {
                     "type": "text",
+                    "program": "texteditor",
                     "available": true,
                     "title": "Notes",
                     "icon": require('@/assets/cards/icons/text.svg'),
@@ -162,6 +164,7 @@ export default {
                 },                
                 {
                     "type": "todo",
+                    "program": "list",
                     "available": true,
                     "title": "Todo",
                     "icon": require('@/assets/cards/icons/todo.svg'),
@@ -169,6 +172,7 @@ export default {
                 },                
                 {
                     "type": "url",
+                    "program": "list",
                     "title": "URL",
                     "available": true,
                     "icon": require('@/assets/cards/icons/link.svg'),
@@ -176,6 +180,7 @@ export default {
                 },                
                 {
                     "type": "pdf",
+                    "program": "pdfviewer",
                     "available": true,
                     "title": "PDF",
                     "icon": require('@/assets/cards/icons/pdf.svg'),
@@ -328,13 +333,18 @@ export default {
 
             if (stackToBoard) {
                 // let stackPos = crds.findIndex(c => c.info.id === id)
-                console.log(card.local.display.stackPosition)
+                // console.log(card.local.display.stackPosition)
+                console.log("assdasd")
                 // let crdsAbove = crds.slice(card.local.display.stackPosition);
-                let crdsAbove = this.cards.slice(card.display.position);
+                console.log(card)
+                console.log(card.display.position)
+                // let crdsAbove = this.cards.slice(card.display.position);
+                let crdsAbove = this.cards.filter(c => c.display.position > card.display.position);
                 console.log(crdsAbove)
                 
                 crdsAbove.forEach(card => {
                     this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', card.local.display.stackPosition - 1)
+                    console.log("zhege")
                 });
 
                 if (this.cardsOnBoard.length === 0) {
@@ -701,7 +711,9 @@ export default {
         },
 
         cards() { 
-           return this.stackData.cards
+           return this.stackData.cards.filter(c => c).sort(function(a, b) {
+                                        return a.display.position - b.display.position
+                                    });
         },
 
         // localCards() {

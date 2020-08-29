@@ -120,6 +120,7 @@ export default {
 
         urlInputBlur(event) {
             let val = event.target.value.trim()
+            console.log(val)
             if (val) this.$emit('urlSubmitted', val)
 
         },

@@ -15,7 +15,7 @@
 
 <script>
 import axios from 'axios';
-axios.defaults.headers.common['Authorization'] = 'Bearer 1|VORoVvCiZeKzaToFT01rnUvPXCstHw2nLD0Iub87ppUERlQykDgzkAK5DQ5uYgDV9MoVnFgprHkpIzDZ';
+axios.defaults.headers.common['Authorization'] = 'Bearer 1|0PEeQDfqCbM6W0HEFvX1WlqA2xuQ0mQ1ABWf5S5r2z9TbWNwM1Jgykz5XJeahWBHQvwAwKBTdPfCM0tS';
 axios.defaults.baseURL = 'http://localhost:8000'
 
 export default {

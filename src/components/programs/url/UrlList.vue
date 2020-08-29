@@ -10,7 +10,7 @@
             @dragover="dragOver($event)"
         >
         <div class="list-items">
-            <div class="list-item" v-for="(item) in content" :key="item.id"
+            <div class="list-item" v-for="(item, index) in content" :key="index"
                 :style="listDynamicStyle">
                 <url-item class="list-item-content"
                             :content="item"
@@ -76,12 +76,17 @@ export default {
     
     methods: {
         onListItemControlsEdit(item) {
-
-            if(this.content.find(c => c.id === item.id).isEditing === true) {
-                this.content.find(c => c.id === item.id).isEditing = false
+            let c = this.content.find(c => c.id === item.id)
+            let updatedUrl = JSON.parse ( JSON.stringify ( c ) )
+            this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")
+            
+            if(c.local.isEditing === true) {
+                this.setNestedObjectValue(updatedUrl, 'local.isEditing', false)
             } else {
-                this.content.find(c => c.id === item.id).isEditing = true
+                this.setNestedObjectValue(updatedUrl, 'local.isEditing', true)
             }
+
+            this.$emit('programUpdatedContent', 'todo-list', updatedUrl)
             
 
             
@@ -165,11 +170,16 @@ export default {
     display: flex;
     flex-direction: row;
     margin-right: 20px;
+    /* opacity: 0; */
     /* flex-wrap: nowrap; */
     /* overflow: hidden; */
     
 
 }
+
+/* .list-item-controls:hover {
+    opacity: 1;
+} */
 
 .list-item-controls-common {
     /* margin-left: 15px; */

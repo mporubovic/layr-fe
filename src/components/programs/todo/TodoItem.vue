@@ -20,17 +20,18 @@
                 type="text"
                 v-bind:value="content.todo.body"
                 id="todo-input"
-                v-if="content.isEditing"
+                ref="input"
+                v-if="content.local.isEditing"
                 autocomplete="off" 
                 >
                 
             <div @contextmenu.prevent="bodyContextmenu()"
                     >
                 <p class="todo-item-body"
-                    v-if="!content.isEditing"
+                    v-if="!content.local.isEditing"
                     
                     >
-                    {{ content.todo.body }}
+                    {{ content.todo.body }} {{content.id}}
                 </p>
             </div>
             
@@ -62,6 +63,10 @@ export default {
     computed: {
         todoListDynamicStyle() {
             return this.hasFocus ? {'pointer-events': ''} : {'pointer-events': 'none'}
+        },
+
+        isEditing() {
+            return this.content.local.isEditing
         }
     },
 
@@ -78,9 +83,13 @@ export default {
             let updatedTodo = JSON.parse ( JSON.stringify ( this.content ) )
 
             updatedTodo.todo.body = event.target.value
+            this.setNestedObjectValue(updatedTodo, 'local.isEditing', false)
+            this.setNestedObjectValue(updatedTodo, 'local.update', "continue")
+            // updatedTodo.local.isEditing = false
+            // updatedTodo.local.update = true
             
             this.updateTodoContent(updatedTodo)
-            this.content.isEditing = false
+            // this.content.isEditing = false
 
         },
         
@@ -121,19 +130,35 @@ export default {
         },
 
         bodyContextmenu() {
-            this.content.isEditing = true
+            // this.content.isEditing = true
+
+            let updatedTodo = JSON.parse ( JSON.stringify ( this.content ) )
+
+            this.setNestedObjectValue(updatedTodo, 'local.update', "terminate")
+            this.setNestedObjectValue(updatedTodo, 'local.isEditing', true)
             
-            this.$nextTick(() => {
-                this.$el.querySelector("#todo-input").focus()
-            })
+            this.updateTodoContent(updatedTodo)
+
+            // this.$nextTick(() => {
+            //     this.$el.querySelector("#todo-input").focus()
+            // })
 
         },
+        
+        
+    },
 
-        toggleContextMenu() {
-            this.contextMenu = !this.contextMenu
+    watch: {
+        'content.local.isEditing': {
+            handler(n) {
+                if (n) {
+                    this.$nextTick(() => {
+                        this.$el.querySelector("#todo-input").focus()
+                    })
+                }
+            }
+            
         }
-        
-        
     },
 };
 </script>

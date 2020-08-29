@@ -7,7 +7,7 @@
 <template>
     <div class="list-container">
         <div class="list-items">
-            <div class="list-item" v-for="(item) in content" :key="item.id"
+            <div class="list-item" v-for="(item, index) in content" :key="index"
                 :style="listDynamicStyle">
                 <todo-item class="list-item-content"
                             :content="item"
@@ -73,12 +73,23 @@ export default {
     
     methods: {
         onListItemControlsEdit(item) {
+            let c = this.content.find(c => c.id === item.id)
+            let child = this.$children.find(ch => ch.content.id === item.id)
+            console.log(child)
+            let updatedTodo = JSON.parse ( JSON.stringify ( c ) )
+            this.setNestedObjectValue(updatedTodo, 'local.update', "terminate")
+                if (c.local.isEditing === true) {
+                    this.setNestedObjectValue(updatedTodo, 'local.isEditing', false)
+                } else {
+                    // if (!child.$refs.input)
+                    this.setNestedObjectValue(updatedTodo, 'local.isEditing', true)                        
 
-            if(this.content.find(c => c.id === item.id).isEditing === true) {
-                this.content.find(c => c.id === item.id).isEditing = false
-            } else {
-                this.content.find(c => c.id === item.id).isEditing = true
-            }
+                }
+                this.$emit('programUpdatedContent', 'todo-list', updatedTodo)
+
+            // this.setNestedObjectValue(updatedTodo, 'local.isEditing', true)
+            
+
             
 
             
