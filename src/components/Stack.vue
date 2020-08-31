@@ -147,8 +147,8 @@ export default {
                     "description": "Upload images from your device"
                 },                
                 {
-                    "type": "embed",
-                    "program": "youtube",
+                    "type": "youtube",
+                    "program": "youtubeplayer",
                     "available": true,
                     "title": "Video",
                     "icon": require('@/assets/cards/icons/youtube.svg'),

@@ -86,7 +86,7 @@ export default {
             let parsedText = JSON.parse(this.content[0].text.text)
             
             console.log(parsedText)
-            // quill.setContents(parsedText)
+            quill.setContents(parsedText.ops)
             
             // quill.on('text-change', function(delta) {
             quill.on('text-change', (delta) => {
@@ -146,7 +146,7 @@ export default {
             // console.log(this.change)
             let newContent = JSON.parse ( JSON.stringify ( this.content[0] ) )
         
-            newContent.text = this.quill.getContents().ops
+            newContent.text = JSON.stringify(this.quill.getContents())
 
             // console.log(newContent)
             
@@ -206,8 +206,9 @@ export default {
 }
 
 .ql-snow .ql-picker {
-    font-size: 18px !important;
+    /* font-size: 18px !important; */
     height: 30px !important;
+    padding-top: 3px;
 }
 
 

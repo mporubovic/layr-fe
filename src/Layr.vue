@@ -106,7 +106,6 @@ export default {
             currentBoardId: 0,
             boardDataLoaded: false,
             stackDataLoaded: false,
-            // stackData: null,
         }
     },
 
@@ -373,12 +372,17 @@ export default {
 
                         "display": {
                             "icon": require('@/assets/cards/icons/image.svg'),
+                        },
+                        "settings": {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
                                 "width": 777,
                                 "height": 550,
                             },
+                            "program": "gallery",
+
+                        
                         },
 
                         "content": [
@@ -404,12 +408,15 @@ export default {
 
                         "display": {
                             "icon": require('@/assets/cards/icons/todo.svg'),
+                        },
+                        "settings": {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
                                 "width": 600,
                                 "height": 340,
                             },
+                            "program": "list",
                         },
 
                         "content": [
@@ -439,12 +446,15 @@ export default {
 
                         "display": {
                             "icon": require('@/assets/cards/icons/link.svg'),
+                        },
+                        "settings": {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
                                 "width": 710,
                                 "height": 260,
-                            },                      
+                            },  
+                            "program": "list",
                         },
 
                         "content": [
@@ -474,12 +484,15 @@ export default {
 
                         "display": {
                             "icon": require('@/assets/cards/icons/text.svg'),
+                        },
+                        "settings": {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
                                 "width": 600,
                                 "height": 320,
-                            },               
+                            },  
+                            "program": "texteditor",
                         },
 
                         "content": [
@@ -501,12 +514,15 @@ export default {
 
                         "display": {
                             "icon": require('@/assets/cards/icons/pdf.svg'),
+                        },
+                        "settings": {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
                                 "width": 490,
                                 "height": 710,
                             },
+                            "program": "pdfviewer",
                         },
 
                         "content": [
@@ -521,28 +537,28 @@ export default {
                         ],
 
                     }
-                case("embed"):
-                    switch(card.display.program) {
-                        case("youtube"):                            
-                            return {
-                                "info": {
-                                    "title": "YouTube video"
-                                },
+                case("youtube"):                          
+                    return {
+                        "info": {
+                            "title": "YouTube video"
+                        },
 
-                                "display": {
-                                    "icon": require('@/assets/cards/icons/youtube.svg'),
-                                    "dimensions": {
-                                        "x": this.generateDimensions('x'),
-                                        "y": this.generateDimensions('y'),
-                                        "width": 580,
-                                        "height": 380,
-                                    },
-                                },
+                        "display": {
+                            "icon": require('@/assets/cards/icons/youtube.svg'),
+                        },
+                        "settings": {
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": 580,
+                                "height": 380,
+                            },
+                            "program": "youtubeplayer",
+                        },
 
-                                "content" : [],
+                        "content" : [],
 
-                            }
-                        }
+                    }
             }
         },
                 generateDimensions(d) {
@@ -604,6 +620,10 @@ export default {
                     })
                     
                     break;
+
+                case 'youtube':
+                    if (!card.content) card.content = []
+                    break
             
                 default:
                     break;
@@ -663,7 +683,7 @@ export default {
                     "info": {
                         "type": card.type
                     },
-                    "display": {
+                    "settings": {
                         "program": card.program,
                         // "position": lastCard.display.position + 1,
                     },
@@ -672,11 +692,11 @@ export default {
 
             let requestPayload = {
                 type: card.type,
-                program: card.program,
+                // program: card.program,
                 stackId: this.currentBoard.stacks[0].info.id,
                 open: true,
                 title: newCardDefaults.info.title,
-                dimensions: newCardDefaults.display.dimensions,
+                settings: JSON.stringify(newCardDefaults.settings),
                 content: newCardDefaults.content,
 
             }      
@@ -687,6 +707,7 @@ export default {
             this.$http.post('/api/cards', requestPayload)
                         .then(response => {
                             let newCard = response.data.card
+                            if (!newCard.content) newCard.content = []
                             console.log("API CARD RESPONSE", response.status)
                             // this.setNestedObjectValue(newCard, 'local.display.stackPosition', newCard.display.position)
                             this.processRequestedCards(newCard)
@@ -718,19 +739,23 @@ export default {
             // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id))
             let c = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)
             
-            if (updatedContent.local.update) {
-                c.local = updatedContent.local
-                if (updatedContent.local.update === "terminate") {
-                    c.local.update = null
-                    return
+            if (updatedContent.local) {
+                if (updatedContent.local.update) {
+                    c.local = updatedContent.local
+                    if (updatedContent.local.update === "terminate") {
+                        c.local.update = null
+                        return
+                    }
                 }
             }
+
             let contentKey = this.cardProgramNameToKey(programName)
             let content = {[contentKey]: updatedContent[contentKey]}
             let requestPayload = {
                 cardId: cardId,
                 content: content
             }
+            console.log("REQUEST PAYLOAD", requestPayload)
             this.$http.patch('/api/content/' + updatedContent.id, requestPayload)
                         .then(response => {
                             // let receivedContent = response.data
@@ -900,8 +925,85 @@ export default {
             console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
             // console.log(this.currentBoard.stacks[0].cards)
             var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
-            // console.log(card)
+            let propertyPath = null
+
+            switch (path) {
+                case "info.title":
+                    propertyPath = 'local.updatePropertyQueue.title'
+                    break;
+                case "display.open":
+                    propertyPath = 'local.updatePropertyQueue.open'
+
+                    break;                
+                case "display.position":
+                    propertyPath = 'local.updatePropertyQueue.position'
+
+                    break;                
+                case "settings.dimensions.x":
+                    propertyPath = 'local.updatePropertyQueue.settings.dimensions.x'
+
+                    break;                
+                case "settings.dimensions.y":
+                    propertyPath = 'local.updatePropertyQueue.settings.dimensions.y'
+
+                    break;                   
+                case "settings.dimensions.width":
+                    propertyPath = 'local.updatePropertyQueue.settings.dimensions.width'
+
+                    break;                   
+                case "settings.dimensions.height":
+                    propertyPath = 'local.updatePropertyQueue.settings.dimensions.height'
+
+                    break;   
+
+                case "local.display.stackPosition":
+                    break;
+            
+                default:
+                    console.log("UNKNOWN PROPERTY ", path)
+                    return
+            }
+
             this.setNestedObjectValue(card, path, value)
+            if (!propertyPath) return
+
+            this.setNestedObjectValue(card, propertyPath, value)
+            // this.setNestedObjectValue(card, path, value)
+
+            if (card.local.updatePropertyTimeout) clearTimeout(card.local.updatePropertyTimeout)
+            
+            card.local.updatePropertyTimeout = setTimeout(() => {
+                console.log("TIMEOUT CARD " + card.info.id, card.local.updatePropertyQueue)
+
+                let requestPayload = card.local.updatePropertyQueue
+                console.log("REQUEST PAYLOAD", requestPayload)
+                this.$http.patch('/api/cards/' + card.info.id, requestPayload)
+                            .then(response => {
+                                // let receivedContent = response.data
+                                console.log(`API CARD ${card.info.id} RESPONSE`, response.status)
+                                // card.content.find(c => c.id === tempId).id = response.data[0].id
+                                // this.$nextTick(() => {cards.push(newCard)})
+                            })
+                card.local.updatePropertyQueue = null
+
+            }, 5000);
+
+            // var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
+
+            // let requestPayload = {
+            //     content: content
+            // }
+            // console.log("REQUEST PAYLOAD", requestPayload)
+            // this.$http.patch('/api/content/' + updatedContent.id, requestPayload)
+            //             .then(response => {
+            //                 // let receivedContent = response.data
+            //                 console.log("API CARD RESPONSE", response.status)
+            //                 // card.content.find(c => c.id === tempId).id = response.data[0].id
+            //                 // this.$nextTick(() => {cards.push(newCard)})
+            //             })
+            
+            // // console.log(card)
+            // this.setNestedObjectValue(card, path, value)
         },
 
 

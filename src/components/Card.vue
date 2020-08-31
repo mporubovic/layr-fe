@@ -8,6 +8,8 @@
                 @mouseover="onCardHeaderMouseOver"
                 @mouseleave="onCardHeaderMouseLeave"
                 @mouseover="onCardHeaderMouseDown"
+                        :contentComponent="cardContentComponentName(card)"
+
 
                 
 <template>
@@ -71,7 +73,6 @@
             <component v-if="loadContent"
                         :is="cardProgram(card)" 
                         :content="cardContent"
-                        :contentComponent="cardContentComponentName(card)"
                         :cardId="card.info.id"
                         :hasFocus="hasFocus"
                         @programUpdatedContent="programUpdatedContent"
@@ -197,7 +198,7 @@ export default {
         },
 
         dimensions() {
-            return this.card.display.dimensions
+            return this.card.settings.dimensions
         },
 
         isInStack() {
@@ -214,6 +215,7 @@ export default {
         },
 
         cardContent() {
+            // this.card.content
             return (this.card.content) ? this.card.content : []
         }
 
@@ -263,7 +265,7 @@ export default {
                 
                 case("image") :
                     
-                    switch (card.display.program) {
+                    switch (card.settings.program) {
                         case "gallery":
                             setTimeout(() => {
                                 this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
@@ -296,6 +298,10 @@ export default {
                     return "todo-list";                
                 
                 case("url") :
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "white";
+                    }, 0);
                     return "url-list";     
                     
                 case("text") :
@@ -308,68 +314,16 @@ export default {
 
                     return "text-editor";  
 
-                case("embed") :
+                case("youtube") :
                     this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
                     setTimeout(() => {
                         this.$el.querySelector(".card-body").style["background-color"] = "rgba(0, 0, 0, 0.5)";
                     }, 0);
                     
                     // this.$el.style["background-color"] = "white";
-                    switch (card.display.program) {
-                        case "youtube":
-                            return "youtube-player"; 
-                    }
+                    return "youtube-player"; 
+
                      
-            }
-        },
-
-        cardContentComponentName(card) {
-            switch (card.info.type) {
-                
-                case("image") :
-                    setTimeout(() => {
-                        this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
-
-                    }, 0);
-                    
-                    return "image-viewer";   
-                    
-                case("video") :
-                    return "video-component";                
-                
-                case("pdf") :
-                    this.$el.querySelector(".card-body").style.padding = "15px 15px 15px 15px";
-                    setTimeout(() => {
-                        this.$el.querySelector(".card-body").style["background-color"] = "#D1D1D1";
-                    }, 0);
-                    
-                    // this.$el.style["background-color"] = "#D1D1D1";
-
-                    return "pdf-component";                
-                
-                case("todo") :
-                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
-                    setTimeout(() => {
-                        this.$el.querySelector(".card-body").style["background-color"] = "white";
-                    }, 0);
-                    return "todo-list";                
-                
-                case("url") :
-                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
-                    setTimeout(() => {
-                        this.$el.querySelector(".card-body").style["background-color"] = "white";
-                    }, 0);
-                    return "url-component";     
-                    
-                case("text") :
-                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
-                    setTimeout(() => {
-                        this.$el.querySelector(".card-body").style["background-color"] = "white";
-                    }, 0);
-                    
-                    // this.$el.style["background-color"] = "white";
-
-                    return "text-component";  
             }
         },
 
@@ -743,10 +697,10 @@ export default {
                             // alert('uwaga');
                             // self.dimensions.width = event.rect.width;
                             // self.dimensions.height = event.rect.height;
-                            self.cardUpdateProperty('display.dimensions.x', Math.round(event.rect.left))
-                            self.cardUpdateProperty('display.dimensions.y', Math.round(event.rect.top))
-                            self.cardUpdateProperty('display.dimensions.width', Math.round(event.rect.width))
-                            self.cardUpdateProperty('display.dimensions.height', Math.round(event.rect.height))
+                            self.cardUpdateProperty('settings.dimensions.x', Math.round(event.rect.left))
+                            self.cardUpdateProperty('settings.dimensions.y', Math.round(event.rect.top))
+                            self.cardUpdateProperty('settings.dimensions.width', Math.round(event.rect.width))
+                            self.cardUpdateProperty('settings.dimensions.height', Math.round(event.rect.height))
                             self.$emit('cardInteractJsResize', self.id, false)
                             
                         }
@@ -828,8 +782,8 @@ export default {
                                 // console.log(event.rect.left);
                                 // self.dimensions.x = event.rect.left;
                                 // self.dimensions.y = event.rect.top;
-                                self.cardUpdateProperty('display.dimensions.x', Math.round(event.rect.left))
-                                self.cardUpdateProperty('display.dimensions.y', Math.round(event.rect.top))
+                                self.cardUpdateProperty('settings.dimensions.x', Math.round(event.rect.left))
+                                self.cardUpdateProperty('settings.dimensions.y', Math.round(event.rect.top))
                                 // alert(self.card.id);
                                 self.$emit('cardInteractJsDrag', self.id, false)
 

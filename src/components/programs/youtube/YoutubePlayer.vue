@@ -6,7 +6,7 @@
 
         <h2 v-if="contentLoading">Loading YouTube video...</h2>
         
-        <div class="video-selector" v-show="content.length === 0">
+        <div class="video-selector" v-show="showSelector">
             <file-selector :sources="contentSources"
                             
                             @urlSubmitted="fileSelectorUrlSubmitted">
@@ -15,7 +15,7 @@
         </div>        
         
         <div class="youtube-video-container"
-                v-if="content.length > 0 && !contentLoading"
+                v-if="!showSelector && !contentLoading"
                 >
             <youtube :video-id="videoId"
                     @ready="videoReady"
@@ -77,6 +77,11 @@ export default {
 
         player() {
             return this.$refs.youtube.player
+        },
+
+        showSelector() {
+            this.content
+            return this.content.length === 0
         }
     },
 
