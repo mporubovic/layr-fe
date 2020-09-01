@@ -141,7 +141,7 @@ export default {
                 {
                     "type": "image",
                     "program": "gallery",
-                    "available": true,
+                    "available": false,
                     "title": "Image",
                     "icon": require('@/assets/cards/icons/image.svg'),
                     "description": "Upload images from your device"
@@ -181,7 +181,7 @@ export default {
                 {
                     "type": "pdf",
                     "program": "pdfviewer",
-                    "available": true,
+                    "available": false,
                     "title": "PDF",
                     "icon": require('@/assets/cards/icons/pdf.svg'),
                     "description": "Upload a PDF from your device"

@@ -44,10 +44,21 @@
                     >
             </div>
 
-            <div class="card-header-controls "
-                    @mouseup="isInStack ? null : onCardMouseUp()"
-                    >
-                ✕
+            <div class="card-header-controls">
+                
+                <div class="card-header-controls-delete"
+                        @mouseup="deleteCard()"
+                        >
+                    <img src="@/assets/common/delete.svg"
+                            :style="deleteButtonDynamicStyle">
+                </div>
+
+
+                <div class="card-header-controls-close"
+                        @mouseup="isInStack ? null : onCardMouseUp()"
+                        >
+                    ✕
+                </div>
             </div>
             
         </div>
@@ -165,6 +176,8 @@ export default {
 
             headerTapCount: 0,
 
+            deleteTapCount: 0,
+
             // index: this.index,
             // index: this.card.display.position,
 
@@ -217,6 +230,10 @@ export default {
         cardContent() {
             // this.card.content
             return (this.card.content) ? this.card.content : []
+        },
+
+        deleteButtonDynamicStyle() {
+            return this.deleteTapCount > 0 ? {'opacity': "1"} : {'opacity': "0.2"}
         }
 
     },
@@ -253,7 +270,7 @@ export default {
     },
 
     beforeDestroy() {
-        this.cardUpdateProperty('local.display.stackPosition', this.index)
+        if (!this.card.local.delete) this.cardUpdateProperty('local.display.stackPosition', this.index)
         // this.cardUpdateProperty('display.', this.index)
         this.$el.remove()
 
@@ -553,8 +570,8 @@ export default {
 
             setTimeout(() => {
                 if (this.headerTapCount === 2) {
-                    this.$emit('cardBringForward', this.card.info.id);
-                    // console.log('forward')
+                    // this.$emit('cardBringForward', this.card.info.id);
+                    console.log('forward DISABLED')
 
 
                 } else if (this.headerTapCount >= 2) {
@@ -810,6 +827,26 @@ export default {
 
         programDeletedContent(programName, deletedContent) {
             this.$emit('cardProgramDeletedContent', programName, deletedContent, this.id)
+        },
+
+        deleteCard() {
+            this.deleteTapCount++
+            // console.log(this.headerTapCount)
+            
+            // this.timer ? clearTimeout(this.timer) : this.timer = setTimeout(() => { this.headerTapCount = 0 }, 700);
+
+            setTimeout(() => {
+                if (this.deleteTapCount > 1) {
+                    // this.$emit('cardBringForward', this.card.info.id);
+                    // console.log('DLETE CARD')
+                    this.cardUpdateProperty('local.delete', 'true')
+
+
+
+                } 
+                this.deleteTapCount = 0
+
+            }, 600);
         }
     },
 
@@ -882,7 +919,32 @@ export default {
 .card-header-controls {
     color: black;
     font-size: 25px;
-    padding-right: 15px;
+    /* padding-right: 15px; */
+    margin-right: 15px;
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+    /* justify-content: center; */
+    /* align-items: center; */
+}
+
+.card-header-controls-delete {
+    margin-right: 11px;
+    /* opacity: 0.4; */
+    cursor: pointer;
+    /* margin-top: 5px; */
+}
+
+.card-header-controls-delete img {
+    height: 22px;
+    /* margin-top: 5px; */
+    color: red;
+    fill: red;
+    /* background-color: red; */
+}
+
+.card-header-controls-close {
+    cursor: pointer;
 
 }
 

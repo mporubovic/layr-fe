@@ -581,6 +581,7 @@ export default {
         },
 
         requestBoard(id) {
+            this.menuBoardsClick()
             this.$http.get('/api/boards/' + id)
                 .then(response => {
                     console.log("API GET RESPONSE for BOARD ID ", id)
@@ -672,9 +673,20 @@ export default {
         },
 
         createNewBoard() {
-            let board = this.generateBoards(1)[0]
-            this.boards.push(board)
-            this.openBoard(board.info.id)
+            // let board = this.generateBoards(1)[0]
+            let title = "New board"
+            let requestPayload = {
+                title: title
+            }
+
+            this.$http.post('/api/boards', requestPayload)
+                        .then(response => {
+                            let newBoard = response.data.board
+                            console.log("API BOARD RESPONSE", response.status)
+                            this.boards.push(newBoard)
+                            this.menuBoardsClick()
+                            this.openBoard(newBoard.id)            
+                        })
         },
 
         createNewCard(card) {
@@ -957,6 +969,17 @@ export default {
                     break;   
 
                 case "local.display.stackPosition":
+                    break;
+
+                case "local.delete":
+                    this.$http.delete('/api/cards/' + cardId)
+                            .then(response => {
+                                // let receivedContent = response.data
+                                console.log(`API CARD ${card.info.id} DELETE RESPONSE`, response.status)
+                                // card.content.find(c => c.id === tempId).id = response.data[0].id
+                                // this.$nextTick(() => {cards.push(newCard)})
+                            })
+                    this.currentBoard.stacks[0].cards.splice(this.currentBoard.stacks[0].cards.findIndex(c => c.info.id === cardId), 1)
                     break;
             
                 default:

@@ -31,7 +31,7 @@
                     v-if="!content.local.isEditing"
                     
                     >
-                    {{ content.todo.body }} {{content.id}}
+                    {{ content.todo.body }}
                 </p>
             </div>
             
