@@ -245,7 +245,7 @@ export default {
         // this.$el.style.bottom = this.index * this.stackSettings.cardGap + 'px'
         this.$el.style.bottom = this.stackPosition * this.stackSettings.cardGap + 'px'
         this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
-        console.log(this.stackPosition)
+        // console.log(this.stackPosition)
     
         // let r = Math.floor(Math.random()* 254) ;
         // let g = Math.floor(Math.random()* 254) ;
@@ -730,7 +730,7 @@ export default {
 
                     // minimum size
                         interact.modifiers.restrictSize({
-                            min: { width: 260, height: 260 }
+                            min: { width: 260, height: 150 }
                         }),
 
                         // interact.modifiers.aspectRatio({ 
@@ -893,9 +893,9 @@ export default {
             }
         },
 
-        card(n ,o) {
-            console.log(n, o)
-        }
+        // card(n ,o) {
+        //     // console.log(n, o)
+        // }
     },
 }
 </script>
@@ -993,7 +993,8 @@ export default {
     /* background-color: rgba(0,0,0,0.15); */
     /* overflow: hidden; */
     /* overflow: hidden; */
-    overflow-y:auto;
+    /* overflow-y:auto; */
+    overflow-y:hidden;
     overflow-x: hidden;
     touch-action: none;
     
