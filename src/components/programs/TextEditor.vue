@@ -80,12 +80,14 @@ export default {
 
                     // ]
                 },
+                placeholder: "Click here to start typing...",
+
                 theme: "snow",
             })
-            console.log(this.content)
+            // console.log(this.content)
             let parsedText = JSON.parse(this.content[0].text.text)
             
-            console.log(parsedText)
+            // console.log(parsedText)
             quill.setContents(parsedText.ops)
             
             // quill.on('text-change', function(delta) {
