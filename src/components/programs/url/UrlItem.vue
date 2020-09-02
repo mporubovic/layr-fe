@@ -190,7 +190,7 @@ export default {
     methods: {
 
         fetchSiteFavicon: function(targetUrl) {
-            let figApi = 'http://favicongrabber.com/api/grab/'
+            let figApi = 'https://favicongrabber.com/api/grab/'
             targetUrl = targetUrl.split("//")[1] ? targetUrl.split("//")[1] : targetUrl
             targetUrl = targetUrl.split("/")[0] ? targetUrl.split("/")[0] : targetUrl
 
