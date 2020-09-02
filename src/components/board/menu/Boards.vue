@@ -31,7 +31,7 @@ export default {
     props: {
         boards: {
             required: true,
-            type: Array
+            // type: [Array, Null]
         }
     },
 

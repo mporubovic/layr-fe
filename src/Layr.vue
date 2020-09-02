@@ -14,10 +14,26 @@
                     </div>
                     
 
-                    <div class="menu-content-board-title">
+                    <div class="menu-content-board-title"
+                        @click.right.prevent="onMenuTitleRightClick"
+                        >
                         <!-- <hr class="menu-content-line-left">     -->
-                        <h1 v-if="!boardDataLoaded">Loading...</h1>
-                        <h1 v-if="boardDataLoaded">{{ currentBoard.info.title }}</h1>
+                        <!-- <h1 v-if="!boardDataLoaded">Select a board</h1> -->
+                        <h1 v-if="!isMenuTitleEditing"
+                            @click="onMenuTitleLeftClick"
+                            > 
+                            {{ menuTitle }}
+                        </h1>
+                        <input
+                            @blur="boardUpdateProperty('info.title', $event.target.value)"
+                            @keydown.enter="onMenuTitleInputKeydownEnter($event)"
+                            class="menu-title-input"
+                            type="text"
+                            id="menu-title-input"
+                            v-bind:value="currentBoard.info.title"
+                            v-if="isMenuTitleEditing"
+                            autocomplete="off" 
+                        >
                         <!-- <hr class="menu-content-line-right"> -->
                     </div>
                     <div class="menu-content-controls-secondary">
@@ -106,6 +122,9 @@ export default {
             currentBoardId: 0,
             boardDataLoaded: false,
             stackDataLoaded: false,
+            menuTitle: "Select a board",
+            isMenuTitleEditing: false,
+            menuTitleTapCount: 0,
         }
     },
 
@@ -126,7 +145,11 @@ export default {
 
         stackData() {
             return this.currentBoard.stacks[0]
-        }
+        },
+
+        // menuTitle() {
+        //     return this.currentBoard ? this.currentBoard.info.title : "Loading..."
+        // }
 
     },
 
@@ -135,12 +158,14 @@ export default {
 
         // this.$http.get('/sanctum/csrf-cookie').then(response => {
             // console.log(response)
-            this.$http.get('/api/boards')
-                .then(response => {
-                    this.boards = response.data.boards
-                    // this.$set(boards, response.data.boards)
-                    // this.openBoard(this.boards[0].info.id)
-                } )
+        this.menuBoardsClick()
+        
+        this.$http.get('/api/boards')
+            .then(response => {
+                this.boards = response.data.boards
+                // this.$set(boards, response.data.boards)
+                // this.openBoard(this.boards[0].info.id)
+            } )
 
         // })
         
@@ -582,6 +607,8 @@ export default {
 
         requestBoard(id) {
             this.menuBoardsClick()
+            this.menuTitle = "Loading..."
+            // if (this.currentBoardId) this.currentBoardId = null
             this.$http.get('/api/boards/' + id)
                 .then(response => {
                     console.log("API GET RESPONSE for BOARD ID ", id)
@@ -638,8 +665,8 @@ export default {
             //     }
                 
             // })
-            this.boardDataLoaded = false       
-            this.stackDataLoaded = false
+            // this.boardDataLoaded = false       
+            // this.stackDataLoaded = false
 
 
             // console.log("API GET RESPONSE for BOARD ID ", id)
@@ -660,7 +687,9 @@ export default {
                 
                 // this.currentBoard = board
                 this.currentBoardId = id
-                this.boardDataLoaded = true        
+                this.boardDataLoaded = true
+                this.menuTitle = this.currentBoard.info.title
+
 
                 // this.stackData = board.stacks[0]
                 // this.stackData = this.currentBoard.stacks[0]
@@ -934,9 +963,11 @@ export default {
         },
         
         stackCardUpdatedItself(cardId, path, value) {
+            var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
+            if (!card) return
             console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
             // console.log(this.currentBoard.stacks[0].cards)
-            var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
+            
             let propertyPath = null
 
             switch (path) {
@@ -1047,7 +1078,68 @@ export default {
             }
 
             return array;
+        },
+        
+        onMenuTitleRightClick() {
+            if (!this.currentBoard) return
+            this.isMenuTitleEditing = true
+            this.$nextTick(() => {
+                this.$el.querySelector('#menu-title-input').focus()
+            })
+        },
+
+        onMenuTitleInputKeydownEnter(event) {
+            event.target.blur()
+            this.isMenuTitleEditing = false
+        },
+        
+        boardUpdateProperty(path, value) {
+            this.isMenuTitleEditing = false
+            let boardId = this.currentBoardId
+            console.log("UPDATE", path, "TO \"", value, "\" BOARD", boardId)
+
+            let propertyPath = null
+
+            switch (path) {
+                case "info.title":
+                    this.menuTitle = value
+                    propertyPath = 'title'
+                    break;
+                
+                default:
+                    break;
             }
+
+            this.setNestedObjectValue(this.currentBoard, path, value)
+
+            let requestPayload = {
+                [propertyPath]: value
+            }
+
+            this.$http.patch('/api/boards/' + boardId, requestPayload)
+                            .then(response => {
+                                // let receivedContent = response.data
+                                console.log(`API BOARD ${boardId} RESPONSE`, response.status)
+                                // card.content.find(c => c.id === tempId).id = response.data[0].id
+                                // this.$nextTick(() => {cards.push(newCard)})
+                            })
+
+        },
+
+        onMenuTitleLeftClick() {
+            this.menuTitleTapCount++
+            // console.log(this.headerTapCount)
+            
+            // this.timer ? clearTimeout(this.timer) : this.timer = setTimeout(() => { this.headerTapCount = 0 }, 700);
+
+            setTimeout(() => {
+                if (this.menuTitleTapCount >= 2) {
+                    this.onMenuTitleRightClick()
+                }
+                this.menuTitleTapCount = 0
+
+            }, 400);
+        }
 
     },
 
@@ -1277,6 +1369,17 @@ export default {
     flex-direction: column;
     height: 100%;
     overflow: hidden;
+}
+
+.menu-title-input {
+    font-size: 25px;
+    font-weight: bold;
+    font-style: italic;
+    width: 100%;
+    margin-left: 10px;
+    text-align: center;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.25);
 }
 
 </style>
