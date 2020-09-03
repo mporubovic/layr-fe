@@ -28,7 +28,7 @@
                     >
                 <img class="card-icon-onboard" 
                     v-if="loadContent"
-                    :src="card.display.icon">
+                    :src="card.local.display.icon">
                 
                 <h1 @click.right.prevent="onCardHeaderRightclick()"
                         v-if="!isHeaderEditing">{{ card.info.title }}</h1>
@@ -77,7 +77,7 @@
             
             <img class="card-icon-instack" 
                     v-if="!loadContent"
-                    :src="card.display.icon">
+                    :src="card.local.display.icon">
 
             <!-- <h1 v-if="loadContent">{{ card.display.position }}</h1> -->
 

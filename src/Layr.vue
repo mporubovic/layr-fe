@@ -1,6 +1,12 @@
 <template>
     <div id="layr">
-        <!-- <debug></debug> -->
+        
+        <div class="debug">
+            DOMAIN {{ userDomain }} <br>
+            SUB {{ userSubdomain }}
+        </div>
+
+
         <div class="menu" id="menu">
             <div class="menu-container" id="menu-container">
 
@@ -125,6 +131,8 @@ export default {
             menuTitle: "Select a board",
             isMenuTitleEditing: false,
             menuTitleTapCount: 0,
+            userDomain: null,
+            userSubdomain: null,
         }
     },
 
@@ -158,6 +166,11 @@ export default {
 
         // this.$http.get('/sanctum/csrf-cookie').then(response => {
             // console.log(response)
+        let domains = location.hostname.split('.')
+        // let secondLevel = domains.slice(-2).join('.');
+        // let secondLevel = domains.slice(-2).join('.');
+        this.userDomain = domains.slice(-2).join('.');
+        this.userSubdomain = domains.slice(-2)[0];
         this.menuBoardsClick()
         
         this.$http.get('/api/boards')
@@ -637,12 +650,17 @@ export default {
             if (!card.content) return
             switch (card.info.type) {
                 case 'todo':
+                    this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/todo.svg'))
+                    
                     card.content.forEach(content => {
                         this.setNestedObjectValue(content, 'local.isEditing', false)
+                        
                     })
                     
                     break;
                 case 'url':
+                    this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/link.svg'))
+
                     card.content.forEach(content => {
                         this.setNestedObjectValue(content, 'local.isEditing', false)
                     })
@@ -650,9 +668,16 @@ export default {
                     break;
 
                 case 'youtube':
+                    this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/youtube.svg'))
+                    
                     if (!card.content) card.content = []
                     break
             
+                case 'text':
+                    this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/text.svg'))
+
+                    break;
+                
                 default:
                     break;
             }
@@ -1160,6 +1185,15 @@ export default {
     /* appearance: none; */
     /* background: transparent; */
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.debug {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 10000;
+    opacity: 0.5;
+
 }
 
 .board {
