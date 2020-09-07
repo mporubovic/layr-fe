@@ -62,6 +62,7 @@
                                         v-bind="subMenuContent"
                                         @subMenuBoardClicked="requestBoard"
                                         @subMenuBoardNewBoard="createNewBoard"
+                                        @loggedIn="userLoggedIn"
                                         >
                                         
                             </component>
@@ -133,6 +134,8 @@ export default {
             menuTitleTapCount: 0,
             userDomain: null,
             userSubdomain: null,
+            students: null,
+            user: null,
         }
     },
 
@@ -141,6 +144,10 @@ export default {
             if (this.subMenu === "menu-boards") {
                 return {
                     boards: this.boards
+                } 
+            } else if (this.subMenu === "menu-students") {
+                return {
+                    students: this.students
                 } 
             } else {
                 return null
@@ -159,6 +166,10 @@ export default {
         //     return this.currentBoard ? this.currentBoard.info.title : "Loading..."
         // }
 
+        userRole() {
+            return this.user.role
+        }
+
     },
 
     mounted() {
@@ -171,14 +182,32 @@ export default {
         // let secondLevel = domains.slice(-2).join('.');
         this.userDomain = domains.slice(-2).join('.');
         this.userSubdomain = domains.slice(-2)[0];
-        this.menuBoardsClick()
+        // this.menuBoardsClick()
+
+        if (localStorage.getItem('userLoggedIn')) {
+            console.log('User logged in (local storage) verification...')
+            this.$http.get('/api/user').then((response) => {
+                console.log('Logged in user ', response.data.user)
+                this.user = response.data.user
+                this.userLoggedIn(this.user)
+            }).catch((error) => {
+                console.log(error)
+                localStorage.clear()
+                console.log('Cleared local storage')
+                this.loginDropdown()
+                
+            })
+        } else {
+            this.loginDropdown()
+        }
         
-        this.$http.get('/api/boards')
-            .then(response => {
-                this.boards = response.data.boards
-                // this.$set(boards, response.data.boards)
-                // this.openBoard(this.boards[0].info.id)
-            } )
+        
+        // this.$http.get('/api/boards')
+        //     .then(response => {
+        //         this.boards = response.data.boards
+        //         // this.$set(boards, response.data.boards)
+        //         // this.openBoard(this.boards[0].info.id)
+        //     } )
 
         // })
         
@@ -218,6 +247,35 @@ export default {
                 // })
             }
 
+        },
+
+        loginDropdown() {
+            this.subMenu = "menu-login"
+            setTimeout(() => {
+                this.$el.querySelector('#sub-menu-container').style["max-height"] = 600 + 'px'
+                
+                this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
+            }, 0)
+        },
+
+        userLoggedIn(user) {
+            this.user = user
+            if (this.user.role === 'tutor') {
+                this.loadStudents()
+                this.subMenu = "menu-students"
+                setTimeout(() => {
+                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
+                    
+                    this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
+                }, 0)
+            }
+        },
+
+        loadStudents() {
+            this.$http.get('/api/students').then((response) => {
+                console.log('API STUDENTS RESPONSE DATA', response.data)
+                this.students = response.data
+            })
         },
 
         settingsMenu() {

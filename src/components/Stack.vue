@@ -334,17 +334,17 @@ export default {
             if (stackToBoard) {
                 // let stackPos = crds.findIndex(c => c.info.id === id)
                 // console.log(card.local.display.stackPosition)
-                console.log("assdasd")
+                // console.log("assdasd")
                 // let crdsAbove = crds.slice(card.local.display.stackPosition);
-                console.log(card)
-                console.log(card.display.position)
+                // console.log(card)
+                // console.log(card.display.position)
                 // let crdsAbove = this.cards.slice(card.display.position);
                 let crdsAbove = this.cards.filter(c => c.display.position > card.display.position);
-                console.log(crdsAbove)
+                // console.log(crdsAbove)
                 
                 crdsAbove.forEach(card => {
                     this.cardUpdatedItself(card.info.id, 'local.display.stackPosition', card.local.display.stackPosition - 1)
-                    console.log("zhege")
+                    // console.log("zhege")
                 });
 
                 if (this.cardsOnBoard.length === 0) {

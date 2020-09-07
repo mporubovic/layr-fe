@@ -4,13 +4,15 @@ import Layr from './Layr.vue'
 import axios from 'axios'
 
 Vue.prototype.$http = axios.create({
-    headers: {
-        common: {
-            Authorization: 'Bearer 1|4fa4LjnYOsRJVOHbksfsePvgSWu0yMhKlfu29j2QFHNYUEM6ORaE98cY37DWAqXh7HbCLclGOZQrkqtR'
-        }
-    },
+    // headers: {
+    //     common: {
+    //         // Authorization: 'Bearer 1|4fa4LjnYOsRJVOHbksfsePvgSWu0yMhKlfu29j2QFHNYUEM6ORaE98cY37DWAqXh7HbCLclGOZQrkqtR' // LOCAL
+    //         // Authorization: 'Bearer 1|cYhOEJaK0vU69WrfWZxEBM4HfXdFIpUbn889Q8fU5u3Hm22HkeLJytGRlmnOODA4GwKgh1ar9MyIitrQ' // PRODUCTION
+    //     }
+    // },
     withCredentials: true,
-    baseURL: 'http://localhost:8000'
+    baseURL: 'http://localhost:8000',  //  LOCAL
+    // baseURL: 'https://mylayr.net/'  // PRODUCTION
 })
 Vue.prototype.$httpCross = axios.create(
     // headers: { 'Access-Control-Allow-Origin': '*' }
