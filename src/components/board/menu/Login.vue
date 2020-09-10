@@ -7,7 +7,7 @@
             </div>
             <hr class="login-container-line">
             
-            <div class="login-container-email">
+            <div class="login-container-email" v-if="showEmailInput">
                 <div class="login-container-email-label">
                     Enter your email
                 </div>
@@ -22,8 +22,8 @@
                 </div>
             </div>
             
-            <!-- <div class="login-container-password" v-if="showPasswordInput"> -->
-            <div class="login-container-password">
+            <div class="login-container-password" v-if="showPasswordInput">
+            <!-- <div class="login-container-password"> -->
                 <div class="login-container-password-label">
                     Enter your password
                 </div>
@@ -40,7 +40,7 @@
             
             <div class="login-container-pin" v-if="showPINInput">
                 <div class="login-container-pin-label">
-                    Enter your PIN code
+                    Enter your PIN code (without spaces)
                 </div>
                 <div class="login-container-input-div-common login-container-pin-input-div">
                     <input id="pin-input" type="pin" class="input-common login-container-pin-input" placeholder="PIN Code">
@@ -102,6 +102,8 @@ export default {
     data() {
         return {
             userRole: null,
+            userEmail: null,
+            showEmailInput: true,
         }
     },
 
@@ -131,12 +133,18 @@ export default {
                 .then(response => {
                     console.log("API CHECKEMAIL GET RESPONSE", response.data )
                     this.userRole = response.data.role
+                    this.userEmail = email
+                    
                     this.$el.querySelector('#email-input').disabled = true
+                    this.$nextTick(()=> {
+                        this.showEmailInput = false
+
+                    })
                 } )           
         },
 
         tutorLogin() {
-            let email = this.$el.querySelector('#email-input').value
+            let email = this.userEmail
             let password = this.$el.querySelector('#password-input').value
 
             let requestPayload = {
@@ -172,8 +180,29 @@ export default {
         },        
         
         studentLogin() {
-            // let email = this.$el.querySelector('#email-input').value
-            // let paassword = this.$el.querySelector('#pin-input').value
+            let email = this.userEmail
+            let password = this.$el.querySelector('#pin-input').value
+
+            let requestPayload = {
+                email: email,
+                password: password
+            }
+
+            this.$http.get('/auth/csrf-cookie').then((response) => {
+                console.log("CSRF COOKIE", response)
+                this.$http.post('/auth/login', requestPayload)
+                    .then(response => {
+                        console.log("API LOGIN RESPONSE", response )
+                        localStorage.setItem('userLoggedIn', true);
+                        this.$http.get('/api/user').then((response) => {
+                            let student = response.data.user
+                            this.$emit('loggedIn', student)
+                        })
+                        
+                        
+                    } )     
+
+            })
         },
     }
 }

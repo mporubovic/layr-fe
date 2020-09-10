@@ -15,12 +15,22 @@
                     <div class="menu-content-controls-primary">
                         <button class="menu-content-controls-primary-boards menu-content-buttons menu-content-buttons-primary" 
                                     @click="menuBoardsClick" 
-                                    id="menu-boards-button">Boards</button>
-                        <button class="menu-content-controls-primary-stacks menu-content-buttons menu-content-buttons-primary">Stacks</button>
+                                    id="menu-boards-button"
+                                    v-if="userRole === 'student'"          
+                                    >
+                                    Boards
+                        </button>
+                        <button class="menu-content-controls-primary-boards menu-content-buttons menu-content-buttons-primary" 
+                                    @click="menuStudentsClick" 
+                                    id="menu-students-button"
+                                    v-if="userRole === 'tutor'"          
+                                    >
+                                    Students
+                        </button>
                     </div>
                     
 
-                    <div class="menu-content-board-title"
+                    <div class="menu-content-board-title" id="menu-title"
                         @click.right.prevent="onMenuTitleRightClick"
                         >
                         <!-- <hr class="menu-content-line-left">     -->
@@ -58,14 +68,15 @@
                     <div class="sub-menu" id="sub-menu" v-if="subMenu !== null">
                         <div class="sub-menu-content">
                             <!-- <component :is="subMenuComponent"></component> -->
-                            <component :is="subMenu" 
-                                        v-bind="subMenuContent"
-                                        @subMenuBoardClicked="requestBoard"
-                                        @subMenuBoardNewBoard="createNewBoard"
-                                        @loggedIn="userLoggedIn"
-                                        >
-                                        
-                            </component>
+                            <!-- <keep-alive> -->
+                                <component :is="subMenu" 
+                                            v-bind="subMenuContent"
+                                            @subMenuBoardClicked="requestBoard"
+                                            @loggedIn="userLoggedIn"
+                                            >
+                                            
+                                </component>
+                            <!-- </keep-alive> -->
                         </div>
                     </div>
 
@@ -125,11 +136,11 @@ export default {
             isMenuOpen: true,
             isFullscreen: false,
             subMenu: null,
-            boards: null,
-            currentBoardId: 0,
+            currentBoard: null,
+            // currentBoardId: 0,
             boardDataLoaded: false,
             stackDataLoaded: false,
-            menuTitle: "Select a board",
+            menuTitle: "Welcome",
             isMenuTitleEditing: false,
             menuTitleTapCount: 0,
             userDomain: null,
@@ -143,7 +154,7 @@ export default {
         subMenuContent() {
             if (this.subMenu === "menu-boards") {
                 return {
-                    boards: this.boards
+                    // boards: this.boards
                 } 
             } else if (this.subMenu === "menu-students") {
                 return {
@@ -154,8 +165,12 @@ export default {
             }
         },
         
-        currentBoard() {
-            return this.boards.find(b => b.info.id === this.currentBoardId)
+        // currentBoard() {
+        //     return this.boards.find(b => b.info.id === this.currentBoardId)
+        // },
+
+        currentBoardId() {
+            return this.currentBoard.info.id
         },
 
         stackData() {
@@ -167,7 +182,7 @@ export default {
         // }
 
         userRole() {
-            return this.user.role
+            return this.user ? this.user.role : null
         }
 
     },
@@ -177,11 +192,11 @@ export default {
 
         // this.$http.get('/sanctum/csrf-cookie').then(response => {
             // console.log(response)
-        let domains = location.hostname.split('.')
+        let parts = location.hostname.split('.')
         // let secondLevel = domains.slice(-2).join('.');
         // let secondLevel = domains.slice(-2).join('.');
-        this.userDomain = domains.slice(-2).join('.');
-        this.userSubdomain = domains.slice(-2)[0];
+        this.userDomain = location.hostname
+        this.userSubdomain = parts[parts.length-3]
         // this.menuBoardsClick()
 
         if (localStorage.getItem('userLoggedIn')) {
@@ -261,21 +276,39 @@ export default {
         userLoggedIn(user) {
             this.user = user
             if (this.user.role === 'tutor') {
-                this.loadStudents()
+                // this.loadStudents()
+                this.menuStudentsClick()
+            } else {
+                this.menuBoardsClick()
+                this.$el.querySelector('#menu-title').style.opacity = 0
+                setTimeout(() => {
+                    this.menuTitle = "Select a board"
+                    this.$el.querySelector('#menu-title').style.opacity = 1
+                    
+                }, 1000);
+            }
+        },
+
+        menuStudentsClick() {
+            if (this.subMenu === "menu-students") {
+                               
+                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
+                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
+                this.$el.querySelector('#menu-students-button').style["background-color"] = ""
+                
+                setTimeout(() => {
+                    this.subMenu = null
+                }, 400);
+            } else {
                 this.subMenu = "menu-students"
                 setTimeout(() => {
                     this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
+                    this.$el.querySelector('#menu-students-button').style["background-color"] = "lightgreen"
+
                     
                     this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
                 }, 0)
             }
-        },
-
-        loadStudents() {
-            this.$http.get('/api/students').then((response) => {
-                console.log('API STUDENTS RESPONSE DATA', response.data)
-                this.students = response.data
-            })
         },
 
         settingsMenu() {
@@ -320,6 +353,16 @@ export default {
             
 
         },
+
+        // closeMenu() {
+        //     this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
+        //     this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
+        //     this.$el.querySelector('#menu-boards-button').style["background-color"] = ""
+            
+        //     setTimeout(() => {
+        //         this.subMenu = null
+        //     }, 400);
+        // },
 
         generateBoards(count) {
             let boards = []
@@ -677,20 +720,25 @@ export default {
         },
 
         requestBoard(id) {
-            this.menuBoardsClick()
+            // this.menuBoardsClick()
+            // this.closeMenu()
+            if (this.userRole === "tutor") this.menuStudentsClick()
+            else this.menuBoardsClick()
+
             this.menuTitle = "Loading..."
             // if (this.currentBoardId) this.currentBoardId = null
             this.$http.get('/api/boards/' + id)
                 .then(response => {
                     console.log("API GET RESPONSE for BOARD ID ", id)
                     console.log(response.data)
-                    let boardIndex = this.boards.findIndex(b => b.info.id === id)
+                    // let boardIndex = this.boards.findIndex(b => b.info.id === id)
                     let r = response.data.board
                     this.processRequestedBoard(r)
                     // console.log(response.data.board)
                     // this.boards[boardIndex] = response.data.board
-                    this.$set(this.boards, boardIndex, r)
-                    this.openBoard(this.boards[boardIndex].info.id)
+                    // this.$set(this.boards, boardIndex, r)
+                    // this.currentBoard = r
+                    this.openBoard(r)
                 } )           
         },
 
@@ -741,7 +789,7 @@ export default {
             }
         },
         
-        openBoard(id) {
+        openBoard(board) {
             // this.$nextTick(() => {
             //     if (this.$refs.stack.cardsOnBoard.length > 0) {
             //         this.$refs.stack.toggleCardStack()
@@ -768,8 +816,8 @@ export default {
                 // setTimeout(() => {
                 // let board = this.boards.find(b => b.info.id === id)
                 
-                // this.currentBoard = board
-                this.currentBoardId = id
+                this.currentBoard = board
+                // this.currentBoardId = id
                 this.boardDataLoaded = true
                 this.menuTitle = this.currentBoard.info.title
 
@@ -784,22 +832,22 @@ export default {
             // }, 100);
         },
 
-        createNewBoard() {
-            // let board = this.generateBoards(1)[0]
-            let title = "New board"
-            let requestPayload = {
-                title: title
-            }
+        // createNewBoard() {
+        //     // let board = this.generateBoards(1)[0]
+        //     let title = "New board"
+        //     let requestPayload = {
+        //         title: title
+        //     }
 
-            this.$http.post('/api/boards', requestPayload)
-                        .then(response => {
-                            let newBoard = response.data.board
-                            console.log("API BOARD RESPONSE", response.status)
-                            this.boards.push(newBoard)
-                            this.menuBoardsClick()
-                            this.openBoard(newBoard.id)            
-                        })
-        },
+        //     this.$http.post('/api/boards', requestPayload)
+        //                 .then(response => {
+        //                     let newBoard = response.data.board
+        //                     console.log("API BOARD RESPONSE", response.status)
+        //                     // this.boards.push(newBoard)
+        //                     // this.menuBoardsClick()
+        //                     // this.openBoard(newBoard.id)            
+        //                 })
+        // },
 
         createNewCard(card) {
             let newCardDefaults = this.cardTemplate(
@@ -1338,10 +1386,16 @@ export default {
     /* height: 50px; */
     /* margin-left: 5px; */
     /* margin-right: 5px; */
-    display: flex;
+    /* display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-between; */
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
     background-color: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(4px);
     border-bottom-left-radius: 10px;
@@ -1387,6 +1441,7 @@ export default {
 
 .menu-content-controls-primary {
     height: 100%;
+    grid-area: 1 / 1 / 2 / 2;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1395,13 +1450,24 @@ export default {
 }
 
 .menu-content-controls-secondary {
-    margin-right: 20px;
-}
-
-.menu-content-board-title {
+    grid-area: 1 / 3 / 2 / 4;
+    /* margin-right: 20px; */
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-left: auto;
+    margin-right: 20px;
+    /* justify-content: center; */
+}
+
+.menu-content-board-title {
+    grid-area: 1 / 2 / 2 / 3;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 1s;
 }
 
 .menu-content-board-title h1 {
@@ -1434,7 +1500,7 @@ export default {
     /* overflow: hidden; */
     /* background-color: red; */
     /* position: relative; */
-    user-select: none;
+    /* user-select: none; */
     margin-top: 0;
     /* height: 0;  */
     padding: 10px;

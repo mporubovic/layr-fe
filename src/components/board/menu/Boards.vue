@@ -1,22 +1,25 @@
 <template>
     <div class="boards-menu-carousel">
-        <div class="boards-menu-carousel-board-new"
+        <!-- <div class="boards-menu-carousel-board-new"
                 >
             <div class="boards-menu-carousel-board-new-icon"
                     @click="newBoard">
                 <h3>Create a <br> new board</h3>
             </div>
             <div class="boards-menu-carousel-board-title">
-                <!-- <h3 style="font-style: italic">New board</h3> -->
+                <h3 style="font-style: italic">New board</h3>
             </div>
-        </div>
+        </div> -->
         <div class="boards-menu-carousel-board" 
-                v-for="board in boards" 
+                v-for="board in sortedBoards" 
                 :key="board.info.id"
                 @click="boardClicked(board.info.id)"
                 >
             <div class="boards-menu-carousel-board-icon">
-
+                <div class="boards-list-carousel-board-icon-description">
+                    <p>{{ convertTimeToDate(board.info.created_at) }}</p>
+                    <p>{{ convertBoardTime(board.info.created_at) }}</p>
+                </div>
             </div>
             <div class="boards-menu-carousel-board-title">
                 <h3>{{ board.info.title }}</h3>
@@ -29,10 +32,33 @@
 export default {
     // name: 'menu-boards'
     props: {
-        boards: {
-            required: true,
-            // type: [Array, Null]
+        // boards: {
+        //     required: true,
+        //     // type: [Array, Null]
+        // }
+    },
+
+    data() {
+        return {
+            boards: null,
         }
+    },
+
+    computed: {
+        sortedBoards() {
+            return this.boards ? this.boards.filter(b=>b).sort(function(a, b) {
+                                        let ta = new Date(a.info.created_at)
+                                        let tb = new Date(b.info.created_at)
+                                        return tb.getTime() - ta.getTime()
+                                    })
+
+                                : null
+            // return this.boards
+        },
+    },
+
+    created() {
+        this.loadBoards()
     },
 
     methods: {
@@ -40,10 +66,37 @@ export default {
             this.$emit('subMenuBoardClicked', id)
         },
 
-        newBoard() {
-            this.$emit('subMenuBoardNewBoard')
-        }
-    }
+        loadBoards() {
+            this.$http.get('/api/boards').then((response) => {
+                console.log("API BOARDS RESPONSE", response.data)
+                this.boards = response.data.boards
+            })
+        },
+
+        convertTimeToDate(date) {
+            if (!date) return
+            let d = new Date(date)
+            let intl = new Intl.DateTimeFormat('en-US').format(d)
+            return intl
+        },        
+        
+        convertBoardTime(date) {
+            let d = new Date(date)
+            let options = {
+                hour: 'numeric', minute: 'numeric', second: 'numeric', 
+                timeZone: 'Europe/Bratislava',
+                // timeZoneName: 'short'
+            }
+            let intl = new Intl.DateTimeFormat('en-US', options).format(d)
+            return intl
+        },
+
+        // newBoard() {
+        //     this.$emit('subMenuBoardNewBoard')
+        // }
+    },
+
+
 }
 </script>
 <style>
@@ -158,5 +211,20 @@ margin-left: 5px;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+}
+
+.boards-list-carousel-board-icon-description {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.boards-list-carousel-board-icon-description p {
+    /* margin-left: auto; */
+    font-size: 20px;
+    font-weight: bold;
 }
 </style>
