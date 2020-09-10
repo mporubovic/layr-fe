@@ -147,7 +147,7 @@ export default {
             // updatedUrl.url.path = event.target.value   
         
             this.setNestedObjectValue(updatedUrl, 'local.url.name', "Loading...")
-            this.setNestedObjectValue(updatedUrl, 'local.update', "continue")  
+            this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
             console.log("EMIT 276", updatedUrl)
             this.$emit('urlItemUpdated', updatedUrl)
 
