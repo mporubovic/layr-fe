@@ -156,7 +156,8 @@ export default {
             //     console.log(response)
             // })
             this.$http.get('/auth/csrf-cookie').then((response) => {
-                console.log(response)
+                console.log("CSRF COOKIE", response)
+
                 // this.$http.get('/api/boards').then((response) => {
                 //     console.log(response)
                 // })

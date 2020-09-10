@@ -494,6 +494,7 @@ export default {
     padding-top: 15px;
     padding-left: 15px;
     padding-right: 15px;
+    height: 100%;
     overflow-y: scroll;
     scroll-behavior: smooth;
     box-sizing: border-box;
