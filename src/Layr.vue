@@ -93,10 +93,10 @@
 
             </div>
         </div>
-        <div class="board" id="board">
+        <div class="board" id="board" @click="boardDivClicked">
             
             <stack :stackData="stackData" 
-                    v-if="stackDataLoaded"
+                    v-if="stackDataLoaded && currentBoard"
                     @createNewCard="createNewCard"
                     :ref="'stack'"
                     @stackCardProgramUpdatedContent="stackCardProgramUpdatedContent"
@@ -170,11 +170,11 @@ export default {
         // },
 
         currentBoardId() {
-            return this.currentBoard.info.id
+            return this.currentBoard ? this.currentBoard.info.id : null
         },
 
         stackData() {
-            return this.currentBoard.stacks[0]
+            return this.currentBoard ? this.currentBoard.stacks[0] : []
         },
 
         // menuTitle() {
@@ -725,6 +725,8 @@ export default {
             if (this.userRole === "tutor") this.menuStudentsClick()
             else this.menuBoardsClick()
 
+            if (this.currentBoard) this.currentBoard = null
+
             this.menuTitle = "Loading..."
             // if (this.currentBoardId) this.currentBoardId = null
             this.$http.get('/api/boards/' + id)
@@ -1094,6 +1096,7 @@ export default {
         },
         
         stackCardUpdatedItself(cardId, path, value) {
+            if (!this.currentBoard) return
             var card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
             if (!card) return
             console.log("UPDATE", path, "TO \"", value, "\" CARD", cardId)
@@ -1270,6 +1273,19 @@ export default {
                 this.menuTitleTapCount = 0
 
             }, 400);
+        },
+
+        boardDivClicked() {
+
+            
+            
+            if (this.subMenu) {
+                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
+                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
+                setTimeout(() => {
+                    this.subMenu = null
+                }, 400);
+            }       
         }
 
     },
