@@ -98,10 +98,12 @@
             <div class="student-new-student-form"
             v-if="isNewStudentFormVisible"
             >
-                <input id="new-student-name-input" type="text" class="new-student-name-input student-input-common" placeholder="Student Name">
+                <input id="new-student-name-input" type="text" class="new-student-name-input student-input-common" placeholder="Student Name" autocomplete="off">
                 <input id="new-student-email-input" type="email" class="new-student-email-input student-input-common" 
                         placeholder="Student Email" 
-                        spellcheck="false">
+                        spellcheck="false"
+                        autocomplete="off"
+                        >
                 <button class="new-student-form-button buttons-common" id="new-student-form-button"
                         @click="createNewStudentClicked"
                     >
@@ -673,7 +675,7 @@ export default {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-
+    background-color: rgba(0, 0, 0, 0.25);
 
 
 }
