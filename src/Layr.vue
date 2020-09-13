@@ -1,10 +1,10 @@
 <template>
     <div id="layr">
         
-        <div class="debug">
+        <!-- <div class="debug">
             DOMAIN {{ userDomain }} <br>
             SUB {{ userSubdomain }}
-        </div>
+        </div> -->
 
 
         <div class="menu" id="menu">
@@ -13,6 +13,14 @@
                 <div class="menu-content">
 
                     <div class="menu-content-controls-primary">
+                        <button class="menu-content-controls-primary-boards menu-content-buttons menu-content-buttons-primary" 
+                                    @click="menuLoginClick" 
+                                    id="menu-login-button"
+                                    v-if="user === null"          
+                                    >
+                                    Login
+                        </button>                        
+                        
                         <button class="menu-content-controls-primary-boards menu-content-buttons menu-content-buttons-primary" 
                                     @click="menuBoardsClick" 
                                     id="menu-boards-button"
@@ -264,10 +272,25 @@ export default {
 
         },
 
+        menuLoginClick() {
+            if (this.subMenu === 'menu-login') {
+                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
+                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
+                this.$el.querySelector('#menu-login-button').style["background-color"] = ""
+
+                setTimeout(() => {
+                    this.subMenu = null
+                }, 400);
+            } else {
+                this.loginDropdown()
+            }
+        },
+
         loginDropdown() {
             this.subMenu = "menu-login"
             setTimeout(() => {
                 this.$el.querySelector('#sub-menu-container').style["max-height"] = 600 + 'px'
+                this.$el.querySelector('#menu-login-button').style["background-color"] = "lightgreen"
                 
                 this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
             }, 0)

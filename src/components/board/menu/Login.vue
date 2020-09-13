@@ -12,9 +12,10 @@
                     Enter your email
                 </div>
                 <div class="login-container-input-div-common">
-                    <input id="email-input" type="email" class="login-container-email-input input-common" placeholder="Email">
+                    <input  @keydown.enter="onSubmitEmailEnter($event)" id="email-input" type="email" class="login-container-email-input input-common" placeholder="Email">
                     <button class="login-container-button-common login-container-next-button"
                             @click="submitEmail"
+
                                 >
                         <img src="@/assets/modal/login/next.svg" class="login-container-next-icon">
                     </button>
@@ -28,7 +29,7 @@
                     Enter your password
                 </div>
                 <div class="login-container-input-div-common">
-                    <input id="password-input" type="password" class="input-common login-container-password-input" placeholder="Password">
+                    <input @keydown.enter="onTutorLoginEnter($event)" id="password-input" type="password" class="input-common login-container-password-input" placeholder="Password">
                     <button class="login-container-button-common login-container-next-button"
                             @click="tutorLogin"
                         >
@@ -43,7 +44,7 @@
                     Enter your PIN code (without spaces)
                 </div>
                 <div class="login-container-input-div-common login-container-pin-input-div">
-                    <input id="pin-input" type="pin" class="input-common login-container-pin-input" placeholder="PIN Code">
+                    <input   @keydown.enter="onStudentLoginEnter($event)" id="pin-input" type="pin" class="input-common login-container-pin-input" placeholder="PIN Code">
                     <button class="login-container-button-common login-container-next-button"
                             @click="studentLogin"
                     
@@ -204,6 +205,23 @@ export default {
                     } )     
 
             })
+        },
+
+        onSubmitEmailEnter(e) {
+            e.target.blur()
+            this.submitEmail()
+        },
+
+        onTutorLoginEnter(e) {
+            e.target.blur()
+            this.tutorLogin()
+
+        },
+
+        onStudentLogin(e) {
+            e.target.blur()
+            this.studentLogin()
+
         },
     }
 }
