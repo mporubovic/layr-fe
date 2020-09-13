@@ -56,11 +56,12 @@ export default {
     mounted() {
         var toolbarOptions =[
                         [{ 'size': ['small', false, 'large', 'huge'] }],
-                        ['bold', 'italic', 'underline',],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
                         [{'align': ''}, {'align': 'center'}, {'align': 'right'}, {'align': 'justify'}],
                         ['image', 'link'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'color': [] }, { 'background': [] }],
+                        // [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        
                     ];
         
         // setTimeout(() => {

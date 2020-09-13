@@ -1429,6 +1429,7 @@ export default {
     text-decoration: none;
     user-select: none;
     color:black;
+    cursor: pointer;
     font-size: 16px;
     background-color: white;
     border-radius: 99px;
@@ -1483,6 +1484,7 @@ export default {
     align-items: center;
     justify-content: center;
     opacity: 1;
+    white-space: nowrap;
     transition: opacity 1s;
 }
 

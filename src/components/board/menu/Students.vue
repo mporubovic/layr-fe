@@ -489,6 +489,8 @@ export default {
     /* background-color: white; */
     display: flex;
     flex-direction: column;
+    user-select: none;
+
     /* align-items: center; */
 }
 
@@ -563,6 +565,7 @@ export default {
     grid-area: 1 / 2 / 2 / 3; 
     background-color: rgba(0, 0, 0, 0.25);
     overflow: hidden;
+    user-select: none;
     /* overflow: hidden; */
     /* overflow-y: scroll; */
 
