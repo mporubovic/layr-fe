@@ -92,7 +92,11 @@ export default {
                     this.$emit('urlSubmitted', event.dataTransfer.getData("text/uri-list"))
                 }
             } else if (this.sources.includes("device")) {
-                return
+                console.log(event.dataTransfer.types)
+                if (event.dataTransfer.types.includes("Files")) {
+                    this.$emit('fileSubmitted', event.dataTransfer.files)
+
+                }
             }
         },
         
@@ -108,6 +112,7 @@ export default {
 
         filesFromExplorer(event) {
             console.log(event.target.files)
+            this.$emit('fileSubmitted', event.target.files)
         },
 
         urlInputMouseOver(event) {

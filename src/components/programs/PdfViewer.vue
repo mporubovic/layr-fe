@@ -5,13 +5,13 @@
         
         <div class="pdf-selector" v-if="content.length === 0">
             <file-selector :sources="contentSources"
-                            @urlSubmitted="fileSelectorUrlSubmitted">
+                            @fileSubmitted="fileSelectorPdfSubmitted">
 
             </file-selector>
         </div>
 
-        <iframe :src="iframes[0]" 
-                v-if="content.length !== 0"
+        <iframe :src="ifrmSrc" 
+                v-if="!contentLoading"
                 :style="ifrmDynamicStyle"
                 frameborder="0"
                 ></iframe>
@@ -37,34 +37,34 @@ export default {
     data() {
         return {
             pagesNumber: [],
-            iframes: [],
-            contentLoading: true,
-            contentSources: ['device', 'link']
+            iframe: null,
+            contentLoading: false,
+            contentSources: ['device']
         };
     },
 
     computed: {
         ifrmDynamicStyle() {
             return this.hasFocus ? {'pointer-events': ''} : {'pointer-events': 'none'}
+        },
+
+        ifrmSrc() {
+            return this.content[0] ? this.content[0].file.url : null 
         }
     },
 
     mounted() {
-            this.content.forEach((element) => {
-                var ifrm = document.createElement("iframe");
-                ifrm.src = element.file.url;
-                setTimeout(() => {
-                    this.iframes.push(ifrm.src);
-                    this.contentLoading = false;
-                }, 1000);
-                
-        });
+        this.iframe = document.createElement("iframe");
+        setTimeout(() => {
+            this.contentLoading = false;
+        }, 1000);
+            
     },
 
     methods: {
-        fileSelectorUrlSubmitted() {
+        fileSelectorPdfSubmitted(files) {
             // this.contentLoading = true
-            // this.$emit('programCreatedContent', 'youtube-player', url)
+            this.$emit('programCreatedContent', 'pdf-viewer', files)
         }
     },
 };

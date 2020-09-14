@@ -137,23 +137,7 @@ export default {
 
             isNewCardMenuVisible: false,
 
-            newCards: [
-                {
-                    "type": "image",
-                    "program": "gallery",
-                    "available": false,
-                    "title": "Image",
-                    "icon": require('@/assets/cards/icons/image.svg'),
-                    "description": "Upload images from your device"
-                },                
-                {
-                    "type": "youtube",
-                    "program": "youtubeplayer",
-                    "available": true,
-                    "title": "Video",
-                    "icon": require('@/assets/cards/icons/youtube.svg'),
-                    "description": "Play a video from YouTube"
-                },                
+            newCards: [              
                 {
                     "type": "text",
                     "program": "texteditor",
@@ -161,6 +145,22 @@ export default {
                     "title": "Notes",
                     "icon": require('@/assets/cards/icons/text.svg'),
                     "description": "Create a note with a text editor"
+                },                 
+                {
+                    "type": "pdf",
+                    "program": "pdfviewer",
+                    "available": true,
+                    "title": "PDF",
+                    "icon": require('@/assets/cards/icons/pdf.svg'),
+                    "description": "Upload a PDF from your device"
+                },      
+                {
+                    "type": "youtube",
+                    "program": "youtubeplayer",
+                    "available": true,
+                    "title": "Video",
+                    "icon": require('@/assets/cards/icons/youtube.svg'),
+                    "description": "Play a video from YouTube"
                 },                
                 {
                     "type": "todo",
@@ -179,13 +179,13 @@ export default {
                     "description": "Create a list of URLs"
                 },                
                 {
-                    "type": "pdf",
-                    "program": "pdfviewer",
+                    "type": "image",
+                    "program": "gallery",
                     "available": false,
-                    "title": "PDF",
-                    "icon": require('@/assets/cards/icons/pdf.svg'),
-                    "description": "Upload a PDF from your device"
-                },
+                    "title": "Image",
+                    "icon": require('@/assets/cards/icons/image.svg'),
+                    "description": "Upload images from your device"
+                },  
 
 
             ],
@@ -537,18 +537,18 @@ export default {
 
         },
 
-        cardProgramNameToKey(program) {
-            switch (program) {            
-                case("todo-list") :
-                    return "todo";                
+        // cardProgramNameToKey(program) {
+        //     switch (program) {            
+        //         case("todo-list") :
+        //             return "todo";                
                 
-                case("url-list") :
-                    return "url";     
+        //         case("url-list") :
+        //             return "url";     
                     
-                case("text-editor") :
-                    return "text";  
-            }
-        },
+        //         case("text-editor") :
+        //             return "text";  
+        //     }
+        // },
 
         cardUpdatedItself(cardId, path, value) {
             this.$emit("stackCardUpdatedItself", cardId, path, value)

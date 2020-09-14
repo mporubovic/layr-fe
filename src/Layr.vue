@@ -687,16 +687,7 @@ export default {
                             "program": "pdfviewer",
                         },
 
-                        "content": [
-                            {
-                                "id": Math.floor(Math.random()*10000),
-                                "meta": {},
-                                "file": {
-                                    "url": 'http://docs.google.com/gview?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
-                                    "name": "NFX"
-                                }    
-                            }
-                        ],
+                        "content": [],
 
                     }
                 case("youtube"):                          
@@ -806,6 +797,11 @@ export default {
             
                 case 'text':
                     this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/text.svg'))
+
+                    break;
+
+                case 'pdf':
+                    this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/pdf.svg'))
 
                     break;
                 
@@ -973,26 +969,48 @@ export default {
 
         stackCardProgramCreatedContent(programName, mainContent, cardId) {
             console.log("CREATE", "FROM", programName, "MAIN CONTENT", mainContent ?? null, "CARD", cardId)
+            // console.log(typeof mainContent[0], mainContent[0] instanceof File)
             let newContent = this.contentTemplate(programName, mainContent ?? null)
-            let contentKey = this.cardProgramNameToKey(programName)
-            let content = [{[contentKey]: newContent[contentKey]}]
-            console.log(newContent)
-            let requestPayload = {
-                cardId: cardId,
-                content: content
+            let content
+            let requestPayload
+            let extraHeaders
+            let isFile = mainContent ? mainContent[0] instanceof File : false
+
+            if (isFile) {
+                let formData = new FormData()
+                formData.append('content', mainContent[0])
+                formData.append('cardId', cardId)
+                requestPayload = formData
+                extraHeaders = {
+                    'Content-Type': 'multipart/form-data'
+                }
+                console.log('formdata', formData.entries())
+            } else {
+                let contentKey = this.cardProgramNameToKey(programName)
+                content = [{[contentKey]: newContent[contentKey]}]
+                console.log(newContent)
+                requestPayload = {
+                    cardId: cardId,
+                    content: content
+                }
             }
+            
+            // console.log(newContent)
+
 
             console.log("REQUEST PAYLOAD", requestPayload)
             let card = this.currentBoard.stacks[0].cards.find(c => c.info.id === cardId)
             // this.processRequestedCards
-            card.content ? card.content.push(newContent) : card.content = [newContent]
+            if (!isFile) card.content ? card.content.push(newContent) : card.content = [newContent]
             // card.content.push(newContent)
             let tempId = newContent.id
-            this.$http.post('/api/content', requestPayload)
+            this.$http.post('/api/content', requestPayload, extraHeaders)
                         .then(response => {
                             // let receivedContent = response.data
-                            console.log("API CARD RESPONSE", response.status)
-                            card.content.find(c => c.id === tempId).id = response.data[0].id
+                            console.log("API CARD RESPONSE", response)
+                            if (isFile) card.content = response.data.data
+                            else card.content.find(c => c.id === tempId).id = response.data.data[0].id
+                            
                             // this.$nextTick(() => {cards.push(newCard)})
                         })
             
@@ -1043,10 +1061,13 @@ export default {
                 
                 case("youtube-player") :
                     return "embed";  
+
+                case("pdf-viewer") :
+                    return "file";  
             }
         },
         
-        contentTemplate(type, mainContent) {
+        contentTemplate(type, mainContent, isFile) {
             switch (type) {
                 case("image-component") : {
                     let obj = {
@@ -1110,6 +1131,22 @@ export default {
                         "meta": {},
                         "embed": {
                             "path": mainContent ?? '',
+                        }    
+                    }
+                    
+                    return obj;
+                }                
+                
+                case("pdf-viewer"): { 
+                    let path
+                    if (isFile) path = ''
+                    else path = mainContent
+                    let obj = {
+                        "id": Math.floor(Math.random() * 1000000000000 ),
+                        "isEditing": false,
+                        "meta": {},
+                        "file": {
+                            "path": path,
                         }    
                     }
                     
