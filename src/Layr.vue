@@ -264,7 +264,7 @@ export default {
                 // })
             } else {
                 // this.$nextTick(() => {
-                    this.$el.querySelector('#menu-container').style["max-height"] = 300 + 'px'
+                    this.$el.querySelector('#menu-container').style["max-height"] = 1500 + 'px'
                     this.$el.querySelector('#menu-pull').style["background-color"] = "rgba(0, 0, 0, 0.45)"
                     this.isMenuOpen = true
                 // })
