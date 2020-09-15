@@ -218,7 +218,7 @@ export default {
 
         },
 
-        onStudentLogin(e) {
+        onStudentLoginEnter(e) {
             e.target.blur()
             this.studentLogin()
 

@@ -253,7 +253,7 @@ export default {
                 } else {
                     this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
                     this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                    this.$el.querySelector('#menu-boards-button').style["background-color"] = ""
+                    this.$el.querySelector('#' + this.subMenu + '-button').style["background-color"] = ""
 
                     setTimeout(() => {
                         this.subMenu = null
@@ -1340,11 +1340,12 @@ export default {
             
             
             if (this.subMenu) {
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                setTimeout(() => {
-                    this.subMenu = null
-                }, 400);
+                this.menuPullClick()
+                // this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
+                // this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
+                // setTimeout(() => {
+                //     this.subMenu = null
+                // }, 400);
             }       
         }
 
