@@ -242,7 +242,13 @@ export default {
                     // })
 
                     interact.modifiers.restrictRect({
-                        restriction: 'parent',
+                        // restriction: 'parent',
+                        restriction: {
+                            x: 0,
+                            y: 0,
+                            width: window.innerWidth - 30,
+                            height: window.innerHeight - 30,
+                        },
                         endOnly: true
                     })
                     ],

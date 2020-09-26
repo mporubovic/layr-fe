@@ -101,7 +101,7 @@
 
             </div>
         </div>
-        <div class="board" id="board" @click="boardDivClicked">
+        <div class="board" id="board" @click="boardDivClicked" @scroll.prevent="onBoardDivWheel">
             
             <stack :stackData="stackData" 
                     v-if="stackDataLoaded && currentBoard"
@@ -155,6 +155,25 @@ export default {
             userSubdomain: null,
             students: null,
             user: null,
+            zoom: {
+                speed: 0.5,
+                maxScale: 4,
+                minScale: 0.5,
+                scale: 1,
+                scaleFactor: 0.1,
+                origin: {
+                    x: 0,
+                    y: 0
+                },
+                target: {
+                    x: 0,
+                    y: 0
+                },
+                pointer: {
+                    x: 0,
+                    y: 0
+                },
+            }
         }
     },
 
@@ -191,10 +210,63 @@ export default {
 
         userRole() {
             return this.user ? this.user.role : null
-        }
+        },
+
+        // cardsCanvas() {
+        //     return this.$el.querySelector('#cards').
+        // }
 
     },
 
+    created() {
+        window.addEventListener('wheel', event => {
+            // event.preventDefault()
+            if (event.ctrlKey) {
+                event.preventDefault()
+
+                // let scale = this.zoom.scale
+                // let scaleFactor = this.zoom.scaleFactor
+                
+                // let mousex = event.clientX
+                // let mousey = event.clientY
+                
+                // let wheel
+                // if (event.deltaY < 0) wheel = 1
+                // else wheel = -1
+
+                // let zoom = Math.exp(wheel*scaleFactor)
+                // // console.log(this.zoom.scale, dir, scaleFactor)
+                // // this.zoom.scale += dir*scaleFactor
+                // // console.log(this.zoom.scale)
+
+                // this.zoom.scale = Math.max(this.zoom.minScale, Math.min(this.zoom.maxScale, this.zoom.scale));
+                // console.log(this.zoom.scale)
+
+                // let deltaX = (- newPointer.x + oldPointer.x ) / this.zoom.scale
+                // let deltaY = (- newPointer.y + oldPointer.y) / this.zoom.scale
+
+                // // this.zoom.pointer = newPointer
+
+
+
+                // // let w = this.$el.querySelector('#cards').getBoundingClientRect().width
+                // // let h = this.$el.querySelector('#cards').getBoundingClientRect().height
+
+                // this.$el.querySelector('#cards').style["transform-origin"] = `${newPointer.x}px ${newPointer.y}px`
+                // // this.$el.querySelector('#cards').style.transform = `translate(${this.zoom.pos.x}px,${this.zoom.pos.y}px) scale(${scale},${scale})`;
+                // // this.$nextTick(()=>{
+                // //     this.$el.querySelector('#cards').style.transform = `scale(${this.zoom.scale},${this.zoom.scale})`;
+                // // })
+
+                // setTimeout(() => {
+                //     this.$el.querySelector('#cards').style.transform = `scale(${this.zoom.scale}) translate(${deltaX}px, ${deltaY}px)`;
+                    
+                // }, 1);
+            }
+        }, { passive: false })
+        // })
+    },
+    
     mounted() {
         // this.boards = this.generateBoards(4)
 
@@ -241,6 +313,11 @@ export default {
     },
 
     methods: {
+        onBoardDivWheel() {
+
+        },
+
+
         menuPullClick() {
             // alert('click')
             if (this.isMenuOpen) {
@@ -842,6 +919,10 @@ export default {
                 this.boardDataLoaded = true
                 this.menuTitle = this.currentBoard.info.title
 
+                
+                this.$el.querySelector('#board').style.width = board.settings.dimensions.width + 'px'
+                this.$el.querySelector('#board').style.height = board.settings.dimensions.height + 'px'
+
 
                 // this.stackData = board.stacks[0]
                 // this.stackData = this.currentBoard.stacks[0]
@@ -1380,18 +1461,27 @@ export default {
 }
 
 .board {
-    position: fixed;
+    /* position: absolute; */
     background-image: linear-gradient(to left bottom, #32bffd, #00aaff, #0092ff, #0076ff, #1653ff);
     height:100%;
     width:100%;
-    overflow:hidden;
+    /* overflow:hidden; */
+    overflow: auto;
     z-index: 100;
+    padding-top: 60px;
+    box-sizing: border-box;
+    /* margin-top: 20px; */
 }
+
+
 
 .cards {
     height:100%;
     width:100%;
-    overflow:hidden
+    overflow:hidden;
+    transition: transform 0.2s;
+    /* padding-top: 50px; */
+    /* transition: all 0.2s; */
 }
 
 .menu {
@@ -1410,13 +1500,14 @@ export default {
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
+    align-items: center;
 }
 
 .menu-container {
     /* max-height: 400px; */
     /* height: 400px; */
     /* position: absolute; */
+    width: 100%;
     overflow: hidden;
     transition: top 0.4s,
                 max-height 0.4s
@@ -1431,8 +1522,8 @@ export default {
     /* right: 45%; */
     /* right: 0; */
     /* left: 0; */
-    margin-left: auto;
-    margin-right: auto;
+    /* margin-left: auto; */
+    /* margin-right: auto; */
     /* bottom: -19px; */
     background-color: rgba(0, 0, 0, 0.55);
     border-bottom-left-radius: 5px;

@@ -303,10 +303,16 @@ export default {
         createBoard() {
             // let board = this.generateBoards(1)[0]
             let title = "New board"
+            let settings = {dimensions: {
+                        width: 2000,
+                        height: 1000
+                    }}
             let requestPayload = {
                 title: title,
-                studentId: this.selectedStudentId
+                studentId: this.selectedStudentId,
+                settings: JSON.stringify(settings)
             }
+
             this.$el.querySelector('#create-board-button').disabled = true
             this.$http.post('/api/boards', requestPayload)
                         .then(response => {
@@ -459,6 +465,7 @@ export default {
 
 .students-container-header {
     padding-top: 5px;
+    padding-bottom: 5px;
     background-color: white;
     width: 100%;
     /* height: 40px; */
@@ -470,7 +477,7 @@ export default {
 }
 
 .students-container-title {
-    font-size: 25px;
+    font-size: 20px;
     /* margin-left: auto; */
     /* width: 100%; */
 }
@@ -483,6 +490,7 @@ export default {
 
 .student-list-container { 
     grid-area: 1 / 1 / 2 / 2; 
+    min-width: 220px;
     /* box-sizing: border-box; */
     overflow: hidden;
     /* overflow-y: scroll; */
@@ -581,6 +589,7 @@ export default {
 
 .boards-container-header {
     padding-top: 5px;
+    padding-bottom: 5px;
     /* margin-left: 20px; */
     padding-left: 20px;
     background-color: white;
@@ -588,7 +597,7 @@ export default {
 }
 
 .boards-container-title {
-    font-size: 25px;
+    font-size: 20px;
 }
 
 .boards-list-carousel {

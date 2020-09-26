@@ -909,6 +909,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     /* width: 100%; */
+    max-height: 34px;
     opacity: 0; 
     background-color: white;
     /* outline: 1px black solid; */
@@ -961,12 +962,12 @@ export default {
 }
 
 .card-icon-onboard {
-    height: 30px;
+    height: 28px;
     /* margin-right: 10px; */
 }
 
 .card-header-title h1 {
-    font-size: 25px;
+    font-size: 22px;
     margin-left: 10px;
     color: black;
     overflow: hidden;
