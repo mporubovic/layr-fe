@@ -976,7 +976,7 @@ export default {
 }
 
 .card-header-title-input {
-    font-size: 25px;
+    font-size: 22px;
     font-weight: bold;
     font-style: italic;
     width: 100%;

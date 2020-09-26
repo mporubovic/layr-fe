@@ -25,9 +25,9 @@
                 autocomplete="off" 
                 >
                 
-            <div @contextmenu.prevent="bodyContextmenu()"
+            <div class="todo-item-body" @contextmenu.prevent="bodyContextmenu()"
                     >
-                <p class="todo-item-body"
+                <p
                     v-if="!content.local.isEditing"
                     
                     >
@@ -208,7 +208,7 @@ export default {
 }
 
 .todo-item-body {
-    font-size: 20px;
+    /* font-size: 20px; */
     /* width: 100%; */
     /* padding-left: 10px; */
     /* margin-right: 25px; */
@@ -218,15 +218,24 @@ export default {
     /* max-width: auto; */
 
     /* max-width: 2000px;  */
-    font-weight: bold;
-    cursor:pointer;
+    /* font-weight: bold; */
+    /* cursor:pointer; */
 
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    /* white-space: nowrap; */
+    /* text-overflow: ellipsis; */
     /* margin-right: 25px; */
     transition: all 0.3s;
     /* text-decoration: none; */
     /* color: blue; */
 }
+
+.todo-item-body p {
+    font-size: 20px;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 </style>

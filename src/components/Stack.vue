@@ -242,13 +242,13 @@ export default {
                     // })
 
                     interact.modifiers.restrictRect({
-                        // restriction: 'parent',
-                        restriction: {
-                            x: 0,
-                            y: 0,
-                            width: window.innerWidth - 30,
-                            height: window.innerHeight - 30,
-                        },
+                        restriction: 'parent',
+                        // restriction: {
+                        //     x: 0,
+                        //     y: 0,
+                        //     width: window.innerWidth - 30,
+                        //     height: window.innerHeight - 30,
+                        // },
                         endOnly: true
                     })
                     ],
@@ -839,6 +839,16 @@ export default {
 /* .stack-controls-common:focus{
     outline
 } */
+
+.stack-controls-toggle {
+    cursor: pointer;
+
+}
+
+.stack-controls-add {
+    cursor: pointer;
+
+}
 
 .stack-controls-move:not(:active) {
     cursor: grab;

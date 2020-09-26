@@ -701,7 +701,7 @@ export default {
                                 "id": Math.floor(Math.random()*10000),
                                 // "isEditing": false,
                                 "url": {
-                                    "path": 'layrstack.com',
+                                    "path": 'placeholder',
                                     "position": 1,
                                     "ico": null,
                                     "name": null,
@@ -748,7 +748,7 @@ export default {
                 case("pdf"):
                     return {
                         "info": {
-                            "title": "NFX"
+                            "title": "PDF"
                         },
 
                         "display": {
@@ -758,8 +758,8 @@ export default {
                             "dimensions": {
                                 "x": this.generateDimensions('x'),
                                 "y": this.generateDimensions('y'),
-                                "width": 490,
-                                "height": 710,
+                                "width": 600,
+                                "height": 450,
                             },
                             "program": "pdfviewer",
                         },
@@ -846,7 +846,7 @@ export default {
 
         processRequestedCards(card) {
             this.setNestedObjectValue(card, 'local.display.stackPosition', card.display.position)
-            if (!card.content) return
+            // if (!card.content) return
             switch (card.info.type) {
                 case 'todo':
                     this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/todo.svg'))
@@ -1461,7 +1461,7 @@ export default {
 }
 
 .board {
-    /* position: absolute; */
+    position: absolute;
     background-image: linear-gradient(to left bottom, #32bffd, #00aaff, #0092ff, #0076ff, #1653ff);
     height:100%;
     width:100%;
