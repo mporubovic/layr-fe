@@ -625,15 +625,15 @@ export default {
                         },
 
                         "content": [
-                            {
-                                "id": Math.floor(Math.random()*10000),
-                                "meta": {},
-                                "file": {
-                                    "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
-                                    "name": "The Andromeda Galaxy"
-                                }
+                            // {
+                            //     "id": Math.floor(Math.random()*10000),
+                            //     "meta": {},
+                            //     "file": {
+                            //         "url": 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Andromeda_Galaxy_%28with_h-alpha%29.jpg/800px-Andromeda_Galaxy_%28with_h-alpha%29.jpg',
+                            //         "name": "The Andromeda Galaxy"
+                            //     }
 
-                            },
+                            // },
 
 
                         ]
@@ -881,6 +881,11 @@ export default {
                     this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/pdf.svg'))
 
                     break;
+
+                case 'image':
+                    this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/image.svg'))
+
+                    break;
                 
                 default:
                     break;
@@ -1089,7 +1094,7 @@ export default {
                         .then(response => {
                             // let receivedContent = response.data
                             console.log("API CARD RESPONSE", response)
-                            if (isFile) card.content = response.data.data
+                            if (isFile) card.content ? card.content.push(response.data.data[0]) : card.content = response.data.data
                             else card.content.find(c => c.id === tempId).id = response.data.data[0].id
                             
                             // this.$nextTick(() => {cards.push(newCard)})
@@ -1150,13 +1155,16 @@ export default {
         
         contentTemplate(type, mainContent, isFile) {
             switch (type) {
-                case("image-component") : {
+                case("image-viewer") : {
+                    let path
+                    if (isFile) path = ''
+                    else path = mainContent
                     let obj = {
                         "id": Math.floor(Math.random() * 1000000000000 ),
+                        "isEditing": false,
                         "meta": {},
                         "file": {
-                            "url": 'https://nasa.gov',
-                            "name": "NFX"
+                            "path": path,
                         }    
                     }
                     return obj

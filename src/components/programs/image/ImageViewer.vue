@@ -1,8 +1,9 @@
 <template>
     <div class="gallery-container">
-        <img :src="images[index]" />
+        <img :src="images[index]" v-if="content.length > 0"/>
+        <!-- <img :src="images[index]" /> -->
 
-        <div class="footer">
+        <div class="footer" v-if="content.length > 0">
             
             <div class="footer-content">{{ imageName }}</div>
 
@@ -39,7 +40,7 @@
         </div>
 
         <div class="image-selector" v-if="isFileSelectorOpen">
-            <file-selector :sources="contentSources">
+            <file-selector :sources="contentSources" @fileSubmitted="fileSelectorImageSubmitted">
 
             </file-selector>
         </div>
@@ -61,12 +62,13 @@ export default {
             index: 0,
             images: [],
             isFileSelectorOpen: false,
-            contentSources: ['device', 'link']
+            contentSources: ['device']
         };
     },
 
     computed: {
         imageName() {
+            if (this.content.length === 0) return
             const splitName = this.content[this.index].file.name.split("/");
             return splitName[splitName.length - 1];
         },
@@ -88,15 +90,38 @@ export default {
 
         addImage() {
             this.isFileSelectorOpen = !this.isFileSelectorOpen;
+        },
+
+        fileSelectorImageSubmitted(files) {
+            this.isFileSelectorOpen = false
+            this.$emit('programCreatedContent', 'image-viewer', files)
+        },
+
+        createImage(source) {
+            let image = new Image();
+            image.src = source
+            this.images.push(image.src);
         }
     },
 
     mounted() {
+        if (this.content.length === 0) {
+            this.isFileSelectorOpen = true
+            return
+        }
         this.content.forEach((element) => {
-            let image = new Image();
-            image.src = element.file.url
-            this.images.push(image.src);
+            this.createImage(element.file.url)
         });
+    },
+
+    watch: {
+        content: {
+            handler(n) {
+                this.createImage(n[n.length-1].file.url)
+                this.index = n.length-1
+            } 
+
+        },
     },
 };
 </script>
@@ -159,9 +184,10 @@ img {
     
 }
 
-.button-move:not(:disabled):hover {
+.move-left:not(:disabled):hover, .move-right:not(:disabled):hover {
     color: lightskyblue;
 }
+
 
 .footer-content {
     /* flex: 0; */

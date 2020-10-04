@@ -181,7 +181,7 @@ export default {
                 {
                     "type": "image",
                     "program": "gallery",
-                    "available": false,
+                    "available": true,
                     "title": "Image",
                     "icon": require('@/assets/cards/icons/image.svg'),
                     "description": "Upload images from your device"
