@@ -1,8 +1,8 @@
 <template>
     <div class="login">
-        <div class="login-container">
+        <div class="login-container container-common">
             <div class="login-container-title">
-                <h1>Sign In</h1>
+                <h1>Sign in</h1>
                 
             </div>
             <hr class="login-container-line">
@@ -90,12 +90,28 @@
             </div> -->
 
         </div>
+
+        <div class="boards-container container-common" v-if="publicBoards !== undefined && publicBoards.length != 0">
+            <div class="boards-container-title">
+                <h1>Public boards</h1>
+            </div>
+
+            <boards :public='true' :publicBoards='publicBoards' @subMenuBoardClicked="boardClicked"></boards>
+
+        </div>
+
     </div>
 </template>
 
 <script>
+import Boards from './Boards.vue'
+
 export default {
     // name: 'menu-boards'
+    components: {
+        Boards
+    },
+    
     props: {
 
     },
@@ -105,7 +121,23 @@ export default {
             userRole: null,
             userEmail: null,
             showEmailInput: true,
+            publicBoards: [],
         }
+    },
+
+    created() {
+        let parts = location.hostname.split('.')
+        let userSubdomain = parts[parts.length-3]
+        this.$http.get('/api/subdomains/' + userSubdomain).then((response) => {
+            console.log("API SUBDOMAINS RESPONSE", response.data)
+            this.publicBoards = response.data.public.boards
+            let set = response.data.settings
+            if (set) {
+                if (set.title) {
+                    this.$emit('subdomainHasTitle', set.title)
+                }
+            }
+        })
     },
 
     computed: {
@@ -115,7 +147,8 @@ export default {
 
         showPINInput() {
             return this.userRole === "student"
-        }
+        },
+
     },
 
     methods: {
@@ -226,31 +259,54 @@ export default {
     }
 }
 </script>
-<style>
+<style scoped>
 .login {
     height: 500px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-container {
-    /* margin-left: auto; */
-    /* margin-right: auto; */
-    /* margin:auto; */
-    background-color: white;
-    width: 400px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 15px;
+}
+
+@media only screen and (max-width: 600px) {
+  .login {
+        align-items:flex-start;
+
+  }
+
+  .boards-container-title {
+        justify-content:left !important;
+
+  }
+}
+
+.container-common {
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    /* margin:auto; */
+    /* background-color: white; */
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* align-items: center; */
+    border-radius: 10px;
 
 }
 
+.login-container {
+    width: 400px;
+    background-color: white;
+    justify-content: center;
+    align-items: center;
+}
+
 .login-container-title {
-    margin-top: 5px;
-    margin-bottom: 5px;
+    /* margin-top: 5px; */
+    /* margin-bottom: 5px; */
+}
+
+.login-container-title h1 {
+    font-size: 25px;
 }
 
 .login-container-line {
@@ -261,7 +317,7 @@ export default {
 
 .login-container-email {
     margin-top: 20px;
-    margin-bottom: 50px;
+    margin-bottom: 30px;
 }
 
 .login-container-input-div-common {
@@ -345,7 +401,7 @@ export default {
 
 .login-container-password {
     margin-top: 20px;
-    margin-bottom: 50px;
+    margin-bottom: 30px;
 }
 
 /* .login-container-pin-input-div {
@@ -388,4 +444,30 @@ export default {
 .login-container-pin-input-key-last {
     grid-column-start: 2;
 }
+
+.boards-container {
+    height: 250px;
+    width: 800px;
+    margin-top: 40px;
+    background-color: rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    /* overflow-x: scroll; */
+
+}
+
+.boards-container-title {
+    background-color: white;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+
+}
+
+.boards-container-title h1 {
+    font-size: 25px;
+}
+
+
+
 </style>

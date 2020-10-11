@@ -36,6 +36,13 @@ export default {
         //     required: true,
         //     // type: [Array, Null]
         // }
+        public: {
+            type: Boolean
+        },
+
+        publicBoards: {
+            type: Array
+        }
     },
 
     data() {
@@ -58,7 +65,17 @@ export default {
     },
 
     created() {
-        this.loadBoards()
+        if (this.public) {
+            if (this.publicBoards.length === 0) {
+                this.loadPublicBoards()
+            } else {
+                this.boards = this.publicBoards
+            }
+        }
+        
+        else this.loadAllBoards()
+
+
     },
 
     methods: {
@@ -66,10 +83,19 @@ export default {
             this.$emit('subMenuBoardClicked', id)
         },
 
-        loadBoards() {
+        loadAllBoards() {
             this.$http.get('/api/boards').then((response) => {
                 console.log("API BOARDS RESPONSE", response.data)
                 this.boards = response.data.boards
+            })
+        },
+
+        loadPublicBoards() {
+            let parts = location.hostname.split('.')
+            let userSubdomain = parts[parts.length-3]
+            this.$http.get('/api/subdomains/' + userSubdomain).then((response) => {
+                console.log("API SUBDOMAINS RESPONSE", response.data)
+                this.boards = response.data.public.boards
             })
         },
 
@@ -114,10 +140,11 @@ margin-left: 5px;
     flex-direction: row;
     /* width: 100%; */
     /* height: 100px; */
-    margin-top: 10px;
+    /* margin-top: 10px; */
     /* padding-bottom: 1px; */
     margin-left: 15px;
     margin-right: 15px;
+    /* margin-bottom: 20px; */
     overflow: hidden;
     overflow-x: scroll;
 }
@@ -199,14 +226,22 @@ margin-left: 5px;
 .boards-menu-carousel-board-title {
     overflow: hidden;
     width: 100%;
+    line-height: 25px;
+    height: 60px;
 }
 
 .boards-menu-carousel-board-title h3 {
-    color: white;
+    color:white;
     font-size: 18px;
     margin-top: 5px;
+    /* overflow: hidden; */
+    /* white-space: nowrap; */
+    /* white-space:normal; */
+    /* text-overflow: ellipsis; */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
     margin-left: auto;
     margin-right: auto;

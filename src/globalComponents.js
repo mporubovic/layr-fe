@@ -22,6 +22,7 @@ import FileSelector from './components/programs/modal/FileSelector.vue'
 import MenuBoards from './components/board/menu/Boards.vue'
 import MenuLogin from './components/board/menu/Login.vue'
 import MenuStudents from './components/board/menu/Students.vue'
+import MenuPersonal from './components/board/menu/Personal.vue'
 
 Vue.component('image-viewer', ImageViewer);
 Vue.component('pdf-viewer', PdfViewer);
@@ -40,3 +41,4 @@ Vue.component('file-selector', FileSelector);
 Vue.component('menu-boards', MenuBoards);
 Vue.component('menu-login', MenuLogin);
 Vue.component('menu-students', MenuStudents);
+Vue.component('menu-personal', MenuPersonal);

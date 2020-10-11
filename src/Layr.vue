@@ -5,6 +5,10 @@
             DOMAIN {{ userDomain }} <br>
             SUB {{ userSubdomain }}
         </div> -->
+        <div class="guest" v-if="user === 'guest'">
+            <p><strong> You are viewing this board as a guest.</strong></p>
+            <p>Any changes you make will not be saved.</p>
+        </div>
 
 
         <div class="menu" id="menu">
@@ -34,6 +38,13 @@
                                     v-if="userRole === 'tutor'"          
                                     >
                                     Students
+                        </button>                        
+                        <button class="menu-content-controls-primary-boards menu-content-buttons menu-content-buttons-primary" 
+                                    @click="menuPersonalClick" 
+                                    id="menu-personal-button"
+                                    v-if="userRole === 'tutor'"          
+                                    >
+                                    Personal
                         </button>
                     </div>
                     
@@ -64,7 +75,7 @@
                         <button class="menu-content-controls-secondary-settings menu-content-buttons menu-content-buttons-secondary"
                                     @click="settingsMenu"
                                     >
-                                Settings
+                                Fullscreen
                         </button>
                         <button class="menu-content-controls-secondary-help menu-content-buttons menu-content-buttons-secondary">Help</button>
                         <!-- <button class="menu-content-controls-secondary-share menu-content-buttons menu-content-buttons-secondary">Share</button> -->
@@ -81,6 +92,7 @@
                                             v-bind="subMenuContent"
                                             @subMenuBoardClicked="requestBoard"
                                             @loggedIn="userLoggedIn"
+                                            @subdomainHasTitle="setLayrTitle"
                                             >
                                             
                                 </component>
@@ -389,6 +401,10 @@ export default {
             }
         },
 
+        setLayrTitle(title) {
+            this.menuTitle = title
+        },
+
         menuStudentsClick() {
             if (this.subMenu === "menu-students") {
                                
@@ -400,10 +416,35 @@ export default {
                     this.subMenu = null
                 }, 400);
             } else {
+                if (this.subMenu === "menu-personal") this.$el.querySelector('#menu-personal-button').style["background-color"] = ""
                 this.subMenu = "menu-students"
                 setTimeout(() => {
                     this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
                     this.$el.querySelector('#menu-students-button').style["background-color"] = "lightgreen"
+
+                    
+                    this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
+                }, 0)
+            }
+        },
+
+        menuPersonalClick() {
+            if (this.subMenu === "menu-personal") {
+                               
+                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
+                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
+                this.$el.querySelector('#menu-personal-button').style["background-color"] = ""
+                
+                setTimeout(() => {
+                    this.subMenu = null
+                }, 400);
+            } else {
+                if (this.subMenu === "menu-students") this.$el.querySelector('#menu-students-button').style["background-color"] = ""
+
+                this.subMenu = "menu-personal"
+                setTimeout(() => {
+                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
+                    this.$el.querySelector('#menu-personal-button').style["background-color"] = "lightgreen"
 
                     
                     this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
@@ -813,8 +854,32 @@ export default {
         requestBoard(id) {
             // this.menuBoardsClick()
             // this.closeMenu()
-            if (this.userRole === "tutor") this.menuStudentsClick()
-            else this.menuBoardsClick()
+            // console.log('hello')
+            if (!this.userRole) this.user = "guest"
+
+            // this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
+            // this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
+
+            switch (this.subMenu) {
+                case 'menu-login':
+                    this.menuLoginClick()
+                    break
+                case 'menu-students':
+                    this.menuStudentsClick()
+                    break
+                case 'menu-boards':
+                    this.menuBoardsClick()
+                    break
+                case 'menu-personal':
+                    this.menuPersonalClick()
+                    break
+            }
+
+            console.log(this.subMenu)
+            
+            // this.subMenu = null
+            
+
 
             if (this.currentBoard) this.currentBoard = null
 
@@ -957,6 +1022,9 @@ export default {
         // },
 
         createNewCard(card) {
+            if (this.user === "guest") {
+                return
+            }
             let newCardDefaults = this.cardTemplate(
                 {
                     "info": {
@@ -1028,6 +1096,10 @@ export default {
                 }
             }
 
+            if (this.user === "guest") {
+                return
+            }
+
             let contentKey = this.cardProgramNameToKey(programName)
             let content = {[contentKey]: updatedContent[contentKey]}
             let requestPayload = {
@@ -1054,6 +1126,9 @@ export default {
         },
 
         stackCardProgramCreatedContent(programName, mainContent, cardId) {
+            if (this.user === "guest") {
+                return
+            }
             console.log("CREATE", "FROM", programName, "MAIN CONTENT", mainContent ?? null, "CARD", cardId)
             // console.log(typeof mainContent[0], mainContent[0] instanceof File)
             let newContent = this.contentTemplate(programName, mainContent ?? null)
@@ -1106,6 +1181,9 @@ export default {
         },
 
         stackCardProgramDeletedContent(programName, deletedContent, cardId) {
+            if (this.user === "guest") {
+                return
+            }
             console.log("DELETE", programName, deletedContent, cardId)
             // console.log(this.cards.find(c => c.info.id === cardId).content.find(c => c.id === deletedContent.id))
             // let contentKey = this.cardProgramNameToKey(programName)
@@ -1308,7 +1386,9 @@ export default {
             // this.setNestedObjectValue(card, path, value)
 
             if (card.local.updatePropertyTimeout) clearTimeout(card.local.updatePropertyTimeout)
-            
+            if (this.user === "guest") {
+                return
+            }
             card.local.updatePropertyTimeout = setTimeout(() => {
                 console.log("TIMEOUT CARD " + card.info.id, card.local.updatePropertyQueue)
 
@@ -1622,7 +1702,7 @@ export default {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     margin-left: 20px;
 }
 
@@ -1716,6 +1796,21 @@ export default {
     text-align: center;
     color: white;
     background-color: rgba(0, 0, 0, 0.25);
+}
+
+.guest {
+    position: fixed;
+    left: 10px;
+    bottom: 10px;
+    z-index: 10000;
+    background-color: rgba(0, 0, 0, 0.35);
+    padding: 10px;
+    border-radius: 10px;
+    opacity: 0.8;
+}
+
+.guest p {
+    color: white;
 }
 
 </style>
