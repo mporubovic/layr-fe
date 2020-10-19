@@ -156,7 +156,7 @@ img {
     /* align-items: center; */
     /* align-items: flex-start; */
     /* margin-bottom: 20px; */
-    opacity: 0.15;
+    opacity: 0.35;
     transition: opacity 0.2s ease-in-out;
     overflow: hidden;
 }
