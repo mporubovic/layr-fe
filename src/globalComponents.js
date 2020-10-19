@@ -15,6 +15,7 @@ Vue.use(VueYoutube)
 
 
 import YoutubePlayer from './components/programs/youtube/YoutubePlayer.vue'
+import Whiteboard from './components/programs/whiteboard/Whiteboard.vue'
 
 
 import FileSelector from './components/programs/modal/FileSelector.vue'
@@ -35,6 +36,7 @@ Vue.component('url-list', UrlList);
 Vue.component('url-item', UrlItem);
 
 Vue.component('youtube-player', YoutubePlayer);
+Vue.component('whiteboard', Whiteboard);
 
 Vue.component('file-selector', FileSelector);
 

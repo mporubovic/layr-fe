@@ -185,6 +185,14 @@ export default {
                     "title": "Image",
                     "icon": require('@/assets/cards/icons/image.svg'),
                     "description": "Upload images from your device"
+                },                  
+                {
+                    "type": "whiteboard",
+                    "program": "whiteboard",
+                    "available": true,
+                    "title": "Draw",
+                    "icon": require('@/assets/cards/icons/whiteboard.svg'),
+                    "description": "Create a whiteboard"
                 },  
 
 

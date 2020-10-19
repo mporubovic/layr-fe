@@ -830,6 +830,37 @@ export default {
                         "content" : [],
 
                     }
+
+                case("whiteboard"):
+                    return {
+                        "info": {
+                            "title": "Whiteboard"
+                        },
+
+                        "display": {
+                            "icon": require('@/assets/cards/icons/whiteboard.svg'),
+                        },
+                        "settings": {
+                            "dimensions": {
+                                "x": this.generateDimensions('x'),
+                                "y": this.generateDimensions('y'),
+                                "width": 1000,
+                                "height": 700,
+                            },  
+                            "program": "whiteboard",
+                        },
+
+                        "content": [
+                            {
+                                "id": Math.floor(Math.random()*10000),
+                                "meta": {},
+                                "whiteboard": {
+                                    "data": {"background": "#FFFFFF"}
+                                }
+                            }
+                        ],
+
+                    }
             }
         },
                 generateDimensions(d) {
@@ -949,6 +980,11 @@ export default {
 
                 case 'image':
                     this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/image.svg'))
+
+                    break;                
+                    
+                case 'whiteboard':
+                    this.setNestedObjectValue(card, 'local.display.icon', require('@/assets/cards/icons/whiteboard.svg'))
 
                     break;
                 
@@ -1227,7 +1263,10 @@ export default {
                     return "embed";  
 
                 case("pdf-viewer") :
-                    return "file";  
+                    return "file"; 
+                    
+                case("whiteboard") :
+                    return "whiteboard";  
             }
         },
         
@@ -1319,6 +1358,9 @@ export default {
                     
                     return obj;
                 }
+
+                case("whiteboard") :
+                    return "whiteboard"; 
             }
         },
         

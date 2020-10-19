@@ -90,6 +90,7 @@
                         @programCreatedContent="programCreatedContent"
                         @programDeletedContent="programDeletedContent"
                         :autoSaveInterval="stackSettings.autoSaveInterval"
+                        :cardDimensions="dimensions"
                         >
             </component>        
 
@@ -339,6 +340,15 @@ export default {
                     
                     // this.$el.style["background-color"] = "white";
                     return "youtube-player"; 
+
+                case("whiteboard") :
+                    this.$el.querySelector(".card-body").style.padding = "10px 10px 10px 10px";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "rgba(0, 0, 0, 0.5)";
+                    }, 0);
+                    
+                    // this.$el.style["background-color"] = "white";
+                    return "whiteboard"; 
 
                      
             }
@@ -998,6 +1008,7 @@ export default {
     overflow-y:hidden;
     overflow-x: hidden;
     touch-action: none;
+    overflow: hidden;
     
 }
 
