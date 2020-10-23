@@ -96,7 +96,9 @@
                 <h1>Public boards</h1>
             </div>
 
-            <boards :public='true' :publicBoards='publicBoards' @subMenuBoardClicked="boardClicked"></boards>
+            <div class="board-carousel">
+                <boards :public='true' :flexDirection="'row'" :boards='publicBoards' @subMenuBoardClicked="boardClicked"></boards>
+            </div>
 
         </div>
 
@@ -259,7 +261,7 @@ export default {
     }
 }
 </script>
-<style scoped>
+<style>
 .login {
     height: 500px;
     display: flex;
@@ -460,7 +462,7 @@ export default {
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
 
 }
 
@@ -468,6 +470,30 @@ export default {
     font-size: 25px;
 }
 
+.board-carousel {
+    padding-top: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    overflow-x: scroll;
+}
 
+.board-carousel::-webkit-scrollbar {
+    height: 10px;
+}
+
+.board-carousel::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+.board-carousel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 99px;
+}
+
+.board-carousel::-webkit-scrollbar-thumb:hover {
+    box-shadow: inset 0 0 5px white;
+
+}
 
 </style>

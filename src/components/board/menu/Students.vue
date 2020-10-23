@@ -48,38 +48,14 @@
             
             <div class="boards-list-carousel-container" v-if="boards">
 
-                
-                <div class="boards-list-carousel">
-                    <button class="boards-list-carousel-board-new"
-                            @click="createBoard"
-                            id="create-board-button"
-                            >
-                        <div class="boards-list-carousel-board-new-icon"
+                <menu-boards @subMenuBoardClicked="selectBoard" 
+                                @subMenuBoardNewBoard="createBoard" 
+                                :createBoard='true' 
+                                :boards="boards"
+                                :flexDirection="'column'"
                                 >
-                            <img src="@/assets/common/addcirclewhite.svg">
-                            
-                            <h3>Create a <br> new board</h3>
-                        </div>
-                        <div class="boards-list-carousel-board-title">
-                            <!-- <h3 style="font-style: italic">New board</h3> -->
-                        </div>
-                    </button>
-                    <div class="boards-list-carousel-board" 
-                            v-for="board in sortedBoards" 
-                            :key="board.info.id"
-                            @click="selectBoard(board.info.id)"
-                            >
-                        <div class="boards-list-carousel-board-icon">
-                            <div class="boards-list-carousel-board-icon-description">
-                                <p>{{ convertTimeToDate(board.info.created_at) }}</p>
-                                <p>{{ convertBoardTime(board.info.created_at) }}</p>
-                            </div>
-                        </div>
-                        <div class="boards-list-carousel-board-title">
-                            <h3>{{ board.info.title }}</h3>
-                        </div>
-                    </div>
-                </div>
+                                
+                </menu-boards>
             </div>
                 
 
@@ -572,20 +548,18 @@ export default {
 .boards-list-container { 
     grid-area: 1 / 2 / 2 / 3; 
     background-color: rgba(0, 0, 0, 0.25);
+    /* overflow-y:hidden; */
+    /* overflow-x: hidden; */
     overflow: hidden;
-    user-select: none;
+    display: flex;
+    flex-direction: column;
+    /* border-radius: 10px; */
+    /* user-select: none; */
     /* overflow: hidden; */
     /* overflow-y: scroll; */
 
 }
 
-.boards-list-carousel-container {
-    overflow: hidden;
-    height: 410px;
-    padding: 10px;
-    
-    overflow-y: scroll;
-}
 
 .boards-container-header {
     padding-top: 5px;
@@ -600,23 +574,23 @@ export default {
     font-size: 20px;
 }
 
-.boards-list-carousel {
-    display: flex;
-    flex-direction: row;
-    /* width: 100%; */
-    /* height: 100px; */
-    margin-top: 10px;
-    /* padding-bottom: 1px; */
-    margin-left: 15px;
-    margin-right: 15px;
-    flex-wrap: wrap;
-    /* overflow: hidden; */
-    /* overflow-y: scroll; */
-    /* box-sizing: border-box; */
+/* .boards-list-carousel-container {
+    overflow-y: scroll;
+    padding-top: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+} */
+
+.boards-list-carousel-container {
+    overflow-y: scroll;
+    padding-top: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .boards-list-carousel-container::-webkit-scrollbar, .students-list::-webkit-scrollbar {
     width: 10px;
+    height: 10px;
 }
 
 .boards-list-carousel-container::-webkit-scrollbar-track, .students-list::-webkit-scrollbar-track {
@@ -632,106 +606,6 @@ export default {
 .boards-list-carousel-container::-webkit-scrollbar-thumb:hover, .students-list::-webkit-scrollbar-thumb:hover {
     box-shadow: inset 0 0 5px white;
 
-}
-
-.boards-list-carousel-board-icon {
-    background-color: white;
-    border-radius: 7px;
-    height: 100px;
-    width: 100%;
-    /* flex-direction: column; */
-}
-
-.boards-list-carousel-board-icon-description {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.boards-list-carousel-board-icon-description p {
-    /* margin-left: auto; */
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.boards-list-carousel-board-new {
-    min-width: 190px;
-    max-width: 190px;
-    padding: 5px;
-    box-sizing: border-box;
-    /* height: 100%; */
-    margin-right: 20px;
-    background-color: transparent;
-    font-size: 16px;
-    /* margin-bottom: 3px; */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 15px;
-
-}
-
-.boards-list-carousel-board-new-icon {
-    height: 95px;
-    width: 100%;
-    box-shadow: 0 0 0pt 5px lightgreen;
-    margin-left: 5px;
-    padding: 3px;
-    box-sizing: border-box;
-    border-radius: 7px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.25);
-
-
-}
-
-.boards-list-carousel-board-new-icon h3 {
-    text-align: center;
-    color:white;
-    text-align: left;
-    margin-left: 15px;
-}
-
-.boards-list-carousel-board-new-icon img {
-    height: 30px;
-    /* background-color: white; */
-}
-
-.boards-list-carousel-board {
-    min-width: 190px;
-    max-width: 190px;
-    padding: 2px;
-    margin-right: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin-bottom: 15px;
-}
-
-.boards-list-carousel-board-title {
-    overflow: hidden;
-    width: 100%;
-}
-
-.boards-list-carousel-board-title h3 {
-    color: white;
-    font-size: 18px;
-    margin-top: 5px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
 }
 
 

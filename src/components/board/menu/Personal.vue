@@ -7,46 +7,14 @@
                 <h1>Your Public Boards</h1>
             </div>
             <div class="boards-menu-carousel">
-            <!-- <div class="boards-menu-carousel-board-new"
-                    >
-                <div class="boards-menu-carousel-board-new-icon"
-                        @click="newBoard">
-                    <h3>Create a <br> new board</h3>
-                </div>
-                <div class="boards-menu-carousel-board-title">
-                    <h3 style="font-style: italic">New board</h3>
-                </div>
-            </div> -->
-
-                <button class="boards-list-carousel-board-new"
-                        @click="createBoard(true)"
-                        id="create-board-button"
-                        >
-                    <div class="boards-list-carousel-board-new-icon"
-                            >
-                        <img src="@/assets/common/addcirclewhite.svg">
-                        
-                        <h3>Create a <br> new board</h3>
-                    </div>
-                    <div class="boards-list-carousel-board-title">
-                        <!-- <h3 style="font-style: italic">New board</h3> -->
-                    </div>
-                </button>
-                <div class="boards-menu-carousel-board" 
-                        v-for="board in publicBoards" 
-                        :key="board.info.id"
-                        @click="boardClicked(board.info.id)"
-                        >
-                    <div class="boards-menu-carousel-board-icon">
-                        <div class="boards-list-carousel-board-icon-description">
-                            <p>{{ convertTimeToDate(board.info.created_at) }}</p>
-                            <p>{{ convertBoardTime(board.info.created_at) }}</p>
-                        </div>
-                    </div>
-                    <div class="boards-menu-carousel-board-title">
-                        <h3>{{ board.info.title }}</h3>
-                    </div>
-                </div>
+                <menu-boards @subMenuBoardClicked="selectBoard" 
+                                @subMenuBoardNewBoard="createBoard" 
+                                :createBoard='true' 
+                                :boards="publicBoards"
+                                :flexDirection="'row'"
+                                >
+                                
+                </menu-boards>
             </div>
         </div>
         
@@ -57,50 +25,19 @@
             </div>
 
             <div class="boards-menu-carousel">
-        <!-- <div class="boards-menu-carousel-board-new"
-                >
-            <div class="boards-menu-carousel-board-new-icon"
-                    @click="newBoard">
-                <h3>Create a <br> new board</h3>
+                <menu-boards @subMenuBoardClicked="selectBoard" 
+                                @subMenuBoardNewBoard="createBoard" 
+                                :createBoard='true' 
+                                :boards="privateBoards"
+                                :flexDirection="'row'"
+                                >
+                                
+                </menu-boards>
             </div>
-            <div class="boards-menu-carousel-board-title">
-                <h3 style="font-style: italic">New board</h3>
-            </div>
-        </div> -->
-            <button class="boards-list-carousel-board-new"
-                    @click="createBoard(false)"
-                    id="create-board-button"
-                    >
-                <div class="boards-list-carousel-board-new-icon"
-                        >
-                    <img src="@/assets/common/addcirclewhite.svg">
-                    
-                    <h3>Create a <br> new board</h3>
-                </div>
-                <div class="boards-list-carousel-board-title">
-                    <!-- <h3 style="font-style: italic">New board</h3> -->
-                </div>
-            </button>
-            <div class="boards-menu-carousel-board" 
-                    v-for="board in privateBoards" 
-                    :key="board.info.id"
-                    @click="boardClicked(board.info.id)"
-                    >
-                <div class="boards-menu-carousel-board-icon">
-                    <div class="boards-list-carousel-board-icon-description">
-                        <p>{{ convertTimeToDate(board.info.created_at) }}</p>
-                        <p>{{ convertBoardTime(board.info.created_at) }}</p>
-                    </div>
-                </div>
-                <div class="boards-menu-carousel-board-title">
-                    <h3>{{ board.info.title }}</h3>
-                </div>
-            </div>
-        </div>
-        </div>
-
-
         
+        </div>
+
+
     </div>
     
 </template>
@@ -192,7 +129,12 @@ export default {
             return intl
         },
 
-        createBoard(publicBoard) {
+        selectBoard(id) {
+            this.$emit('subMenuBoardClicked', id)
+        },
+
+        createBoard() {
+            // let board = this.generateBoards(1)[0]
             let title = "New board"
             let settings = {dimensions: {
                         width: 2000,
@@ -200,10 +142,10 @@ export default {
                     }}
             let requestPayload = {
                 title: title,
-                settings: JSON.stringify(settings),
-                public: publicBoard
+                studentId: this.selectedStudentId,
+                settings: JSON.stringify(settings)
             }
-            
+
             this.$el.querySelector('#create-board-button').disabled = true
             this.$http.post('/api/boards', requestPayload)
                         .then(response => {
@@ -215,7 +157,7 @@ export default {
                             // this.menuBoardsClick()
                             // this.openBoard(newBoard.id)            
                         })
-        }
+        },
     },
 
 

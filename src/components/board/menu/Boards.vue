@@ -1,27 +1,32 @@
 <template>
-    <div class="boards-menu-carousel">
-        <!-- <div class="boards-menu-carousel-board-new"
+    <div class="carousel" :ref="'carousel'">
+        <button class="carousel-board-new"
+                @click="newBoard"
+                v-if="createBoard"
+                id="create-board-button"
                 >
-            <div class="boards-menu-carousel-board-new-icon"
-                    @click="newBoard">
+            <div class="carousel-board-new-icon"
+                    >
+                <img src="@/assets/common/addcirclewhite.svg">
+                
                 <h3>Create a <br> new board</h3>
             </div>
-            <div class="boards-menu-carousel-board-title">
-                <h3 style="font-style: italic">New board</h3>
+            <div class="carousel-board-title">
+                <!-- <h3 style="font-style: italic">New board</h3> -->
             </div>
-        </div> -->
-        <div class="boards-menu-carousel-board" 
+        </button>
+        <div class="carousel-board" 
                 v-for="board in sortedBoards" 
                 :key="board.info.id"
                 @click="boardClicked(board.info.id)"
                 >
-            <div class="boards-menu-carousel-board-icon">
-                <div class="boards-list-carousel-board-icon-description">
+            <div class="carousel-board-icon">
+                <div class="carousel-board-icon-description">
                     <p>{{ convertTimeToDate(board.info.created_at) }}</p>
                     <p>{{ convertBoardTime(board.info.created_at) }}</p>
                 </div>
             </div>
-            <div class="boards-menu-carousel-board-title">
+            <div class="carousel-board-title">
                 <h3>{{ board.info.title }}</h3>
             </div>
         </div>
@@ -32,24 +37,32 @@
 export default {
     // name: 'menu-boards'
     props: {
-        // boards: {
-        //     required: true,
-        //     // type: [Array, Null]
-        // }
+        boards: {
+            // required: true,
+            // type: [Array, Null]
+        },
         public: {
             type: Boolean
         },
 
         publicBoards: {
             type: Array
+        },
+
+        createBoard: {
+            type: Boolean
+        },
+
+        flexDirection: {
+            type: String
         }
     },
 
-    data() {
-        return {
-            boards: null,
-        }
-    },
+    // data() {
+    //     // return {
+    //     //     boards: null,
+    //     // }
+    // },
 
     computed: {
         sortedBoards() {
@@ -64,18 +77,8 @@ export default {
         },
     },
 
-    created() {
-        if (this.public) {
-            if (this.publicBoards.length === 0) {
-                this.loadPublicBoards()
-            } else {
-                this.boards = this.publicBoards
-            }
-        }
-        
-        else this.loadAllBoards()
-
-
+    mounted() {
+        if (this.flexDirection === "column") this.$refs.carousel.style['flex-wrap'] = 'wrap'
     },
 
     methods: {
@@ -117,59 +120,37 @@ export default {
             return intl
         },
 
-        // newBoard() {
-        //     this.$emit('subMenuBoardNewBoard')
-        // }
+        newBoard() {
+            this.$emit('subMenuBoardNewBoard')
+        }
     },
 
 
 }
 </script>
 <style>
-.boards-menu-title {
-margin-left: 5px;
+/* .container {
+    padding-top: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+} */
 
-}
-.boards-menu-title h3 {
-    color: white;
-
-}
-
-.boards-menu-carousel {
+.carousel {
     display: flex;
     flex-direction: row;
     /* width: 100%; */
-    /* height: 100px; */
+    /* height: 500px; */
     /* margin-top: 10px; */
     /* padding-bottom: 1px; */
-    margin-left: 15px;
-    margin-right: 15px;
-    /* margin-bottom: 20px; */
-    overflow: hidden;
-    overflow-x: scroll;
+    /* margin-left: 15px; */
+    /* margin-right: 15px; */
+    /* flex-wrap: wrap; */
+    /* overflow: hidden; */
+    /* overflow-y: scroll; */
+    /* box-sizing: border-box; */
 }
 
-.boards-menu-carousel::-webkit-scrollbar {
-    height: 7px;
-    /* margin-top: 5px; */
-}
-
-.boards-menu-carousel::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 5px grey;
-    border-radius: 10px;
-}
-
-.boards-menu-carousel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 99px;
-}
-
-.boards-menu-carousel::-webkit-scrollbar-thumb:hover {
-    box-shadow: inset 0 0 5px white;
-
-}
-
-.boards-menu-carousel-board-icon {
+.carousel-board-icon {
     background-color: white;
     border-radius: 7px;
     height: 100px;
@@ -177,78 +158,7 @@ margin-left: 5px;
     /* flex-direction: column; */
 }
 
-.boards-menu-carousel-board-new {
-    min-width: 150px;
-    max-width: 150px;
-    padding: 5px;
-    box-sizing: border-box;
-    /* height: 100%; */
-    margin-right: 35px;
-    /* margin-bottom: 3px; */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.boards-menu-carousel-board-new-icon {
-    height: 95px;
-    width: 100%;
-    box-shadow: 0 0 0pt 5px lightgreen;
-    margin-left: 5px;
-    padding: 3px;
-    box-sizing: border-box;
-    border-radius: 7px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    cursor: pointer;
-
-
-}
-
-.boards-menu-carousel-board-new-icon h3 {
-    text-align: center;
-    color:white
-}
-
-.boards-menu-carousel-board {
-    min-width: 190px;
-    max-width: 190px;
-    padding: 2px;
-    margin-right: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.boards-menu-carousel-board-title {
-    overflow: hidden;
-    width: 100%;
-    line-height: 25px;
-    height: 60px;
-}
-
-.boards-menu-carousel-board-title h3 {
-    color:white;
-    font-size: 18px;
-    margin-top: 5px;
-    /* overflow: hidden; */
-    /* white-space: nowrap; */
-    /* white-space:normal; */
-    /* text-overflow: ellipsis; */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-.boards-list-carousel-board-icon-description {
+.carousel-board-icon-description {
     width: 100%;
     height: 100%;
     display: flex;
@@ -257,9 +167,88 @@ margin-left: 5px;
     justify-content: center;
 }
 
-.boards-list-carousel-board-icon-description p {
+.carousel-board-icon-description p {
     /* margin-left: auto; */
     font-size: 20px;
     font-weight: bold;
+}
+
+.carousel-board-new {
+    min-width: 190px;
+    max-width: 190px;
+    padding: 5px;
+    box-sizing: border-box;
+    /* height: 100%; */
+    margin-right: 10px;
+    margin-left: 8px;
+    background-color: transparent;
+    font-size: 16px;
+    /* margin-bottom: 3px; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+
+}
+
+.carousel-board-new-icon {
+    height: 95px;
+    width: 100%;
+    box-shadow: 0 0 0pt 5px lightgreen;
+    margin-left: 5px;
+    padding: 3px;
+    box-sizing: border-box;
+    border-radius: 7px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.25);
+
+
+}
+
+.carousel-board-new-icon h3 {
+    text-align: center;
+    color:white;
+    text-align: left;
+    margin-left: 15px;
+}
+
+.carousel-board-new-icon img {
+    height: 30px;
+    /* background-color: white; */
+}
+
+.carousel-board {
+    min-width: 190px;
+    max-width: 190px;
+    padding: 2px;
+    margin-left: 8px;
+    margin-right: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.carousel-board-title {
+    overflow: hidden;
+    width: 100%;
+}
+
+.carousel-board-title h3 {
+    color: white;
+    font-size: 18px;
+    margin-top: 5px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
 }
 </style>
