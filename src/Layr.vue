@@ -84,10 +84,10 @@
                 </div>
 
                 <div class="sub-menu-container" id="sub-menu-container">
-                    <div class="sub-menu" id="sub-menu" v-if="subMenu !== null">
+                    <div class="sub-menu" id="sub-menu" v-show="subMenu !== null">
                         <div class="sub-menu-content">
                             <!-- <component :is="subMenuComponent"></component> -->
-                            <!-- <keep-alive> -->
+                            <keep-alive>
                                 <component :is="subMenu" 
                                             v-bind="subMenuContent"
                                             @subMenuBoardClicked="requestBoard"
@@ -96,7 +96,7 @@
                                             >
                                             
                                 </component>
-                            <!-- </keep-alive> -->
+                            </keep-alive>
                         </div>
                     </div>
 
