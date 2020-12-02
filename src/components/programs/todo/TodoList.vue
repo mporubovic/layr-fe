@@ -12,6 +12,7 @@
                 <todo-item class="list-item-content"
                             :content="item"
                             :hasFocus="hasFocus"
+                            :key='index'
                             @todoItemUpdated="todoItemUpdated"
                             >
                 </todo-item> 
@@ -136,7 +137,7 @@ export default {
 .list-item {
     display: flex;
     flex-direction: row;
-    min-height: 60px;
+    min-height: 40px;
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
@@ -149,7 +150,7 @@ export default {
     flex-direction: row;
     align-items: center;
     width: 100%;
-    margin-left: 15px;
+    margin-left: 5px;
     margin-right: 15px;
     /* margin-right: 25px; */
     overflow: hidden;
@@ -158,7 +159,7 @@ export default {
 .list-item-controls {
     display: flex;
     flex-direction: row;
-    margin-right: 20px;
+    margin-right: 5px;
     /* flex-wrap: nowrap; */
     /* overflow: hidden; */
     
@@ -173,17 +174,18 @@ export default {
     text-decoration: none;
     user-select: none;
     color:black;
-    font-size: 20px;
+    font-size: 16px;
     background-color: white;
     border-radius: 99px;
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25),
+    padding-left: 10px;
+    padding-right: 10px;
+    /* padding-top: 5px; */
+    /* padding-bottom: 5px; */
+    box-shadow: 0px 2px 5px 2px rgba(0, 0, 0, 0.25),
                 inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
     transition: background-color 0.4s,
                 box-shadow 0.1s;
+    cursor: pointer;
 }
 
 .list-item-controls-edit:hover {
@@ -192,7 +194,7 @@ export default {
 }
 
 .list-item-controls-delete {
-    margin-left: 15px;
+    margin-left: 10px;
 }
 
 .list-item-controls-delete:hover {
@@ -210,18 +212,20 @@ export default {
     text-decoration: none;
     user-select: none;
     color:black;
-    font-size: 20px;
+    font-size: 14px;
     background-color: white;
     border-radius: 99px;
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 5px;
     padding-bottom: 5px;
-    box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25),
+    box-shadow: 0px 2px 6px 2px rgba(0, 0, 0, 0.25),
                 inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
     /* margin-left: 5px; */
     transition: background-color 0.4s,
                 box-shadow 0.1s;
+
+    cursor: pointer;
 }
 
 .list-create-common:hover {

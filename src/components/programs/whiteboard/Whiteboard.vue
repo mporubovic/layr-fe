@@ -156,6 +156,10 @@ export default {
         content: {
             type: Array,
             required: true,
+        },
+
+        cardRect: {
+            type: Object,
         }
     },
 
@@ -237,7 +241,6 @@ export default {
 
 
         this.canvas.freeDrawingBrush.width = 3
-        console.log('url(' + require('@/assets/programs/whiteboard/rotate.svg') + '), auto')
 
         fabric.Object.prototype.transparentCorners = false;
         fabric.Object.prototype.cornerColor = 'rgba(0, 0, 255, 0.5)';
@@ -258,6 +261,10 @@ export default {
         this.canvasObjectsUniformStroke(this.canvas.getObjects())
     },
 
+    created() {
+        window.addEventListener("resize", this.windowResized);
+    },
+
     beforeDestroy() {
         if (this.autosaveTimeout) { 
             this.canvasAutosave()  
@@ -266,6 +273,7 @@ export default {
     
     destroyed() {
         clearTimeout(this.autosaveTimeout)
+        window.removeEventListener("resize", this.windowResized);
     },
 
     methods: {
@@ -682,6 +690,8 @@ export default {
 
         removeGrid() {
             let grid = this.canvas.getObjects().filter(o => o.name === "grid")
+            if (grid.length === 0) return
+            
             this.canvas.remove(grid[0])
             
             this.canvas.grid.show = false
@@ -693,10 +703,12 @@ export default {
             this.canvas.clear()
             this.removeGrid()
             this.$el.querySelector('#gridCheckbox').checked = false
-
-            this.canvas.backgroundColor = "#FFFFFF"
-            this.canvasBackgroundColor = "whiteColor"
             
+            this.$nextTick(() => {
+                this.canvas.backgroundColor = "#FFFFFF"
+                this.canvas.renderAll()
+            } )
+            this.canvasBackgroundColor = "whiteColor"
             this.canvasChanged()
         },
 
@@ -708,7 +720,7 @@ export default {
     },
 
     watch: {
-        cardDimensions: {
+        cardRect: {
             deep: true,
             handler(n) {
                 this.canvas.setHeight(n.height)
@@ -716,7 +728,7 @@ export default {
                 if (this.canvas.grid) this.drawGrid(this.canvas.grid ? this.canvas.grid.size : 10)
                 // this.drawGrid()
             }
-        }
+        },
     },
     
 }
@@ -730,6 +742,7 @@ export default {
     align-items: center;
     width: 100%;
     height: 100%;
+    position: relative;
 }
 
 .toolbar {
@@ -738,18 +751,17 @@ export default {
     align-items: center;
     margin-top: 10px;
     position: absolute;
-    bottom: 20px;
-    /* max-height: 30px; */
+    bottom: 5px;
     overflow: hidden;
     border-radius: 10px;
-    transition: max-height 1s;
+    transition: transform 0.5s ease-in-out;
     /* justify-content: ; */
-
-
+    /* transform: translateY(60px); */
 }
 
 .toolbar:hover {
-    max-height: 500px;
+    /* max-height: 500px; */
+    /* transform: none; */
 }
 
 .toolbar-secondary {
@@ -765,6 +777,9 @@ export default {
     padding-top: 5px;
     padding-bottom: 5px;
     overflow: hidden;
+    flex: 1;
+    backdrop-filter: blur(8px);
+
 }
 
 .toolbar-primary {
@@ -779,9 +794,31 @@ export default {
     justify-content: center;
     border-radius: 100px;
     margin-top: 5px;
-    overflow: hidden;
+    /* overflow: hidden; */
     position: relative;
+    /* flex: 0 0 auto; */
+    padding: 0;
+    max-height: 10px;
+    transition: all 0.5s;
 }
+
+.toolbar-primary:hover {
+    max-height: 100px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.toolbar-primary > * {
+    opacity: 0;
+    transition: all 0.5s;
+}
+
+.toolbar-primary:hover > * {
+    opacity: 1;
+}
+
 
 .canvas-container {
     flex: 1;

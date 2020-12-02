@@ -19,16 +19,16 @@
                 class="todo-item-input"
                 type="text"
                 v-bind:value="content.todo.body"
-                id="todo-input"
+                :id="'todo-input-'+content.id"
                 ref="input"
-                v-if="content.local.isEditing"
+                v-show="content.local.isEditing"
                 autocomplete="off" 
                 >
                 
             <div class="todo-item-body" @contextmenu.prevent="bodyContextmenu()"
                     >
                 <p
-                    v-if="!content.local.isEditing"
+                    v-show="!content.local.isEditing"
                     
                     >
                     {{ content.todo.body }}
@@ -153,7 +153,7 @@ export default {
             handler(n) {
                 if (n) {
                     this.$nextTick(() => {
-                        this.$el.querySelector("#todo-input").focus()
+                        this.$el.querySelector("#todo-input-"+this.content.id).focus()
                     })
                 }
             }
@@ -177,10 +177,10 @@ export default {
 
 .todo-item-checkbox {
     /* height: 100%; */
-    height: 35px;
-    min-width: 35px;
+    height: 25px;
+    min-width: 25px;
     /* min-width: 100%; */
-    margin-right: 25px;
+    margin-right: 15px;
 
 }
 
@@ -189,7 +189,7 @@ export default {
 
     /* width: auto; */
     /* margin-right: 15px; */
-    font-size: 20px;
+    font-size: 16px;
     width: 100%;
     /* padding-left: 10px; */
     box-sizing: border-box;
@@ -208,30 +208,12 @@ export default {
 }
 
 .todo-item-body {
-    /* font-size: 20px; */
-    /* width: 100%; */
-    /* padding-left: 10px; */
-    /* margin-right: 25px; */
-
-    /* box-sizing: border-box; */
-    /* border-bottom: 1px solid black; */
-    /* max-width: auto; */
-
-    /* max-width: 2000px;  */
-    /* font-weight: bold; */
-    /* cursor:pointer; */
-
     overflow: hidden;
-    /* white-space: nowrap; */
-    /* text-overflow: ellipsis; */
-    /* margin-right: 25px; */
     transition: all 0.3s;
-    /* text-decoration: none; */
-    /* color: blue; */
 }
 
 .todo-item-body p {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     overflow: hidden;
     white-space: nowrap;

@@ -2,10 +2,10 @@
     <div class="file-selector" 
             @drop.prevent="dropFiles($event)"
             @dragover="dragOver($event)">
-        <div class="file-selector-header">
+        <!-- <div class="file-selector-header">
             <p>Content selector</p>
         </div>
-        <hr class="file-selector-body-line">
+        <hr class="file-selector-body-line"> -->
 
         <div class="file-selector-body">
             <div class="file-selector-drag-n-drop">
@@ -143,10 +143,10 @@ export default {
     background: white;
     /* position: relative; */
     z-index: 99;
-    max-height: 410px;
-    min-height: 210px;
-    max-width: 550px;
-    min-width: 550px;
+    /* max-height: 410px; */
+    /* min-height: 210px; */
+    /* max-width: 550px; */
+    /* min-width: 550px; */
     border-radius: 15px;
     box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25);
     overflow: hidden;
@@ -156,20 +156,17 @@ export default {
     align-items: center;
 }
 
-.file-selector-header {
-    /* width: 100%; */
+/* .file-selector-header {
     display:flex;
     flex-direction: row;
     justify-content: center;
     margin-top: 5px;
-    /* margin-right: auto; */
 }
 
 .file-selector-header p {
     margin: 0;
     font-size: 30px;
-    /* margin-right: auto; */
-}
+} */
 
 .file-selector-body {
     display: flex;
@@ -228,10 +225,11 @@ export default {
 
 .file-selector-device-upload-text {
     font-weight: bold;
+    flex-wrap: nowrap;
 }
 
 .file-selector-device-upload-icon {
-    height: 40px;
+    height: 25px;
     margin-bottom: 10px;
     margin-right: 15px;
 }
@@ -284,7 +282,7 @@ export default {
 }
 
 .file-selector-link-icon {
-    height: 35px;
+    height: 25px;
     margin-right: 15px;
 
 }
@@ -299,12 +297,12 @@ export default {
     box-sizing: border-box;
     flex: 1;
     background-color: lightgray;
-    padding: 14px 18px;
-    font-size: 20px;
+    padding: 8px 12px;
+    font-size: 16px;
     border-radius: 8px;
     box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1), 1px 1px 3px 0 rgba(255, 255, 255, 0.1);
     transition: padding 0.15s, box-shadow 0.15s;
-    margin-top: 10px;
+    /* margin-top: 10px; */
 }
 
 .file-selector-link-input:hover {
@@ -322,7 +320,7 @@ export default {
 
 .file-selector-link-input-div {
     margin-top: 10px;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
     width: 100%;
 }
 

@@ -1,8 +1,8 @@
 <template>
     <div class="students">
         <div class="student-list-container containers-common">
-            <div class="students-container-header">
-                <h1 class="students-container-title">Your Students</h1>
+            <div class="container-header">
+                Your Students
                 
             </div>
             <hr class="line-common">
@@ -26,7 +26,7 @@
                             v-bind:value="student.name"
                             >
                     <button class="students-list-button buttons-common"
-                            @click="selectStudent(student.id)"
+                                                                                                                                   @click="selectStudent(student.id)"
                             >
                         <img src="@/assets/modal/login/next.svg" class="next-icon">
                     </button>
@@ -35,27 +35,30 @@
             </div>
         </div>
 
-        <div class="boards-list-container containers-common">
-            <div class="boards-container-header">
-                <h1 class="boards-container-title"> {{ boardContainerTitle }} </h1>
+        <div class="stacks-list-container containers-common">
+            <div class="container-header">
+                {{ stackContainerTitle }}
                 
             </div>
             <hr class="line-common">
             
-            <div class="boards-list-loading" v-if="selectedStudentId && !boards">
-                    <p class="boards-list-loading-text">Loading...</p>
+            <div class="stacks-list-loading" v-if="selectedStudentId && !stacks">
+                    <p class="stacks-list-loading-text">Loading...</p>
                 </div>
             
-            <div class="boards-list-carousel-container" v-if="boards">
+            <div class="stacks-list-carousel-container" v-if="stacks">
 
-                <menu-boards @subMenuBoardClicked="selectBoard" 
-                                @subMenuBoardNewBoard="createBoard" 
-                                :createBoard='true' 
-                                :boards="boards"
+                <menu-stacks @subMenuStackClicked="selectStack" 
+                                @subMenuStackNewStack="createStack" 
+                                @stackUpdatedItself="stackUpdatedItself"
+                                :createStack='true' 
+                                :stacks="stacks"
+                                :groupBy="'category'"
                                 :flexDirection="'column'"
+                                :userTags="user.tags"
                                 >
                                 
-                </menu-boards>
+                </menu-stacks>
             </div>
                 
 
@@ -64,12 +67,12 @@
         <div class="student-settings-container containers-common">
             <button class="student-add-student-button buttons-common"
                     @click="newStudentClicked"
-                    v-if="!isNewStudentFormVisible && !newStudentPinCode"
+                    v-if="!isNewStudentFormVisible && !newStudentInvited"
                 >
                 <img src="@/assets/common/addcircle.svg">
                 <p>New Student</p>
             </button>
-            <p class="student-add-student-count" v-if="!isNewStudentFormVisible && students && !newStudentPinCode">{{ students.length }} / 99 Students</p>
+            <p class="student-add-student-count" v-if="!isNewStudentFormVisible && students && !newStudentInvited">{{ students.length }} / 20 Students</p>
 
             <div class="student-new-student-form"
             v-if="isNewStudentFormVisible"
@@ -81,54 +84,35 @@
                         autocomplete="off"
                         >
                 <button class="new-student-form-button buttons-common" id="new-student-form-button"
-                        @click="createNewStudentClicked"
+                        @click="createNewStudent"
                     >
-                    Create new student
+                    Invite student
                 </button>
             </div>
 
-            <div class="student-new-student-pin-code" v-if="newStudentPinCode">
-                <div class="new-student-pin-code-title">
-                    <p>Your new student's PIN Code</p>
-                    <!-- <p>PIN Code</p> -->
-                </div>
-
-                <div class="new-student-pin-code-code">
-                    <p>{{ newStudentPinCodeFormatted }}</p>
-                </div>
-
-                <div class="new-student-pin-code-buttons">
-                    <button class="new-student-pin-code-instructions buttons-common">
-                        <img src="@/assets/common/info.svg">
-                        <p>Instructions</p>
-                    </button>
-
-                    <button class="new-student-pin-code-ok buttons-common"
-                            @click="newStudentOkClicked">
-                        <img src="@/assets/common/tickcircle.svg">
-                        <p>OK</p>
-                    </button>
-                </div>
+            <div class="student-new-student-confirmation" v-if="newStudentInvited">
+                <div class="student-new-student-confirmation-text">
+                Your student will receive an email with login instructions. In the meantime, you can start preparing lessons for them.
+                    
+                </div>                
+                <button class="new-student-ok buttons-common"
+                        @click="newStudentOkClicked">
+                    <img src="@/assets/common/tickcircle.svg">
+                    <p>OK</p>
+                </button>
+            
             </div>
         </div>
 
-        <div class="board-settings-container containers-common">
+        <div class="stack-settings-container containers-common">
             <div class="student-info" v-if="selectedStudent">
                 <p>Student ID: {{ selectedStudent.id }}</p>
-                <p>Registered on: {{ convertTimeToDate(selectedStudent.created_at) }}</p> 
                 <p>Email: {{ selectedStudent.email }}</p> 
+                <p v-if="selectedStudent.email_verified_at">Registered on: {{ convertTimeToDate(selectedStudent.created_at) }}</p> 
+                <p v-if="!selectedStudent.email_verified_at">Invite sent on: {{ convertTimeToDate(selectedStudent.created_at) }} <br> The student has not accepted the invite yet.</p> 
 
                 <div class="student-controls">
-                    <button class="student-controls-reset-pin-code buttons-common" 
-                            v-if="!studentResetPinCode"
-                            @click="resetStudentPinCode"
-                            >
-                        Reset Student PIN Code
-                    </button>
-                    <div class="student-controls-reset-pin-code-new" v-if="studentResetPinCode">
-                        <p>New PIN Code:</p>
-                        <p class="student-controls-reset-pin-code-new-text">{{ studentResetPinCodeFormatted }}</p>
-                    </div>
+
                 </div>
             
 
@@ -140,28 +124,31 @@
 
 <script>
 
-import { loremIpsum } from "lorem-ipsum";
+// import { loremIpsum } from "lorem-ipsum";
 
 export default {
-    // name: 'menu-boards'
+    // name: 'menu-stacks'
     props: {
         // students: {
         //     // type: [Object, Null],
         //     required: true,
         // }
-        // boards,
+        // stacks,
+
+        user: {
+            type: Object
+        }
     },
 
     data() {
         return {
-            boards: null,
+            stacks: null,
             students: [],
             // students: null,
             selectedStudentId: null,
             studentNameEditingId: null,
             isNewStudentFormVisible: false,
-            newStudentPinCode: null,
-            studentResetPinCode: null,
+            newStudentInvited: false,
         }
     },
 
@@ -170,44 +157,24 @@ export default {
             return this.students.find(s => s.id === this.selectedStudentId)
         },
         
-        boardContainerTitle() {
-            return this.selectedStudent ? this.selectedStudent.name + '\'s boards' : 'Select a student on the left'  
+        stackContainerTitle() {
+            return this.selectedStudent ? this.selectedStudent.name + '\'s stacks' : 'Select a student on the left'  
         },
 
-        sortedBoards() {
-            return this.boards.filter(b=>b).sort(function(a, b) {
+        sortedStacks() {
+            return this.stacks.filter(b=>b).sort(function(a, b) {
                                         let ta = new Date(a.info.created_at)
                                         let tb = new Date(b.info.created_at)
                                         return tb.getTime() - ta.getTime()
                                     });
-            // return this.boards
-        },
-
-        newStudentPinCodeFormatted() {
-            if (this.newStudentPinCode) {
-                let s = this.newStudentPinCode.toString().split('')
-                s.splice(3, 0, "  ")
-                return s.join('')
-            } else {
-                return null
-            }
-        },
-
-        studentResetPinCodeFormatted() {
-            if (this.studentResetPinCode) {
-                let s = this.studentResetPinCode.toString().split('')
-                s.splice(3, 0, "  ")
-                return s.join('')
-            } else {
-                return null
-            }
+            // return this.stacks
         },
 
 
     },
 
     created() {
-        // this.boards = this.generateBoards(15)
+        // this.stacks = this.generateStacks(15)
         this.loadStudents()
     },
 
@@ -223,35 +190,15 @@ export default {
             this.selectedStudentId = id
             if (this.newStudentPinCode) this.newStudentPinCode = null
             if (this.studentResetPinCode) this.studentResetPinCode = null
-            if (this.boards) this.boards = null
+            if (this.stacks) this.stacks = null
             // this.$refs['students-list-item-' + id][0].style['background-color'] = 'lightgreen'
             this.$http.get('/api/students/' + id).then((response) => {
                 console.log('API STUDENT RESPONSE ', response.data)
                 let student = response.data.student
-                let boards = student.boards
-                this.boards = boards
+                let stacks = student.stacks
+                this.stacks = stacks
                 // this.$emit
             })
-        },
-
-        generateBoards(count) {
-            let boards = []
-            for (let index = 0; index < count; index++) {
-                let board = {
-                    info: {
-                        id: Math.floor(Math.random() * 10000),
-                        title: loremIpsum(
-                                {
-                                    count: 4, 
-                                    units: "words"
-                                }
-                            )
-                    },
-                
-                }
-                boards.push(board)
-            }
-            return boards
         },
 
         convertTimeToDate(date) {
@@ -261,7 +208,7 @@ export default {
             return intl
         },        
         
-        convertBoardTime(date) {
+        convertStackTime(date) {
             let d = new Date(date)
             let options = {
                 hour: 'numeric', minute: 'numeric', second: 'numeric', 
@@ -272,33 +219,43 @@ export default {
             return intl
         },
 
-        selectBoard(id) {
-            this.$emit('subMenuBoardClicked', id)
+        selectStack(id) {
+            this.$emit('subMenuStackClicked', id)
         },
 
-        createBoard() {
-            // let board = this.generateBoards(1)[0]
-            let title = "New board"
-            let settings = {dimensions: {
-                        width: 2000,
-                        height: 1000
-                    }}
+        stackUpdatedItself(id, path, value) {
+            this.$emit('subMenuStackUpdatedItself', id, path, value)
+
+        },
+
+        createStack(withTag) {
+            // let stack = this.generateStacks(1)[0]
+            let title = "New stack"
+            let boardSettings = {
+                dimensions: {
+                    width: 4,
+                    height: 3
+                }
+            } 
+
             let requestPayload = {
                 title: title,
                 studentId: this.selectedStudentId,
-                settings: JSON.stringify(settings)
+                ...(withTag && {tag: withTag}),
+                boardSettings: JSON.stringify(boardSettings)
             }
 
-            this.$el.querySelector('#create-board-button').disabled = true
-            this.$http.post('/api/boards', requestPayload)
-                        .then(response => {
-                            let newBoard = response.data.board
-                            console.log("API BOARD RESPONSE", response.status)
-                            this.boards.push(newBoard)
-                            this.$el.querySelector('#create-board-button').disabled = false
 
-                            // this.menuBoardsClick()
-                            // this.openBoard(newBoard.id)            
+            this.$el.querySelector('#new-stack-button').disabled = true
+            this.$http.post('/api/stacks', requestPayload)
+                        .then(response => {
+                            let newStack = response.data.stack
+                            console.log("API STACK RESPONSE", response.status)
+                            this.stacks.push(newStack)
+                            this.$el.querySelector('#new-stack-button').disabled = false
+
+                            // this.menuStacksClick()
+                            // this.openStack(newStack.id)            
                         })
         },
 
@@ -332,21 +289,26 @@ export default {
             this.isNewStudentFormVisible = true
         },
 
-        createNewStudentClicked() {
-            this.$el.querySelector('#new-student-form-button').disabled = true
+        newStudentOkClicked() {
+            this.newStudentInvited = false
+            this.isNewStudentFormVisible = false
+        },
+
+        createNewStudent() {
             
             let name = this.$el.querySelector('#new-student-name-input').value
             let email = this.$el.querySelector('#new-student-email-input').value
-            let password = this.generatePinCode()
 
             if (!name || !email) {
                 return
             }
 
+            // this.$el.querySelector('#new-student-form-button').disabled = true
+
+
             let requestPayload = {
                 name,
                 email,
-                password
             }
 
             console.log("REQUEST PAYLOAD", requestPayload)
@@ -358,40 +320,17 @@ export default {
                 // this.loadStudents()
                 this.students.push(newStudent)
                 this.isNewStudentFormVisible = false
+                this.newStudentInvited = true
+                this.$el.querySelector('#new-student-form-button').disabled = false
+
                 this.$nextTick(() => {
                     let el = this.$el.querySelector('#students-list')
                     el.scrollTop = el.scrollHeight
 
                 })
 
-                this.newStudentPinCode = password
-
             })
         },
-
-        generatePinCode() {
-            return Math.floor(100000 + Math.random() * 900000)
-        },
-
-        newStudentOkClicked() {
-            this.newStudentPinCode = null
-        },
-
-        resetStudentPinCode() {
-            let id = this.selectedStudentId
-            let password = this.generatePinCode()
-            this.studentResetPinCode = password
-
-            let requestPayload = {
-                password: password
-            }
-
-            this.$http.patch('/api/students/' + id, requestPayload).then((response) => {
-                console.log("API STUDENT RESPOSNE", response.status)
-            })
-
-        }
-
 
     }
 }
@@ -400,60 +339,21 @@ export default {
 .students {
     display: grid;
     grid-template-columns: 1fr 3fr;
-    grid-template-rows: 3fr 1fr;
+    grid-template-rows: 4fr 1fr;
     grid-column-gap: 20px;
     grid-row-gap: 20px;
     height: 700px;
     padding: 20px;
 }
 
-
-
-.buttons-common {
-    text-decoration: none;
-    user-select: none;
-    color:black;
-    /* font-size: 16px; */
-    background-color: white;
-    border-radius: 99px;
-    /* padding-left: 20px; */
-    /* padding-right: 20px; */
-    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.25),
-                inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
-    /* margin-left: 5px; */
-    transition: background-color 0.4s,
-                box-shadow 0.1s;
-    cursor: pointer;
-}
-
-.buttons-common:hover:not([disabled]) {
-    box-shadow: 0 0 0pt 2pt lightgreen;
-
-}
-
 .next-icon {
-    height: 26px
+    height: 22px
 }
 
-.containers-common {
-    border-radius: 10px;
-}
 
-.students-container-header {
-    padding-top: 5px;
-    padding-bottom: 5px;
-    background-color: white;
-    width: 100%;
-    /* height: 40px; */
-    display: flex;
-    flex-direction: row;
-    /* align-items: center; */
-    justify-content: center;
-    /* margin-bottom: 5px; */
-}
 
 .students-container-title {
-    font-size: 20px;
+    font-size: 16px;
     /* margin-left: auto; */
     /* width: 100%; */
 }
@@ -486,7 +386,6 @@ export default {
     overflow-y: scroll;
     scroll-behavior: smooth;
     box-sizing: border-box;
-    background-color: rgba(0, 0, 0, 0.25);
 
 }
 
@@ -498,14 +397,14 @@ export default {
     margin-bottom: 15px;
     background-color: white;
     padding-left: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     border-radius: 6px;
     /* box-sizing: border-box; */
 }
 
 .students-list-item-name {
-    font-size: 20px;
+    font-size: 16px;
     text-decoration: underline;
     /* width: 80%; */
     width: 220px;
@@ -513,7 +412,7 @@ export default {
 }
 
 .students-list-item-name-input {
-    font-size: 20px;
+    font-size: 16px;
     font-style: italic;
     /* width: 80%; */
     width: 220px;
@@ -524,9 +423,9 @@ export default {
 }
 
 .students-list-button {
-    height: 35px;
-    width: 35px;
-    min-width: 35px;
+    height: 30px;
+    width: 30px;
+    min-width: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -535,75 +434,66 @@ export default {
     
 }
 
-.boards-list-loading {
+.stacks-list-loading {
     margin-top: 10px;
     margin-left: 10px;
 }
 
-.boards-list-loading-text {
+.stacks-list-loading-text {
     color: white;
-    font-size: 25px;
+    font-size: 16px;
 }
 
-.boards-list-container { 
+.stacks-list-container { 
     grid-area: 1 / 2 / 2 / 3; 
-    background-color: rgba(0, 0, 0, 0.25);
-    /* overflow-y:hidden; */
-    /* overflow-x: hidden; */
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    /* border-radius: 10px; */
-    /* user-select: none; */
-    /* overflow: hidden; */
-    /* overflow-y: scroll; */
 
 }
 
 
-.boards-container-header {
+.stacks-container-header {
     padding-top: 5px;
     padding-bottom: 5px;
     /* margin-left: 20px; */
-    padding-left: 20px;
+    /* padding-left: 20px; */
     background-color: white;
     /* width: 100%; */
 }
 
-.boards-container-title {
-    font-size: 20px;
+.stacks-container-title {
+    font-size: 16px;
+    margin-left: 20px;
 }
 
-/* .boards-list-carousel-container {
+/* .stacks-list-carousel-container {
     overflow-y: scroll;
     padding-top: 20px;
     padding-left: 15px;
     padding-right: 15px;
 } */
 
-.boards-list-carousel-container {
+.stacks-list-carousel-container {
     overflow-y: scroll;
     padding-top: 20px;
     padding-left: 15px;
     padding-right: 15px;
 }
 
-.boards-list-carousel-container::-webkit-scrollbar, .students-list::-webkit-scrollbar {
+.stacks-list-carousel-container::-webkit-scrollbar, .students-list::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 
-.boards-list-carousel-container::-webkit-scrollbar-track, .students-list::-webkit-scrollbar-track {
+.stacks-list-carousel-container::-webkit-scrollbar-track, .students-list::-webkit-scrollbar-track {
     box-shadow: inset 0 0 5px grey;
     border-radius: 10px;
 }
 
-.boards-list-carousel-container::-webkit-scrollbar-thumb, .students-list::-webkit-scrollbar-thumb{
+.stacks-list-carousel-container::-webkit-scrollbar-thumb, .students-list::-webkit-scrollbar-thumb{
     background: rgba(255, 255, 255, 0.4);
     border-radius: 99px;
 }
 
-.boards-list-carousel-container::-webkit-scrollbar-thumb:hover, .students-list::-webkit-scrollbar-thumb:hover {
+.stacks-list-carousel-container::-webkit-scrollbar-thumb:hover, .students-list::-webkit-scrollbar-thumb:hover {
     box-shadow: inset 0 0 5px white;
 
 }
@@ -632,11 +522,11 @@ export default {
 .student-add-student-count {
     position: absolute;
     bottom: 40px;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .student-add-student-button p {
-    font-size: 20px;
+    font-size: 16px;
     margin-left: 10px;
 }
 
@@ -651,8 +541,8 @@ export default {
     box-sizing: border-box;
     /* flex: 1; */
     background-color: lightgray;
-    padding: 14px 18px;
-    font-size: 20px;
+    padding: 5px 14px;
+    font-size: 16px;
     border-radius: 8px;
     box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1), 1px 1px 3px 0 rgba(255, 255, 255, 0.1);
     transition: padding 0.15s, box-shadow 0.15s;
@@ -685,52 +575,11 @@ export default {
     padding-right: 20px;
     padding-top: 5px;
     padding-bottom: 5px;
-    margin-top: 5px;
-    /* margin-left: auto; */
-    font-size: 18px;
+    font-size: 16px;
 
 }
 
-.student-new-student-pin-code {
-    display: flex;
-    height: 100%;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.new-student-pin-code-title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    
-}
-
-.new-student-pin-code-title p {
-    font-size: 20px;
-}
-
-.new-student-pin-code-code {
-    margin-top: 10px;
-    background-color: lightgray;
-    padding-left: 30px;
-    padding-right: 30px;
-}
-
-.new-student-pin-code-code p {
-    font-size: 35px;
-    font-weight: bold;
-}
-
-.new-student-pin-code-buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-top: 20px
-}
-
-.new-student-pin-code-instructions, .new-student-pin-code-ok {
+.new-student-ok {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -740,22 +589,28 @@ export default {
     padding-bottom: 5px;
 }
 
-.new-student-pin-code-ok {
-    margin-left: 15px;
-}
-
-.new-student-pin-code-instructions p, .new-student-pin-code-ok p {
-    font-size: 15px;
-    margin-left: 10px;
-}
-
-.new-student-pin-code-instructions img, .new-student-pin-code-ok img {
+.new-student-ok img {
     height: 20px;
 }
 
+.new-student-ok p {
+    font-size: 14px;
+    margin-left: 10px;
+}
 
+.student-new-student-confirmation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-.board-settings-container { 
+.student-new-student-confirmation-text {
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.stack-settings-container { 
     grid-area: 2 / 2 / 3 / 3; 
     background-color: white;
 
@@ -766,34 +621,8 @@ export default {
 }
 
 .student-info p {
-    font-size: 20px;
+    font-size: 16px;
 }
 
-.student-controls-reset-pin-code {
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    font-size: 15px;
-    margin-top: 10px;
-}
-
-.student-controls-reset-pin-code-new {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-top: 10px;
-    /* justify-content: center; */
-}
-
-.student-controls-reset-pin-code-new-text {
-    /* margin-top: 10px; */
-    background-color: lightgray;
-    padding-left: 20px;
-    padding-right: 20px;
-    font-size: 35px;
-    font-weight: bold;
-    margin-left: 10px;
-}
 
 </style>

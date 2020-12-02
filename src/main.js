@@ -5,7 +5,12 @@ import axios from 'axios'
 
 Vue.prototype.$http = axios.create({
     withCredentials: true,
-    baseURL: process.env.NODE_ENV === "development" ? 'http://localhost:8000' : 'https://api.mylayr.net/'
+    // baseURL: process.env.NODE_ENV === "development" ? 'http://localhost:8000' : 'https://api.mylayr.net/',
+    baseURL: process.env.NODE_ENV === "development" ? location.hostname === "localhost" ? 'http://localhost:8000' : 'http://192.168.0.17:8000' : 'https://app.mylayr.com/',
+    // ...(process.env.NODE_ENV === "development" && {headers: {
+    //     authorization: 'Bearer 1|KGYCavjhIczvhijwB34eFlaBoc3LBbUoB4wygFw4cJVLb98wjmmH6zMD9JTxtPTjuOlDVpVDBLZCa8me'
+    // }})
+
 })
 Vue.prototype.$httpCross = axios.create(
     // headers: { 'Access-Control-Allow-Origin': '*' }
@@ -39,9 +44,17 @@ import Vue2TouchEvents from 'vue2-touch-events'
  
 Vue.use(Vue2TouchEvents)
 
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+
+const router = new VueRouter({
+    mode: 'history',
+})
+
 new Vue({
     el: '#layr',
     render: h => h(Layr),
+    router,
 
 })
 

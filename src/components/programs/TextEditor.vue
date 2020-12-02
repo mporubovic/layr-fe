@@ -100,7 +100,7 @@ export default {
             
             this.intervalId = setInterval(() => {
                 if (this.change.length() > 0 ) {
-                    console.log("AUTO-UPDATE")
+                    // console.log("AUTO-UPDATE")
                     this.saveContent()
                 }
                 // console.log('interval')
@@ -149,7 +149,7 @@ export default {
             // console.log(this.change)
             let newContent = JSON.parse ( JSON.stringify ( this.content[0] ) )
         
-            newContent.text = JSON.stringify(this.quill.getContents())
+            newContent.text.text = JSON.stringify(this.quill.getContents())
 
             // console.log(newContent)
             
@@ -189,7 +189,7 @@ export default {
 .text-editor-container-wrapper {
     flex: 1;
     overflow: hidden;
-    padding-top: 20px;
+    padding-top: 10px;
 
     /* overflow-y: scroll; */
 }
@@ -205,7 +205,7 @@ export default {
     border: none !important;
 }
 .ql-snow.ql-toolbar button {
-    height: 28px !important;
+    /* height: 28px !important; */
 }
 
 .ql-snow .ql-picker {

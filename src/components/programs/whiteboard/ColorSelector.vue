@@ -60,7 +60,6 @@ export default {
 
             this.selectedColor = color
 
-
             this.$nextTick(()=>{
                 this.$refs[color].style['opacity'] = 1
                 this.$refs[color].style['width'] = '45px'
@@ -78,7 +77,7 @@ export default {
 
         localColor: {
             handler(n) {
-                this.setColor(n)
+                if (n !== undefined) this.setColor(n)
             }
             
         }

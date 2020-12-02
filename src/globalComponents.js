@@ -20,10 +20,13 @@ import Whiteboard from './components/programs/whiteboard/Whiteboard.vue'
 
 import FileSelector from './components/programs/modal/FileSelector.vue'
 
-import MenuBoards from './components/board/menu/Boards.vue'
+import MenuStacks from './components/board/menu/Stacks.vue'
 import MenuLogin from './components/board/menu/Login.vue'
 import MenuStudents from './components/board/menu/Students.vue'
 import MenuPersonal from './components/board/menu/Personal.vue'
+import MenuInvite from './components/board/menu/Invite.vue'
+import MenuStudentDashboard from './components/board/menu/StudentDashboard.vue'
+import MenuHelp from './components/board/menu/Help.vue'
 
 Vue.component('image-viewer', ImageViewer);
 Vue.component('pdf-viewer', PdfViewer);
@@ -40,7 +43,10 @@ Vue.component('whiteboard', Whiteboard);
 
 Vue.component('file-selector', FileSelector);
 
-Vue.component('menu-boards', MenuBoards);
+Vue.component('menu-stacks', MenuStacks);
 Vue.component('menu-login', MenuLogin);
 Vue.component('menu-students', MenuStudents);
 Vue.component('menu-personal', MenuPersonal);
+Vue.component('menu-invite', MenuInvite);
+Vue.component('menu-student-dashboard', MenuStudentDashboard);
+Vue.component('menu-help', MenuHelp);

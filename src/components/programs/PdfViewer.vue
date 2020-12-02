@@ -1,6 +1,6 @@
 
 <template>
-    <div>
+    <div class="pdf-viewer">
         <h2 v-if="contentLoading">Loading PDF</h2>        
         
         <div class="pdf-selector" v-if="content.length === 0">
@@ -70,26 +70,20 @@ export default {
 };
 </script>
 
-<style scoped>
-div {
-    width: 100%;
+<style>
+.pdf-viewer {
     height: 100%;
 }
+
 iframe {
     width: 100%;
     height: 100%;
-
-
-    /* z-index: -1; */
-    /* margin-bottom: 30px; */
-    /* overflow-y: hidden; */
-
 }
 
 .pdf-selector {
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
     overflow: hidden;
-    padding: 50px;
+    /* padding: 50px; */
     height: 100%;
     display: flex;
     justify-content: center;

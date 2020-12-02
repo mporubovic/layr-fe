@@ -26,7 +26,7 @@ v-bind:href="content.url.path"
                         type="url"
                         v-bind:value="urlInput"
                         id="url-input"
-                        v-if="content.local.isEditing"
+                        v-show="content.local.isEditing"
                         autocomplete="off" 
                         >
 
@@ -37,7 +37,7 @@ v-bind:href="content.url.path"
                         target="_blank"
                         rel="noopener noreferrer"
                         v-bind:href="urlPathFormat"
-                        v-if="!content.local.isEditing"
+                        v-show="!content.local.isEditing"
                         @contextmenu.prevent="hrefContextmenu()"
                         >
                         <!-- {{ url.url.path }} -->
@@ -420,6 +420,7 @@ export default {
     overflow: hidden;
     /* overflow-y: scroll; */
     overflow-y:auto;
+    margin-bottom: 5px;
 
 }
 
@@ -431,11 +432,11 @@ export default {
 .url-list-item {
     display: flex;
     flex-direction: row;
-    min-height: 60px;
+    /* min-height: 800px; */
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     /* position: absolute; */
 
 
@@ -466,7 +467,7 @@ export default {
 
     /* width: auto; */
     /* margin-right: 15px; */
-    font-size: 20px;
+    font-size: 16px;
     width: 100%;
     /* padding-left: 10px; */
     box-sizing: border-box;
@@ -485,10 +486,10 @@ export default {
 }
 
 .url-list-item-favicon-wrapper {
-    height: 50px;
-    /* width: 50px; */
-    min-width: 50px;
-    margin-right: 25px;
+    height: 40px;
+    /* width: 40px; */
+    min-width: 40px;
+    margin-right: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -517,7 +518,7 @@ export default {
     /* margin-left: 25px; */
     /* width: auto; */
     /* margin-right: 15px; */
-    font-size: 20px;
+    font-size: 16px;
     /* font-weight: bold; */
 
     /* width: 100%; */

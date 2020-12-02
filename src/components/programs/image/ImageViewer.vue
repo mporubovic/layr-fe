@@ -173,7 +173,7 @@ img {
 
 .footer-controls-common {
     font-family: monospace;
-    font-size: 40px;
+    font-size: 30px;
     background-color: transparent;
     /* color: light; */
     cursor: pointer;
@@ -192,12 +192,12 @@ img {
 .footer-content {
     /* flex: 0; */
     /* text-align: center; */
-    font-size: 15px;
+    font-size: 14px;
     background-color: rgba(255, 255, 255, 1);
     /* max-width: 40%; */
     /* width: auto; */
     height: 25px;
-    max-height: 25px;
+    max-height: 20px;
     /* min-width: 100px; */
     /* max-width: 100px; */
     padding: 5px 15px 5px 15px;
@@ -229,15 +229,15 @@ img {
 
 .footer-controls-lr {
     background-color: white;
-    min-width: 100px;
-    max-width: 100px;
+    min-width: 80px;
+    max-width: 80px;
     /* height: auto; */
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
     border-radius: 99px;
-    height: 35px;
+    height: 30px;
     margin-right: 10px;
         box-shadow: 0px 2px 10px 2px rgba(0, 0, 0, 0.25),
             inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
@@ -258,7 +258,7 @@ img {
     align-items: center;
     padding-left: 0;
     padding-right: 0;
-    height: 35px;
+    height: 30px;
     min-width: 50px;
     max-width: 50px;
     border-radius: 99px;
@@ -268,8 +268,8 @@ img {
 }
 
 .footer-controls-add-button img {
-    height: 20px;
-    width: 20px;
+    height: 15px;
+    width: 15px;
 }
 
 .footer-controls-add-button:hover {

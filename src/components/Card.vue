@@ -13,16 +13,18 @@
 
                 
 <template>
-    <div class="card card-in-stack" 
+    <div class="card card-transitions" 
         :ref="'card' + id"  
         key="id"
-        :style="cardDynamicStyle"
-        @mouseover="onCardMouseOver"
-        @mouseleave="onCardMouseLeave"
+        :style="`grid-area: ${card.settings.dimensions.y+1} / ${card.settings.dimensions.x+1} / ${card.settings.dimensions.y + 1 + card.settings.dimensions.height} / ${card.settings.dimensions.x + 1 + card.settings.dimensions.width}`"
+        :id="'card-'+id"
         >
+
+        <div class="card-corner">
+
+        </div>
         
         <div class="card-header"
-                @mousedown="onCardHeaderMouseDown()"
             >
             <div class="card-header-title card-header-drag-handle"
                     >
@@ -52,23 +54,13 @@
                     <img src="@/assets/common/delete.svg"
                             :style="deleteButtonDynamicStyle">
                 </div>
-
-
-                <div class="card-header-controls-close"
-                        @mouseup="isInStack ? null : onCardMouseUp()"
-                        >
-                    ✕
-                </div>
             </div>
             
         </div>
 
         <div class="card-body card-body-resize-handle" id="card-body"
-                @mousedown="isInStack ? onCardMouseDown() : cardChildPointerEvents()"
-                @mouseup="isInStack ? onCardMouseUp() : null"
                 @mouseover="onCardBodyMouseOver"
                 @mouseleave="onCardBodyMouseLeave"
-                :style="cardBodyDynamicStyle"
                 >
 
             <!-- <div class="test">
@@ -82,6 +74,7 @@
             <!-- <h1 v-if="loadContent">{{ card.display.position }}</h1> -->
 
             <component v-if="loadContent"
+                        class="card-component"
                         :is="cardProgram(card)" 
                         :content="cardContent"
                         :cardId="card.info.id"
@@ -89,8 +82,9 @@
                         @programUpdatedContent="programUpdatedContent"
                         @programCreatedContent="programCreatedContent"
                         @programDeletedContent="programDeletedContent"
-                        :autoSaveInterval="stackSettings.autoSaveInterval"
+                        :autoSaveInterval="5000"
                         :cardDimensions="dimensions"
+                        :cardRect="boundingRect"
                         >
             </component>        
 
@@ -117,27 +111,21 @@
 
 <script>
 import interact from 'interactjs';
-// import { nextTick } from 'vue/types/umd';
 
 export default {
     
-    // props: ['card', 'index'],
     props: {
         card: {
             type: Object,
             required: true,
         },
-        // index: {
-        //     type: Number,
-        //     required: true, 
-        // },
-        stackSettings: {
-            type: Object,
-            required: true, 
-        },
         hasFocus: {
             type: Boolean,
             required: true
+        },
+
+        dropzoneGrid: {
+            type: Object
         }
     },
 
@@ -145,41 +133,23 @@ export default {
         return {
             isHovering: false,
             boundingRect: {
-                x: 0,
-                y: 0,
+                left: 0,
+                top: 0,
                 width: 0,
                 height: 0,
             },
-
-            stackBoundingRect: {
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0,
-            },
-
-            // stackPosition: 0,
 
             boardPosition: {
                 x: null,
                 y: null,
             },
 
-            // dimensions: this.card.display.dimensions,
-
-            // isInStack: true,
             mouseDown: false,
 
-
-            // id: this.card.info.id,
-
-            // hasFocus: false,
 
             headerTapCount: 0,
 
             deleteTapCount: 0,
-
-            // index: this.index,
             // index: this.card.display.position,
 
             isHeaderEditing: false,
@@ -188,24 +158,14 @@ export default {
 
             loadContent: false,
 
+            newColumn: null,
+            newRow: null,
+
         }
     },
     
    
     computed: {
-        cardDynamicStyle() {
-            
-                return this.isInStack ? { 'z-index': this.index} : {'z-index': this.index};
-
-        },
-
-        cardBodyDynamicStyle() {
-            return this.isInStack ? {'background-color': "white"} : null
-        },
-
-        // loadContent() {
-        //     return !this.isInStack;
-        // }
 
         id() {
             return this.card.info.id  
@@ -215,19 +175,6 @@ export default {
             return this.card.settings.dimensions
         },
 
-        isInStack() {
-            return !this.card.display.open
-        },
-
-        index() {
-            return this.card.display.position
-        },
-
-        stackPosition() {
-            return this.card.local.display.stackPosition
-            // return this.card.local ? this.card.local.display.stackPosition : this.index
-        },
-
         cardContent() {
             // this.card.content
             return (this.card.content) ? this.card.content : []
@@ -235,46 +182,37 @@ export default {
 
         deleteButtonDynamicStyle() {
             return this.deleteTapCount > 0 ? {'opacity': "1"} : {'opacity': "0.2"}
+        },
+
+        overlap() {
+            this.card.local
+            return this.card.local.overlap
         }
 
     },
     
     mounted() {
         this.calcBoundingRect();
-        // this.stackPosition = (this.index -1 );
-        // this.stackPosition = (this.index);
-        // this.$el.style.bottom = this.index * this.stackSettings.cardGap + 'px'
-        this.$el.style.bottom = this.stackPosition * this.stackSettings.cardGap + 'px'
-        this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
-        // console.log(this.stackPosition)
-    
-        // let r = Math.floor(Math.random()* 254) ;
-        // let g = Math.floor(Math.random()* 254) ;
-        // let b = Math.floor(Math.random()* 254) ;
-        // let a = 0.9;
-        // // alert('rgba(' + r + ',' + g + ',' + b + ',' + a + ')');
-        // this.$el.style["background-color"] = 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+        this.initializeInteractjs();
 
-        this.initializeInteractJsResizable();
-        this.initializeInteractJsDraggable();
+        this.loadContent = true
 
-        if (!this.isInStack) this.cardToBoard()
-        // if (!this.isInStack) {
-        //     setTimeout(() => {
-        //         this.cardToBoard()
-        //     }, 100 + 100*this.index);
-        // }
-
-
-        // this.$el.classList.remove();
+        // setTimeout(() => {
+        //     this.loadContent = true
+        // }, 100);
  
     },
 
     beforeDestroy() {
-        if (!this.card.local.delete) this.cardUpdateProperty('local.display.stackPosition', this.index)
-        // this.cardUpdateProperty('display.', this.index)
         this.$el.remove()
+    },
 
+    created() {
+        window.addEventListener("resize", this.calcBoundingRect);
+    },
+
+    destroyed() {
+        window.removeEventListener("resize", this.calcBoundingRect);
     },
 
     methods: {
@@ -354,202 +292,16 @@ export default {
             }
         },
 
-
-        
-        startupAnimation () {
-            this.onCardMouseDown();
-        },
         
         calcBoundingRect() {
             let cid = 'card' + this.id;
             let br = this.$refs[cid].getBoundingClientRect();
-            this.boundingRect.x = br.x;
-            this.boundingRect.y = br.y;
+            this.boundingRect.left = br.left;
+            this.boundingRect.top = br.top;
             this.boundingRect.width = br.width;
             this.boundingRect.height = br.height;
         },
-
-        onCardMouseOver() {
-            this.isHovering = true;
-            if (this.isInStack) {
-                this.$el.children[0].style.opacity = 1;
-                this.$el.style.transform = "";
-                this.$el.style.transform += "rotate3d(-41, 14, 15, 50deg) rotateX(15deg) scale(0.8)";
-            }
-
-        },
         
-        onCardMouseLeave() {
-            this.isHovering = false;
-            if (this.isInStack) {
-                this.$el.children[0].style.opacity = 0;
-                this.$el.style.transform = "";
-                this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
-            }
-            
-            // if (!this.isInStack) {
-            //     this.hasFocus = false;
-            // }
-            
-            // this.$el.style.transform -= "rotateX(15deg)";
-
-        },
-
-        cardToBoard() {
-                // alert('GO TO BOARD');
-                // console.log(this.loadContent)
-                setTimeout(() => {
-                    this.loadContent = true
-                    // console.log(this.loadContent)
-
-                }, 1000);
-
-                this.$emit('cardStackInteraction', this.id, true);
-
-                
-                this.$el.classList.remove("card-in-stack");
-                this.$el.classList.add("card-on-board");
-                this.calcBoundingRect();
-                
-                
-                document.getElementById("cards").appendChild(this.$el);
-                
-                this.$el.style.bottom = "" ;
-                this.$el.style.top = this.boundingRect.y + 'px' ;
-                this.$el.style.left = this.boundingRect.x + 'px';
-                
-            
-
-                setTimeout(() => {
-                // this.$nextTick(() => {
-                    
-                    this.$el.style.left = this.dimensions.x + 'px';
-                    this.$el.style.top = this.dimensions.y + 'px';
-
-                    this.$el.style.width = this.dimensions.width + 'px';
-                    this.$el.style.height = this.dimensions.height + 'px';
-
-
-                    this.$el.style.opacity = 1;
-                    this.$el.children[0].style.opacity = 1;
-
-
-                    this.$el.style.transform = "";
-                }, 50);
-                // });
-
-                // setTimeout(() => {
-                //     this.loadContent = true
-                // }, 1500);
-
-                interact(this.$refs['card'+this.id]).draggable(true).resizable(true);
-                
-                this.$el.classList.add('draggable');
-                this.$el.classList.add('resizable');
-                // this.isInStack = false;
-                // this.cardUpdateProperty('display.open', true)
-        },
-
-        cardToStack() {
-                // alert('GO TO STACK');
-                this.loadContent = false
-
-                let brStack = this.$parent.calculateBoundingRectangle();
-                this.$emit('cardStackInteraction', this.id, false);
-                
-                
-                // this.$el.offsetHeight;
-                this.$el.classList.remove("card-on-board");
-                this.$el.classList.add("card-in-stack");
-                let cid = 'card' + this.id;
-                let br = this.$refs[cid].getBoundingClientRect();
-                let crd = this.$refs[cid];
-                
-                crd.setAttribute('data-x', 0);
-                crd.setAttribute('data-y', 0);
-                
-                document.getElementById("stack-cards").appendChild(crd);
-
-                
-                
-                this.$el.style.transform = "";
-                this.$el.style.top = "";
-                
-                // console.log(brStack);
-                this.$el.style.bottom =  (brStack.y - br.y - br.height ) + 'px' ;
-                // this.$el.style.bottom =  300 + 'px' ; 
-                this.$el.style.left = br.x - brStack.x + 'px' ;
-                // this.$el.style.left = brStack.x - br.x + 'px' ;
-
-                crd.style.opacity = 1;
-
-                
-                setTimeout(() => {
-                    
-                    crd.style.bottom = (this.stackPosition * this.stackSettings.cardGap) + 'px';
-
-                    crd.style.left = 0;
-                    this.$el.style.transform = "rotate3d(-41, 14, 15, 50deg) scale(0.8)";
-                    
-                    crd.style.width = this.stackSettings.cardDimensions.width + 'px';
-                    crd.style.height = this.stackSettings.cardDimensions.height + 'px';
-                    
-                    crd.children[0].style.opacity = 0;
-                    this.$el.style.opacity = 0.15;
-
-                    this.$el.querySelector(".card-body").style.padding = "";
-
-
-                    // this.$el.style["background-color"] = "white";
-
-                    // this.loadContent = false
-
-
-                    
-                }, 50);
-
-                this.$el.classList.add("card-in-stack");
-                
-                // interact('.resizable').resizable(false);
-                // interact('.draggable').draggable(false);
-                
-                interact(this.$refs['card'+this.id]).draggable(false).resizable(false);
-                crd.classList.remove('draggable');
-                crd.classList.remove('resizable');
-                
-                
-                // this.isInStack = true;
-                // this.cardUpdateProperty('display.open', false)
-        },
-
-        onCardMouseUp() {
-            
-            if (this.isInStack) {
-                // this.cardToBoard()
-                this.cardUpdateProperty('display.open', true)
-
-            } else {
-                // this.cardToStack()
-                this.cardUpdateProperty('display.open', false)
-    
-            }
-
-        },
-
-        onCardMouseDown() {
-            
-            this.$el.style.transform += "translateY(10px)" ;
-            if (!this.isInStack) {
-                // this.hasFocus = true;
-                alert('warn')
-            }
-                
-
-
-            
-            
-        },
-
 
         onCardMouseMove() {
         },
@@ -572,50 +324,6 @@ export default {
             this.$el.style.cursor = "";
         },
 
-        onCardHeaderMouseDown() {
-            this.headerTapCount++
-            // console.log(this.headerTapCount)
-            
-            // this.timer ? clearTimeout(this.timer) : this.timer = setTimeout(() => { this.headerTapCount = 0 }, 700);
-
-            setTimeout(() => {
-                if (this.headerTapCount === 2) {
-                    // this.$emit('cardBringForward', this.card.info.id);
-                    console.log('forward DISABLED')
-
-
-                } else if (this.headerTapCount >= 2) {
-                    
-                    this.isHeaderEditing = true
-                    this.$nextTick(() => {
-                        this.$el.querySelector('#title-input').focus()
-                    })
-                    
-                    // console.log('editing')
-                }
-
-                this.headerTapCount = 0
-
-            }, 400);
-
-            // setTimeout(() => {
-            //     if (this.headerTapCount === 2) {
-            //         this.$emit('cardBringForward', this);
-            //         console.log('forward')
-
-
-            //     } else if (this.headerTapCount >= 2) {
-            //         this.isHeaderEditing = true
-
-            //         console.log('editing')
-            //     }
-
-            //     this.headerTapCount = 0
-
-            // }, 200);
-
-
-        },
 
         onCardHeaderRightclick() {
             this.isHeaderEditing = true
@@ -636,193 +344,173 @@ export default {
             this.isHeaderEditing = false
         },
 
-        setStackPosition(pos) {
-            this.stackPosition = pos;
-            this.$el.style.bottom = pos * this.stackSettings.cardGap + 'px';
-        },
         
-        
-        dragMoveListener (event) {
-            var target = event.target
-            // keep the dragged position in the data-x/data-y attributes
-            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
-
-            // translate the element
-            target.style.webkitTransform =
-                target.style.transform =
-                'translate(' + x + 'px, ' + y + 'px)'
-
-            // update the posiion attributes
-            target.setAttribute('data-x', x)
-            target.setAttribute('data-y', y)
-            },
-
-        cardChildPointerEvents() {
-            // this.hasFocus = true;
-            // alert('warning');
-            // this.$children[0].$el.style["pointer-events"] = 'all'
-            // this.$children[0].$el.style.removeProperty('pointer-events')
-        },
-            
-        initializeInteractJsResizable() {
-            let self = this;
-            interact(this.$refs['card'+this.id])
-                .resizable({
-                    enabled: false,
-                    // resize from all edges and corners
-                    edges: { left: true, right: true, bottom: true, top: false },
-                    // margin: 10,
-                    allowFrom: '.card-body-resize-handle',
-                    ratio: 1,
-                    // ratio: 800/526,
-
-                    listeners: {
-                        start () {
-                            // event = ""
-                            self.$emit('cardInteractJsResize', self.id, true)
-                        },
-                        
-                        move (event) {
-                            var target = event.target
-                            
-                            target.classList.add("card-no-delay");
-                        
-                            
-                            
-                            
-                            var x = (parseFloat(target.getAttribute('data-x')) || 0)
-                            var y = (parseFloat(target.getAttribute('data-y')) || 0)
-
-                            // update the element's style
-                            target.style.width = event.rect.width + 'px'
-                            target.style.height = event.rect.height + 'px'
-
-                            // translate when resizing from top or left edges
-                            x += event.deltaRect.left
-                            y += event.deltaRect.top
-
-                            target.style.webkitTransform = target.style.transform =
-                            'translate(' + x + 'px,' + y + 'px)'
-
-                            target.setAttribute('data-x', x)
-                            target.setAttribute('data-y', y)
-
-                            // console.log(event);
-                            // console.log(self.boardPosition.x);
-                            // console.log(event.rect.left);
-                            
-                            // self.dimensions.x = event.rect.left;
-                            // self.dimensions.y = event.rect.top;
-
-                            // self.cardUpdateProperty('display.dimensions.x', event.rect.left)
-                            // self.cardUpdateProperty('display.dimensions.y', event.rect.top)
-                        },
-
-                        end (event) {
-                            event.target.classList.remove("card-no-delay");
-                            // alert('uwaga');
-                            // self.dimensions.width = event.rect.width;
-                            // self.dimensions.height = event.rect.height;
-                            self.cardUpdateProperty('settings.dimensions.x', Math.round(event.rect.left))
-                            self.cardUpdateProperty('settings.dimensions.y', Math.round(event.rect.top))
-                            self.cardUpdateProperty('settings.dimensions.width', Math.round(event.rect.width))
-                            self.cardUpdateProperty('settings.dimensions.height', Math.round(event.rect.height))
-                            self.$emit('cardInteractJsResize', self.id, false)
-                            
-                        }
-                    },
-                    modifiers: [
-                    // keep the edges inside the parent
-                        interact.modifiers.restrictEdges({
-                            outer: 'parent'
-                        }),
-
-                    // minimum size
-                        interact.modifiers.restrictSize({
-                            min: { width: 260, height: 150 }
-                        }),
-
-                        // interact.modifiers.aspectRatio({ 
-                        //     ratio: 481/354,
-
-
-                        // })
-                    ],
-
-                    inertia: true
-                })
-                
-            
-        },
-        
-        initializeInteractJsDraggable() {
+        initializeInteractjs() {
             let self = this;
 
-            interact(this.$refs['card'+this.id])
+            interact('#card-'+this.id)
+            // interact('.card')
                     .draggable({
-                        enabled: false,
-                        
-                        // enable inertial throwing
-                        inertia: true,
-                        // keep the element within the area of it's parent
+                        enabled: true,
                         modifiers: [
                             interact.modifiers.restrictRect({
                                 restriction: 'parent',
-                                endOnly: true
                             }),
 
                         ],
-                        // enable autoScroll
                         autoScroll: false,
-                        allowFrom: '.card-header-drag-handle',
+                        allowFrom: '.card-header',
 
                         listeners: {
-                        // call this function on every dragmove event
-                            start () {
-                                self.$emit('cardInteractJsDrag', self.id, true)
-                            },
-                            
                             move (event) {
-                                var target = event.target
-                                target.classList.add("card-no-delay");
+                                let target = event.target
+
+                                target.classList.remove('card-transitions')
+                                target.classList.add('card-semitransparent')
                                 
-                                // keep the dragged position in the data-x/data-y attributes
-                                var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-                                var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+                                let x = (self.interactx || 0) + event.dx
+                                let y = (self.interacty || 0) + event.dy
                                 
-                                // translate the element
                                 target.style.webkitTransform =
                                     target.style.transform =
                                     'translate(' + x + 'px, ' + y + 'px)'
 
-                                // update the posiion attributes
-                                target.setAttribute('data-x', x)
-                                target.setAttribute('data-y', y)
+                                self.interactx = x
+                                self.interacty = y
+
+                                let cardRect = target.getBoundingClientRect()
+
+                                self.$emit('cardDragStart', self.id, cardRect.left, cardRect.top)
                             },
 
-                            // call this function on every dragend event
                             end (event) {
-                                event.target.classList.remove("card-no-delay");
-                                // console.log(event);
-                                // console.log(self.boardPosition.x);
-                                // console.log(event.rect.left);
-                                // self.dimensions.x = event.rect.left;
-                                // self.dimensions.y = event.rect.top;
-                                self.cardUpdateProperty('settings.dimensions.x', Math.round(event.rect.left))
-                                self.cardUpdateProperty('settings.dimensions.y', Math.round(event.rect.top))
-                                // alert(self.card.id);
-                                self.$emit('cardInteractJsDrag', self.id, false)
+                                self.$emit('cardDragEnd', self.id)
+
+                                let target = event.target
+                                target.classList.add('card-transitions')
+
+                                self.interactx = self.interacty = null
+                                
+
+                                if (!self.overlap) {
+                                    target.style.webkitTransform =
+                                    target.style.transform =
+                                    'translate(' + self.card.local.dx + 'px, ' + self.card.local.dy + 'px)'  
+
+                                } else {
+                                    target.style.transform = null
+
+                                }
+                                 
+                                setTimeout(() => {
+                                    target.classList.remove('card-transitions')
+                                    target.classList.remove('card-semitransparent')
+                                    target.style.transform = null
+
+                                }, 200);
 
                             }
                         }
-                    })
+                    }).resizable({
+                    enabled: true,
+                    edges: { right: '.card-corner', bottom: '.card-corner' },
+                    ratio: 1,
+                    listeners: {
+                        move (event) {
+                            var target = event.target
+
+                            target.classList.remove('card-transitions')
+                            target.classList.add('card-semitransparent')
+
+                            target.style.width = event.rect.width + 'px'
+                            target.style.height = event.rect.height + 'px'
+
+                            // let els = document.elementsFromPoint(event.clientX, event.clientY)
+                            
+                            // let newCell = els.find(el => el.classList.contains("dropzone"))
+                            // let newCellRow = parseInt(newCell.getAttribute('row'))
+                            // let newCellColumn = parseInt(newCell.getAttribute('column'))
+
+                            // let newCellRect = newCell.getBoundingClientRect()
+
+                            // let offsetX = (event.clientX - newCellRect.left) > (self.dropzoneGrid.cellWidth *0.5) ? 0 : -1
+                            // let offsetY = (event.clientY - newCellRect.top) > (self.dropzoneGrid.cellHeight *0.5) ? 0 : -1
+
+                            // let anchorCellRow = self.dimensions.y
+                            // let anchorCellColumn = self.dimensions.x
+                            
+                            // if (newCellColumn+offsetX < anchorCellColumn) offsetX = 0
+                            // if (newCellRow+offsetY < anchorCellRow) offsetY = 0
+                            
+                            // self.newColumn = newCellColumn + offsetX
+                            // self.newRow = newCellRow + offsetY
+
+                            self.$emit('cardResizeStart', self.id, event.clientX, event.clientY)
+
+                            
+                            
+                            // let overlap = self.checkOverlap(self.id, anchorCellColumn, anchorCellRow, newCellColumn+offsetX, newCellRow+offsetY)
+                            
+                            // self.overlap = overlap
+
+                            // self.deactivateAllDropzones()
+                            // self.activateDropzonesInArea(anchorCellColumn, anchorCellRow, newCellColumn+offsetX, newCellRow+offsetY, overlap)
+                        
+                        },
+
+                        end (event) {
+                            let target = event.target
+                            self.$emit('cardResizeEnd', self.id)
+                            
+
+                            // target.style.webkitTransform = target.style.transform = null
+                            
+                            // let width = !self.overlap ? self.newColumn + 1 - self.dimensions.x : self.dimensions.w
+                            // let height = !self.overlap ? self.newRow + 1 - self.dimensions.y : self.dimensions.h
+                                
+                            // target.style.height = height * self.dropzoneGrid.cellHeight - 10 +'px'
+                            // target.style.width = width * self.dropzoneGrid.cellWidth - 10 +'px'
+                            target.classList.add('card-transitions')
+
+                            target.style.width = "100%"
+                            target.style.height = "100%"
+
+                            setTimeout(() => {
+                                target.classList.remove('card-transitions')
+                                target.classList.remove('card-semitransparent')
+                                self.cardResized()
+
+                            }, 200);
+
+
+
+                            // setTimeout(() => {
+                            //     target.style.height = null                            
+                            //     target.style.width = null   
+                            //     target.classList.remove('card-delay')
+                            //     self.deactivateAllDropzones()
+
+                            //     self.w = width
+                            //     self.h = height
+                            // }, 200);
+
+                        }
+
+                    },
+                    modifiers: [
+                        interact.modifiers.restrictEdges({
+                            outer: 'parent'
+                        }),
+                        interact.modifiers.restrictSize({
+                            min: { width: 100, height: 100 }
+                        }),
+                    ],
+
+                })
+
         },
-                
-        // loadContent() {
-        //     return !this.isInStack;
-            
-        // },
+
+
         programUpdatedContent(programName, updatedContent) {
             // console.log(programName, updateFunction, updatedContent)
             this.$emit('cardProgramUpdatedContent', programName, updatedContent, this.id)
@@ -857,61 +545,20 @@ export default {
                 this.deleteTapCount = 0
 
             }, 600);
-        }
-    },
-
-    watch: {
-        isInStack: {
-            // console.log(o, n)
-            // console.log(this.isInStack)
-            // this.$nextTick(() => {
-            //     console.log(this.isInStack)
-            handler(n) {
-                // console.log(o, "->", n)
-                // if (n) this.loadContent = false
-                
-                // setTimeout(() => {
-                    // console.log(o, "->", n)
-                    // this.$nextTick(() => this.onCardMouseUp())
-                    if (n === true) {
-                        // this.loadContent = false
-                        this.cardToStack()
-                        
-                    } else {
-                        // this.loadContent = true
-                        this.cardToBoard()
-                        
-                    }
-                    // this.onCardMouseUp()
-                // }, 100 + 100*this.index);
-                // }, 1);
-            }
-            // })
-
         },
 
-        stackPosition: {
-            handler(n) {
-                // this.$el.style.bottom = this.stackSettings.cardGap * (this.stackPosition)  + 'px';
-                // console.log(n, o)
-                // if (n > o) {
-                    this.$el.style.bottom = this.stackSettings.cardGap * n  + 'px';
-
-                // } else {
-                    // this.$el.style.bottom = this.stackSettings.cardGap * n  + 'px';
-                // }
-            }
+        cardResized() {
+            this.calcBoundingRect()
         },
-
-        // card(n ,o) {
-        //     // console.log(n, o)
-        // }
     },
 }
 </script>
 
 
 <style>
+.card-component {
+    height: 100%;
+}
 
 .card-header {
     display: flex;
@@ -919,8 +566,8 @@ export default {
     justify-content: space-between;
     align-items: center;
     /* width: 100%; */
-    max-height: 34px;
-    opacity: 0; 
+    max-height: 30px;
+    /* opacity: 0;  */
     background-color: white;
     /* outline: 1px black solid; */
     border-bottom: 2px black solid;
@@ -940,7 +587,7 @@ export default {
 }
 
 .card-header-controls-delete {
-    margin-right: 11px;
+    /* margin-right: 11px; */
     /* opacity: 0.4; */
     cursor: pointer;
     /* margin-top: 5px; */
@@ -952,11 +599,6 @@ export default {
     color: red;
     fill: red;
     /* background-color: red; */
-}
-
-.card-header-controls-close {
-    cursor: pointer;
-
 }
 
 .card-header-title {
@@ -972,12 +614,12 @@ export default {
 }
 
 .card-icon-onboard {
-    height: 28px;
+    height: 24px;
     /* margin-right: 10px; */
 }
 
 .card-header-title h1 {
-    font-size: 22px;
+    font-size: 18px;
     margin-left: 10px;
     color: black;
     overflow: hidden;
@@ -986,7 +628,7 @@ export default {
 }
 
 .card-header-title-input {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: bold;
     font-style: italic;
     width: 100%;
@@ -999,12 +641,6 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
-    /* align-items: stretch; */
-    /* background-color: rgba(0,0,0,0.15); */
-    /* overflow: hidden; */
-    /* overflow: hidden; */
-    /* overflow-y:auto; */
     overflow-y:hidden;
     overflow-x: hidden;
     touch-action: none;
@@ -1012,24 +648,9 @@ export default {
     
 }
 
-.card-icon-instack {
-    height: 50px;
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    /* right: 0; */
-}
-
-.test {
-    flex:1;
-    /* overflow: hidden; */
-    /* width: 100%; */
-    /* height: 100%; */
-    
-}
 
 .card-body p {
-    font-size: 20px;
+    font-size: 16px;
     margin: 0px;
     color: black;
 }
@@ -1043,71 +664,41 @@ export default {
 
 
 .card {
-    width: 225px;
-    height: 225px;
-    transition: top 0.5s ease, 
-                left 0.5s ease, 
-                bottom 0.5s ease, 
-                margin 1s,
-                opacity 0.11s,
-                /* opacity 0.8s, */
-                transform 0.15s ease,
-                /* transform 1.5s ease, */
-                width 0.8s ease-in-out,
-                height 0.8s ease-in-out,
-                ;
-
-
-
+    position: relative;
     user-select: none;
-
+    opacity: 1;
     touch-action: none;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    /* align-items:stretch; */
-    /* float:left; */
-    border-radius: 13px;
-    box-shadow: 0px 0px 9px 1px rgba(0,0,0,0.75);
-    /* background-color: none; */
+    border-radius: 10px;
+    /* box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.75); */
     overflow: hidden;
-    /* background-color: rgba(0,0,0,0.1); */
-    /* pointer-events: none; */
-
-
 }
 
-
-.card:after {
-    content: '';
+.card-corner {
     position: absolute;
-    right: 50px;
-    top: 7px;
-    border-radius: 100%;
-    width: 25px;
-    height: 25px;
-    /* box-shadow: 0px 0px 0px 9999px white; */
-    /* box-shadow: 0px 0px 0px 0px white; */
-    z-index: -1;
-    /* overflow: visible; */
+    /* position: relative; */
+    bottom: 0;
+    right: 0;
+    background-color:rgba(0, 0, 0, 0.1);
+    width: 20px;
+    height: 20px;
+    z-index: 20;
 }
 
-.card-no-delay {
-    transition: none !important;
+.card-transitions {
+    transition: 
+                transform 0.20s ease-in-out,
+                width 0.20s ease-in-out,
+                height 0.20s ease-in-out,
+                opacity 0.20s ease-in-out,
+                ;
 }
 
-.card-in-stack {
-    position: absolute;
-    /* opacity: 1; */
-    opacity: 0.15;
-    /* transform: rotate3d(-41, 14, 15, 50deg); */
-    transform-style: preserve-3d;
-    /* transform: scale(0.8); */
-
-}
-
-.card-in-stack:hover {
-    opacity: 1 !important;
+.card-semitransparent {
+    opacity: 0.3;
+    z-index: 9999;
 }
 
 .card-on-board {

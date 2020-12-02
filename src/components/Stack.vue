@@ -139,12 +139,12 @@ export default {
 
             newCards: [              
                 {
-                    "type": "text",
-                    "program": "texteditor",
+                    "type": "whiteboard",
+                    "program": "whiteboard",
                     "available": true,
-                    "title": "Notes",
-                    "icon": require('@/assets/cards/icons/text.svg'),
-                    "description": "Create a note with a text editor"
+                    "title": "Draw",
+                    "icon": require('@/assets/cards/icons/whiteboard.svg'),
+                    "description": "Create a whiteboard"
                 },                 
                 {
                     "type": "pdf",
@@ -163,12 +163,12 @@ export default {
                     "description": "Play a video from YouTube"
                 },                
                 {
-                    "type": "todo",
-                    "program": "list",
+                    "type": "text",
+                    "program": "texteditor",
                     "available": true,
-                    "title": "Todo",
-                    "icon": require('@/assets/cards/icons/todo.svg'),
-                    "description": "Create a todo list"
+                    "title": "Notes",
+                    "icon": require('@/assets/cards/icons/text.svg'),
+                    "description": "Create a note with a text editor"
                 },                
                 {
                     "type": "url",
@@ -187,12 +187,12 @@ export default {
                     "description": "Upload images from your device"
                 },                  
                 {
-                    "type": "whiteboard",
-                    "program": "whiteboard",
+                    "type": "todo",
+                    "program": "list",
                     "available": true,
-                    "title": "Draw",
-                    "icon": require('@/assets/cards/icons/whiteboard.svg'),
-                    "description": "Create a whiteboard"
+                    "title": "Todo",
+                    "icon": require('@/assets/cards/icons/todo.svg'),
+                    "description": "Create a todo list"
                 },  
 
 
