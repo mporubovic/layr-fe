@@ -79,6 +79,7 @@
                         :content="cardContent"
                         :cardId="card.info.id"
                         :hasFocus="hasFocus"
+                        :cardUnload="boardUnload"
                         @programUpdatedContent="programUpdatedContent"
                         @programCreatedContent="programCreatedContent"
                         @programDeletedContent="programDeletedContent"
@@ -126,7 +127,11 @@ export default {
 
         dropzoneGrid: {
             type: Object
-        }
+        },
+
+        boardUnload: {
+            type: Boolean
+        },
     },
 
     data() {

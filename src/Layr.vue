@@ -178,6 +178,7 @@
                     :card=card
                     :index=index
                     :hasFocus="cardsHaveFocus"
+                    :boardUnload="boardUnload"
                     :dropzoneGrid='dropzoneGrid'
                     @cardInteractJsDrag="cardsSetFocus"
                     @cardInteractJsResize="cardsSetFocus"
@@ -239,6 +240,7 @@ export default {
             currentBoardId: null,
             currentStack: null,
             boardDataLoaded: false,
+            boardUnload: false,
             stackDataLoaded: false,
             menuTitle: "Welcome",
             isMenuTitleEditing: false,
@@ -1218,7 +1220,7 @@ export default {
                 case("text"):
                     return {
                         "info": {
-                            "title": "Text editor"
+                            "title": "Notes"
                         },
 
                         "display": {
@@ -1239,8 +1241,7 @@ export default {
                                 "id": Math.floor(Math.random()*10000),
                                 "meta": {},
                                 "text": {
-                                    // "text": {"ops":[{"insert":"Hello World!"}]}
-                                    "text": JSON.stringify({"ops": [{"insert": ""}]})
+                                    "text": ""
                                 }
                             }
                         ],
@@ -1430,15 +1431,21 @@ export default {
         },
 
         openBoard(id) {
-            this.currentBoardId = id
-            this.processCards(this.currentBoard.cards)
-            this.dropzoneGridSetup()
-            this.$nextTick(() => this.windowResized())
+            this.boardUnload = true
             this.$nextTick(() => {
-                this.dropzoneGrid.DOMcells = this.$refs['dropzone-cell']
-                this.dropzoneGrid.height = this.currentBoard.settings.dimensions.height
-                this.dropzoneGrid.width = this.currentBoard.settings.dimensions.width
-            } )
+
+                this.currentBoardId = id
+                this.processCards(this.currentBoard.cards)
+                this.dropzoneGridSetup()
+                this.$nextTick(() => this.windowResized())
+                this.$nextTick(() => {
+                    this.dropzoneGrid.DOMcells = this.$refs['dropzone-cell']
+                    this.dropzoneGrid.height = this.currentBoard.settings.dimensions.height
+                    this.dropzoneGrid.width = this.currentBoard.settings.dimensions.width
+                    this.boardUnload = false
+
+                } )
+            })
         },
 
         createNewCard(cardType, x, y) {
@@ -1852,7 +1859,7 @@ export default {
 }
 
 body {
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .debug {

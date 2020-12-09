@@ -1,26 +1,25 @@
 <template>
     <div class="text-editor"
             :style="editorDynamicStyle">
-        <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
-
-        <div class="text-editor-toolbar" id="text-editor-toolbar">
-        <!-- <div :class="editorId"> -->
-        
-        </div>
         <h2 v-show="contentLoading">Loading Text Editor</h2>
         
         <div class="text-editor-container-wrapper" v-show="!contentLoading">   
             <div class="text-editor-container" :id="editorId" >
-                <p>Hello World!</p>
+                <editor api-key="k579ttia58ux83p72dnl63ipvrbirtk3hjzzbgvp4frh2bne" :init="tinymcesettings" v-model="localText"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import Quill from "quill";
+import Editor from "@tinymce/tinymce-vue";
+
 
 export default {
+    components: {
+        'editor': Editor
+    },
+    
     props: {
         cardId: {
             type: Number,
@@ -41,11 +40,15 @@ export default {
             type: Array,
             required: true,
         },
+
+        cardUnload: {
+            type: Boolean,
+        },
     },
 
     computed: {
         editorId() {
-            return "text-editor-container-" + this.cardId
+            return "text-editor-" + this.cardId
         },
 
         editorDynamicStyle() {
@@ -54,126 +57,129 @@ export default {
     },
     
     mounted() {
-        var toolbarOptions =[
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{'align': ''}, {'align': 'center'}, {'align': 'right'}, {'align': 'justify'}],
-                        ['image', 'link'],
-                        // [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        
-                    ];
-        
-        // setTimeout(() => {
-            this.Delta = Quill.import('delta');
-            this.change = new this.Delta();
-            // console.log(this.change.compose(delta))
-            let quill = new Quill("#" + this.editorId, {
-                modules: {
-                    toolbar: toolbarOptions,
-                    // toolbar: [
-                    //     [{ 'size': ['small', false, 'large', 'huge'] }],
-                    //     ['bold', 'italic', 'underline',],
-                    //     [{'align': ''}, {'align': 'center'}, {'align': 'right'}, {'align': 'justify'}],
-                    //     ['image', 'link'],
-                    //     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    //     [{ 'color': [] }, { 'background': [] }],
-
-                    // ]
-                },
-                placeholder: "Click here to start typing...",
-
-                theme: "snow",
-            })
-            // console.log(this.content)
-            let parsedText = JSON.parse(this.content[0].text.text)
-            
-            // console.log(parsedText)
-            quill.setContents(parsedText.ops)
-            
-            // quill.on('text-change', function(delta) {
-            quill.on('text-change', (delta) => {
-                this.change = this.change.compose(delta);
-                });
-            
-            
-            
-            this.intervalId = setInterval(() => {
-                if (this.change.length() > 0 ) {
-                    // console.log("AUTO-UPDATE")
-                    this.saveContent()
-                }
-                // console.log('interval')
-            }, this.autoSaveInterval);
-
-            // alert(document.getElementsByClassName("ql-toolbar")[0])
-            // this.$el.querySelector("#text-editor-toolbar").appendChild(this.$el.querySelector(".ql-toolbar"));
-            this.quill = quill;
-            
-
-        // setTimeout(() => {
-        
-            // console.log (quill);
-            this.$el.querySelector("#text-editor-toolbar").appendChild(this.$el.querySelector(".ql-toolbar"));
-            this.contentLoading = false
-        // }, 1000);
+        let text = this.content[0].text.text
+        this.localText = text
+        this.contentLoading = false
 
     },
 
-    beforeDestroy() {
-        if (this.change.length() > 0 ) { 
-            this.saveContent()
-        }
-
+    // beforeDestroy() {
         
-        
-    },
+    // },
     
-    destroyed() {
-        clearInterval(this.intervalId)
-        
-    },
-
     data() {
+        let editorChange = this.editorChange
         return {
-            quill: Object,
             contentLoading: true,
-            Delta: Quill.import('delta'), 
-            change: [],
+            timeout: null,
+            localText: null,
+            tinymcesettings: {
+                selector: ".editor",
+                plugins:
+                "lists advlist autolink link image charmap print table emoticons wordcount codesample fullscreen",
+                toolbar_mode: "floating",
+                // height: 500,
+                height: '100%',
+                resize: false,
+                toolbar:
+                "fontsizeselect | bold italic underline strikethrough | backcolor | alignleft aligncenter alignright alignjustify | numlist bullist",
+                menubar: "edit insert tools",
+                menu: {
+                    edit: { title: "Edit", items: "undo redo | copy paste cut" },
+                    // view: {},
+                    insert: {
+                        title: "Insert",
+                        items: "image link | inserttable | charmap emoticons | codesample",
+                    },
+                    tools: { title: "Tools", items: "print fullscreen | wordcount" },
+                },
+                image_description: false,
+                image_dimensions: false,
+                file_picker_types: "image",
+                ui_container: '#text-editor-136',
+                // block_unsupported_drop: false,
+                content_style:
+                "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap'); body { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }",
+            
+                images_upload_handler: this.imageUploadHandler,
+                setup: function(editor) {
+                    
+                    // editor.on('NodeChange', this.editorInput)
+                    // editor.on('Paste Change input Undo Redo', function(e) {
+                    //     console.log(e)
+                    // })
+                    editor.on('Paste Change input Undo Redo', editorChange)
+                }
+
+                ///// Waiting for bugfix https://github.com/tinymce/tinymce/issues/6321
+                // setup: function (editor) {
+                //     editor.ui.registry.addContextToolbar('textselection', {
+                //         predicate: function (node) {
+                //             return !editor.selection.isCollapsed() && node.nodeName.toLowerCase() !== 'img'
+                //         },
+                //         items: 'bold italic underline strikethrough | backcolor',
+                //         position: 'selection',
+                //         scope: 'node'
+                //     });
+                // },
+            
+            
+            },
         }
         
     },
 
     methods: {
         saveContent() {
-            // console.log(this.change)
             let newContent = JSON.parse ( JSON.stringify ( this.content[0] ) )
         
-            newContent.text.text = JSON.stringify(this.quill.getContents())
+            newContent.text.text = this.localText
 
-            // console.log(newContent)
-            
-            // console.log('Saving text editor changes', change, newContent);
             this.$emit('programUpdatedContent', this.$options._componentTag, newContent)
-            
-            this.change = new this.Delta();
+
+        },
+
+        imageUploadHandler(blobInfo, success, failure) {
+            let data = new FormData();
+            data.append("file", blobInfo.blob(), blobInfo.filename()) 
+            this.$http
+                .post("/api/files", data)
+                .then(function (res) {
+                console.log(res)
+                success(res.data.file.url)
+                })
+                .catch(function (err) {
+                console.log(err)
+                failure("HTTP Error: " + err.message)
+                });
+            },
+
+        editorChange() {
+            if (this.timeout) clearTimeout(this.timeout)
+            this.timeout = setTimeout(() => {
+                this.saveContent()
+            }, 5000);
         }
     },
     
     watch: {
-        // content: {
-        //     deep: true,
-        //     handler(newVal, oldVal) {
-        //         console.log(newVal[0].text, oldVal)
-        //         this.quill.setContents(newVal[0].text)
-
-        //     }
-        // } 
+        cardUnload(n) {
+            if (n === true) {
+                if (this.timeout) {
+                    this.saveContent()
+                    clearTimeout(this.timeout)
+                }
+            }
+        }
     }
 };
 </script>
 
 <style>
+
+.tox .tox-tbtn--bespoke .tox-tbtn__select-label {
+    width: 3em !important;
+}
 .text-editor {
     width: 100%;
     height: 100%;
@@ -188,8 +194,9 @@ export default {
 
 .text-editor-container-wrapper {
     flex: 1;
-    overflow: hidden;
-    padding-top: 10px;
+    /* overflow: hidden; */
+    /* padding-top: 10px; */
+    /* height: 100%; */
 
     /* overflow-y: scroll; */
 }
@@ -199,6 +206,7 @@ export default {
 
 .text-editor-container {
     -webkit-user-select: text;
+    height: 100%;
 }
 
 .ql-container.ql-snow {

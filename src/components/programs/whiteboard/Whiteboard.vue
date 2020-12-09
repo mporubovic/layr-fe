@@ -160,7 +160,11 @@ export default {
 
         cardRect: {
             type: Object,
-        }
+        },
+        
+        cardUnload: {
+            type: Boolean,
+        },
     },
 
     computed: {
@@ -265,14 +269,7 @@ export default {
         window.addEventListener("resize", this.windowResized);
     },
 
-    beforeDestroy() {
-        if (this.autosaveTimeout) { 
-            this.canvasAutosave()  
-        }
-    },
-    
     destroyed() {
-        clearTimeout(this.autosaveTimeout)
         window.removeEventListener("resize", this.windowResized);
     },
 
@@ -729,6 +726,15 @@ export default {
                 // this.drawGrid()
             }
         },
+
+        cardUnload(n) {
+            if (n === true) {
+                if (this.autosaveTimeout) {
+                    clearTimeout(this.autosaveTimeout)
+                    this.canvasAutosave()
+                }
+            }
+        }
     },
     
 }
