@@ -76,7 +76,7 @@ export default {
             tinymcesettings: {
                 selector: ".editor",
                 plugins:
-                "lists advlist autolink link image charmap print table emoticons wordcount codesample fullscreen",
+                "paste lists advlist autolink link image charmap print table emoticons wordcount codesample fullscreen",
                 toolbar_mode: "floating",
                 // height: 500,
                 height: '100%',
@@ -109,7 +109,7 @@ export default {
                     //     console.log(e)
                     // })
                     editor.on('Paste Change input Undo Redo', editorChange)
-                }
+                },
 
                 ///// Waiting for bugfix https://github.com/tinymce/tinymce/issues/6321
                 // setup: function (editor) {
