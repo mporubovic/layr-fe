@@ -70,7 +70,10 @@ export default {
 
     methods: {
         stackClicked(id) {
-            if (!this.stackEditingId) this.$emit('subMenuStackClicked', id)
+            if (!this.stackEditingId) {
+                this.$emit('subMenuStackClicked', id)
+                document.querySelector('#dropzone-grid').style.outline = "solid 3px rgba(235, 235, 235, 0.2)"
+            } 
         },
 
         newStack() {

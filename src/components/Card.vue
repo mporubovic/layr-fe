@@ -199,13 +199,7 @@ export default {
     mounted() {
         this.calcBoundingRect();
         this.initializeInteractjs();
-
         this.loadContent = true
-
-        // setTimeout(() => {
-        //     this.loadContent = true
-        // }, 100);
- 
     },
 
     beforeDestroy() {
@@ -299,8 +293,7 @@ export default {
 
         
         calcBoundingRect() {
-            let cid = 'card' + this.id;
-            let br = this.$refs[cid].getBoundingClientRect();
+            let br = this.$el.getBoundingClientRect()
             this.boundingRect.left = br.left;
             this.boundingRect.top = br.top;
             this.boundingRect.width = br.width;

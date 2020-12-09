@@ -6,6 +6,10 @@
 
             </div>
         </div> -->
+        <credits v-if="showCredits"></credits>
+        <ribbon v-if="showRibbon"></ribbon>
+
+
         <div class="guest" v-if="user === 'guest'">
             <p><strong> You are viewing this board as a guest.</strong></p>
             <p>Any changes you make will not be saved.</p>
@@ -172,8 +176,11 @@
             
 
             <div id="layout-grid">
-
-                <card v-for="(card, index) in cards" 
+                <!-- eslint-disable --> 
+                <!-- v-if and v-for don't mix well -->
+                <card
+                    v-if="stackDataLoaded"
+                    v-for="(card, index) in cards" 
                     :key="card.info.id"
                     :card=card
                     :index=index
@@ -192,6 +199,7 @@
                     @cardResizeEnd="cardResizeEnd"
 
                 ></card>   
+                <!--eslint-enable-->
 
 
                 </div>
@@ -220,6 +228,8 @@
 
 <script>
 import Card from './components/Card.vue'
+import Credits from './components/Credits.vue'
+import Ribbon from './components/Ribbon.vue'
 import screenfull from 'screenfull'
 import interact from "interactjs";
 
@@ -229,7 +239,9 @@ export default {
 
 
     components: {
-        Card
+        Card,
+        Credits,
+        Ribbon,
     },
 
     data() {
@@ -378,11 +390,19 @@ export default {
 
         isInDevelopment() {
             return process.env.NODE_ENV === "development"
-        }
+        },
 
         // cardsCanvas() {
         //     return this.$el.querySelector('#cards').
         // }
+
+        showCredits() {
+            return this.user === null
+        },
+
+        showRibbon() {
+            return true
+        }
 
     },
 
@@ -1348,7 +1368,7 @@ export default {
                     break
             }
 
-            console.log(this.subMenu)
+            // console.log(this.subMenu)
 
             if (this.currentStack) this.currentStack = null
 
@@ -1422,11 +1442,15 @@ export default {
         },
         
         openStack(stack) {
+            this.stackDataLoaded = false
             this.currentStack = stack
-            this.openBoard(stack.boards[0].info.id)
-            this.stackDataLoaded = true
-            this.initializeBottomSidebar()
-            this.menuTitle = stack.info.title
+            this.$nextTick(() => {
+
+                this.openBoard(stack.boards[0].info.id)
+                this.stackDataLoaded = true
+                this.initializeBottomSidebar()
+                this.menuTitle = stack.info.title
+            })
 
         },
 
@@ -1845,7 +1869,7 @@ export default {
 
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap');
 
 *, html {
     margin: 0;
@@ -2065,7 +2089,6 @@ body {
     height: 100%;
     position: absolute;
     z-index: 100;
-    outline: solid 3px rgba(235, 235, 235, 0.2);
     /* box-shadow: 0px 0px 0px 3px red; */
     grid-area: 1 / 1 / 4 / 4;
 }
