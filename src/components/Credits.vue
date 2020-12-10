@@ -5,8 +5,9 @@
         </div> -->
         <div id="container">
             <div class="credit" v-for="(c, i) in credits" :key="i">
-                <img :src="c[0]" class="credit" v-if="c[0].substring(0,4) === 'http'" :style="{height: c[1] ? c[1] +'px' : null}">
+                <img :src="c[0]" class="credit" v-if="c[1] !== -1" :style="{height: c[1] ? c[1] +'px' : null}">
                 <p v-else>{{ c[0] }}</p>
+                <!-- <img src="@/assets/credits/vuejs.png"> -->
             </div>
         </div>
     </div>
@@ -17,13 +18,13 @@ export default {
     data() {
         return {
             credits: [
-                ["https://vuejs.org/images/logo.png"],
-                ["https://laravel.com/img/logomark.min.svg"],
-                ["https://pbs.twimg.com/profile_images/1436375272/Screen_shot_2011-07-11_at_1.55.36_AM_400x400.png"],
-                ["https://avatars1.githubusercontent.com/u/119815", 40],
-                ["https://interactjs.io/img/ijs.e9d09045.svg", 25],
-                ["https://raw.githubusercontent.com/anteriovieira/vue-youtube/master/media/logo.png"],
-                ["screenful.js"],
+                [require("@/assets/credits/vuejs.png")],
+                [require("@/assets/credits/laravel.svg")],
+                [require("@/assets/credits/fabricjs.png")],
+                [require("@/assets/credits/tinymce.png"), 40],
+                [require("@/assets/credits/interactjs.svg"), 25],
+                [require("@/assets/credits/youtubevue.png")],
+                ["screenful.js", -1],
             ]
         }
     },
