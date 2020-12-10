@@ -13,11 +13,13 @@ v-bind:href="content.url.path"
 
 
                     <div class="url-list-item-favicon-wrapper">
-                            <img class="url-list-item-favicon" onerror="onImgError"
+                            <img class="url-list-item-favicon" @error="onImgError"
                                     :src="urlFavicon"
                                     v-if="!imgError"
                                     >
-                            <img src="https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png" v-if="imgError">
+                            <img class="url-list-item-favicon" 
+                                    src="https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png" 
+                                    v-if="imgError">
                     </div>
                     
                     
