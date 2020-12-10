@@ -270,7 +270,7 @@ export default {
         },
 
         fetchSiteTitle: function(targetUrl) {
-            let titleApi = 'http://services.mylayr.com/sitetitle/'
+            let titleApi = 'https://services.mylayr.com/sitetitle/'
             targetUrl = encodeURIComponent(targetUrl.split("//")[1] ? targetUrl.split("//")[1] : targetUrl)
 
             let titleEndpoint = titleApi + targetUrl
