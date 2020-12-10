@@ -254,7 +254,7 @@ export default {
                                 this.setNestedObjectValue(updatedUrl, 'local.url.ico', icon)
                                 this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
                                 this.$emit('urlItemUpdated', updatedUrl)
-                                console.log("EMIT 225", updatedUrl)
+                                // console.log("EMIT 225", updatedUrl)
 
 
                             }).catch((error) =>  {
@@ -270,7 +270,8 @@ export default {
         },
 
         fetchSiteTitle: function(targetUrl) {
-            let titleApi = 'https://services.mylayr.com/sitetitle/'
+            // let titleApi = 'https://services.mylayr.com/sitetitle/'
+            let titleApi = 'http://localhost:8010/index.php/sitetitle/'
             targetUrl = encodeURIComponent(targetUrl.split("//")[1] ? targetUrl.split("//")[1] : targetUrl)
 
             let titleEndpoint = titleApi + targetUrl
@@ -287,7 +288,7 @@ export default {
                             this.setNestedObjectValue(updatedUrl, 'local.url.name', response.data)
                             this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
                             this.$emit('urlItemUpdated', updatedUrl)
-                            console.log("EMIT 249", updatedUrl)
+                            // console.log("EMIT 249", updatedUrl)
 
                             
                         }).catch((error)=>  {
@@ -301,7 +302,7 @@ export default {
                                 this.setNestedObjectValue(updatedUrl, 'local.url.name', updatedUrl.url.path )
                                 this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
                                 this.$emit('urlItemUpdated', updatedUrl)
-                                console.log("EMIT 260", updatedUrl)
+                                // console.log("EMIT 260", updatedUrl)
 
 
                                 })
@@ -321,7 +322,7 @@ export default {
         
             // this.setNestedObjectValue(updatedUrl, 'local.url.name', "Loading...")
             // this.setNestedObjectValue(updatedUrl, 'local.update', "continue")  
-            console.log("EMIT 276", updatedUrl)
+            // console.log("EMIT 276", updatedUrl)
             this.$emit('urlItemUpdated', updatedUrl)
             
             // this.content.url.name = "Loading..."
@@ -334,7 +335,7 @@ export default {
             // if (this.content.url.path === "placeholder") return
             let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
             this.setNestedObjectValue(updatedUrl, 'local.isEditing', false)
-            console.log("va", event.target.value)
+            // console.log("va", event.target.value)
             // if (event.target.value === null && this.content.url.path === "placeholder") {
             if (event.target.value === "") {
                 this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
@@ -389,7 +390,7 @@ export default {
 
             this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")
             this.setNestedObjectValue(updatedUrl, 'local.isEditing', true)
-            console.log("EMIT 335", updatedUrl)
+            // console.log("EMIT 335", updatedUrl)
             this.$emit('urlItemUpdated', updatedUrl)
             
 
