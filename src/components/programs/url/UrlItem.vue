@@ -153,7 +153,7 @@ export default {
         
             this.setNestedObjectValue(updatedUrl, 'local.url.name', "Loading...")
             this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
-            console.log("EMIT 276", updatedUrl)
+            // console.log("EMIT 276", updatedUrl)
             this.$emit('urlItemUpdated', updatedUrl)
 
             this.fetchSiteTitle(this.content.url.path)
@@ -270,11 +270,11 @@ export default {
         },
 
         fetchSiteTitle: function(targetUrl) {
-            let titleApi = '/api/services/sitetitle/'
+            let titleApi = 'http://services.mylayr.com/sitetitle/'
             targetUrl = encodeURIComponent(targetUrl.split("//")[1] ? targetUrl.split("//")[1] : targetUrl)
 
             let titleEndpoint = titleApi + targetUrl
-            this.$http.get(titleEndpoint)
+            this.$httpCross.get(titleEndpoint)
                         .then(response => {
                             // console.log(response.data)
                             // return response.data
