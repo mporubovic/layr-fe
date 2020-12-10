@@ -13,9 +13,11 @@ v-bind:href="content.url.path"
 
 
                     <div class="url-list-item-favicon-wrapper">
-                            <img class="url-list-item-favicon" 
+                            <img class="url-list-item-favicon" onerror="onImgError"
                                     :src="urlFavicon"
+                                    v-if="!imgError"
                                     >
+                            <img src="https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png" v-if="imgError">
                     </div>
                     
                     
@@ -85,6 +87,7 @@ export default {
             // urlInput: "New url",
             urlNameReuqestCompleted: false,
             urlFaviconReuqestCompleted: false,
+            imgError: false,
         };
     },
 
@@ -391,6 +394,10 @@ export default {
             
         },
 
+        onImgError() {
+            this.imgError = true
+        }
+
 
         
         
@@ -503,16 +510,6 @@ export default {
     margin-right: auto; */
 }
 
-.url-list-item-favicon:before {
-    content: 'NaN';
-    font-size: 20px;
-    display: block;
-    height: 50px;
-    width: 50px;
-    margin-top: 5px;
-    background-color: white;
-
-}
 
 .url-list-item-href {
     /* margin-left: 25px; */
