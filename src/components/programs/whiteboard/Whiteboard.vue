@@ -917,7 +917,7 @@ export default {
 .shape-selector {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
 }
 
 .shape-button-common {
