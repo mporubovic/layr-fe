@@ -106,7 +106,7 @@
 
         <div class="stack-settings-container containers-common">
             <div class="student-info" v-if="selectedStudent">
-                <p>Student ID: {{ selectedStudent.id }}</p>
+                <!-- <p>Student ID: {{ selectedStudent.id }}</p> -->
                 <p>Email: {{ selectedStudent.email }}</p> 
                 <p v-if="selectedStudent.email_verified_at">Registered on: {{ convertTimeToDate(selectedStudent.created_at) }}</p> 
                 <p v-if="!selectedStudent.email_verified_at">Invite sent on: {{ convertTimeToDate(selectedStudent.created_at) }} <br> The student has not accepted the invite yet.</p> 
@@ -291,7 +291,9 @@ export default {
 
         newStudentOkClicked() {
             this.newStudentInvited = false
-            this.isNewStudentFormVisible = false
+            // this.isNewStudentFormVisible = false
+            // this.$el.querySelector('#new-stack-button').disabled = false
+
         },
 
         createNewStudent() {
@@ -302,8 +304,11 @@ export default {
             if (!name || !email) {
                 return
             }
-
+                
+                
             // this.$el.querySelector('#new-student-form-button').disabled = true
+            this.isNewStudentFormVisible = false
+            this.newStudentInvited = true
 
 
             let requestPayload = {
@@ -319,8 +324,8 @@ export default {
                 let newStudent = response.data.student
                 // this.loadStudents()
                 this.students.push(newStudent)
-                this.isNewStudentFormVisible = false
-                this.newStudentInvited = true
+                // this.isNewStudentFormVisible = false
+                // this.newStudentInvited = true
                 this.$el.querySelector('#new-student-form-button').disabled = false
 
                 this.$nextTick(() => {
