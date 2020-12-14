@@ -1,5 +1,5 @@
 <template>
-    <div id="layr">
+    <div id="layr" @click="bodyClicked($event)">
         
         <!-- <div class="debug" v-if="isInDevelopment">
             <div class="token" @click="tokenClicked">
@@ -23,27 +23,27 @@
 
                     <div class="menu-content-controls-primary">
                         <button class="buttons-common button-text-primary" 
-                                    @click="menuLoginClick" 
+                                    @click="menuClick('login')" 
                                     id="menu-login-button"
                                     v-if="user === null"          
-                                    :style="{backgroundColor: subMenu === 'menu-login' ? 'lightgreen' : 'white'}"
+                                    :style="{backgroundColor: subMenu === 'login' ? 'lightgreen' : 'white'}"
                                     >
                                     Sign in
                         </button>                        
                         
                         <button class="buttons-common button-text-primary" 
-                                    @click="menuStudentDashboardClick" 
+                                    @click="menuClick('student-dashboard')" 
                                     id="menu-student-dashboard-button"
                                     v-if="userRole === 'student'"          
-                                    :style="{backgroundColor: subMenu === 'menu-student-dashboard' ? 'lightgreen' : 'white'}"
+                                    :style="{backgroundColor: subMenu === 'student-dashboard' ? 'lightgreen' : 'white'}"
                                     >
                                     Dashboard
                         </button>
                         <button class="buttons-common button-text-primary" 
-                                    @click="menuStudentsClick" 
+                                    @click="menuClick('students')" 
                                     id="menu-students-button"
                                     v-if="userRole === 'tutor'"          
-                                    :style="{backgroundColor: subMenu === 'menu-students' ? 'lightgreen' : 'white'}"
+                                    :style="{backgroundColor: subMenu === 'students' ? 'lightgreen' : 'white'}"
                                     >
                                     Students
                         </button>                        
@@ -82,8 +82,8 @@
                                 Fullscreen
                         </button>
                         <button id="menu-help-button" class="menu-content-controls-secondary-help buttons-common button-text-secondary" 
-                                @click="menuHelpClick"
-                                :style="{backgroundColor: subMenu === 'menu-help' ? 'lightgreen' : 'white'}"
+                                @click="menuClick('help')"
+                                :style="{backgroundColor: subMenu === 'help' ? 'lightgreen' : 'white'}"
                                 
                                 >
                                 Help
@@ -97,7 +97,7 @@
                         <div class="sub-menu-content">
                             <!-- <component :is="subMenuComponent"></component> -->
                             <keep-alive>
-                                <component :is="subMenu" 
+                                <component :is="subMenu ? 'menu-'+subMenu : null" 
                                             v-bind="subMenuContent"
                                             @subMenuStackClicked="requestStack"
                                             @subMenuStackUpdatedItself="stackUpdateProperty"
@@ -117,11 +117,11 @@
             </div>
 
             
-            <!-- <div class="menu-pull" id="menu-pull"
-                    @click="menuPullClick">
+            <div class="menu-pull" id="menu-pull" v-show="subMenu !== null"
+                    @click="menuClick('close')">
                 <hr class="menu-pull-line">
 
-            </div> -->
+            </div>
         </div>
         
         
@@ -172,7 +172,7 @@
         </div>
 
 
-        <div class="board" id="board" @click="boardDivClicked" @scroll.prevent="onBoardDivWheel">
+        <div class="board" id="board" @scroll.prevent="onBoardDivWheel">
             
 
             <div id="layout-grid">
@@ -419,11 +419,13 @@ export default {
         let path = window.location.pathname
         let parts = path.split('/')
         // console.log(parts)
-        if (parts[1] === 'invite' && parts[2] !== undefined) {
-            this.inviteDropdown()
-            return
+        switch (parts[1]) {
+            case 'invite': 
+                if (parts[2] !== undefined) this.menuClick('invite')
+                else this.menuClick('login')
+                return
         }
-        
+
         // if (this.isInDevelopment) {
         //     this.$http.get('/api/user').then((response) => {
         //         console.log('Logged in user ', response.data.user)
@@ -446,11 +448,10 @@ export default {
                 console.log(error)
                 localStorage.clear()
                 console.log('Cleared local storage')
-                this.loginDropdown()
-                
+                this.menuClick('login')
             })
         } else {
-            this.loginDropdown()
+            this.menuClick('login')
         }
 
         
@@ -458,6 +459,12 @@ export default {
     },
 
     methods: {
+
+        bodyClicked(e) {
+            if (this.subMenu && document.elementsFromPoint(e.clientX, e.clientY).filter(el => el.className === "menu" || el.className === "sub-menu").length === 0) this.menuClick('close')
+        },
+
+
         onBoardDivWheel() {
 
         },
@@ -954,77 +961,31 @@ export default {
         },
 
 
-        menuPullClick() {
-            if (this.isMenuOpen) {
-                if (this.subMenu === null) {
-                    this.$el.querySelector('#menu-container').style["max-height"] = 0 + 'px'
-                    this.$el.querySelector('#menu-pull').style["background-color"] = "rgba(0, 0, 0, 0.15)"
-
-                    this.isMenuOpen = false
-                } else {
-                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
-                    this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                    this.$el.querySelector('#' + this.subMenu + '-button').style["background-color"] = ""
-
-                    setTimeout(() => {
-                        this.subMenu = null
-                    }, 400);
-                }
-
-            } else {
-                this.$el.querySelector('#menu-container').style["max-height"] = 1500 + 'px'
-                this.$el.querySelector('#menu-pull').style["background-color"] = "rgba(0, 0, 0, 0.45)"
-                this.isMenuOpen = true
-            }
-
-        },
-
-        menuLoginClick() {
-            if (this.subMenu === 'menu-login') {
+        menuClick(menu) {
+            let current = this.subMenu
+            if (menu === current || menu === "close") {
                 this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
                 this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
 
                 setTimeout(() => {
                     this.subMenu = null
                 }, 400);
-            } else {
-                this.loginDropdown()
+                
+                return
             }
-        },
+            this.subMenu = menu
 
-        loginDropdown() {
-            this.subMenu = "menu-login"
-            setTimeout(() => {
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 600 + 'px'
+            this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
                 
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
-            }, 0)
-        },
-
-        inviteDropdown() {
-            this.subMenu = "menu-invite"
-            setTimeout(() => {
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 600 + 'px'
-                
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
-            }, 0)
+            this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'    
         },
 
         userLoggedIn(user) {
             this.user = user
             this.menuTitle = "Welcome, " + user.name.split(' ')[0]
 
-            if (this.user.role === 'tutor') {
-                this.menuStudentsClick()
-            } else {
-                this.menuStudentDashboardClick()
-                // this.$el.querySelector('#menu-title').style.opacity = 0
-                // setTimeout(() => {
-                //     this.menuTitle = "Select a board"
-                //     this.$el.querySelector('#menu-title').style.opacity = 1
-                    
-                // }, 1000);
-            }
+            if (this.user.role === 'tutor') this.menuClick('students') 
+            else this.menuClick('student-dashboard')
             
         },
 
@@ -1032,105 +993,8 @@ export default {
             this.menuTitle = title
         },
 
-        menuStudentsClick() {
-            if (this.subMenu === "menu-students") {
-                               
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                setTimeout(() => {
-                    this.subMenu = null
-                }, 400);
-            } else {
-                if (this.subMenu === "menu-personal") this.$el.querySelector('#menu-personal-button').style["background-color"] = ""
-                this.subMenu = "menu-students"
-                setTimeout(() => {
-                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
-
-                    
-                    this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
-                }, 0)
-            }
-        },
-
-
-        menuStudentDashboardClick() {
-            if (this.subMenu === "menu-student-dashboard") {
-                               
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                setTimeout(() => {
-                    this.subMenu = null
-                }, 400);
-            } else {
-                this.subMenu = "menu-student-dashboard"
-                setTimeout(() => {
-                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
-                    this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
-                }, 0)
-            }
-        },
-
-        menuHelpClick() {
-            if (this.subMenu === "menu-help") {
-                               
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                setTimeout(() => {
-                    this.subMenu = null
-                }, 400);
-            } else {
-                this.subMenu = "menu-help"
-                setTimeout(() => {
-                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
-                    this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
-                }, 0)
-            }
-        },
-
-        menuPersonalClick() {
-            if (this.subMenu === "menu-personal") {
-                               
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                
-                setTimeout(() => {
-                    this.subMenu = null
-                }, 400);
-            } else {
-                if (this.subMenu === "menu-students") this.$el.querySelector('#menu-students-button').style["background-color"] = ""
-
-                this.subMenu = "menu-personal"
-                setTimeout(() => {
-                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
-
-                    
-                    this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
-                }, 0)
-            }
-        },
-
         settingsMenu() {
             screenfull.toggle(); 
-        },
-
-        menuStacksClick() {
-            if (this.subMenu === "menu-boards") {
-                               
-                this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
-                this.$el.querySelector('#sub-menu').style["margin-top"] = 0 + 'px'
-                
-                setTimeout(() => {
-                    this.subMenu = null
-                }, 400);
-            } else {
-                this.subMenu = "menu-boards"
-                setTimeout(() => {
-                    this.$el.querySelector('#sub-menu-container').style["max-height"] = 400 + 'px'
-
-                    
-                    this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'        
-                }, 0)
-            }
         },
 
         cardTemplate(card) {
@@ -1350,26 +1214,7 @@ export default {
         requestStack(id) {
             if (!this.userRole) this.user = "guest"
 
-            switch (this.subMenu) {
-                case 'menu-login':
-                    this.menuLoginClick()
-                    break
-                case 'menu-students':
-                    this.menuStudentsClick()
-                    break
-                case 'menu-boards':
-                    this.menuStacksClick()
-                    break
-                case 'menu-personal':
-                    this.menuPersonalClick()
-                    break
-                case 'menu-student-dashboard':
-                    this.menuStudentDashboardClick()
-                    break
-            }
-
-            // console.log(this.subMenu)
-
+            this.menuClick('close')
             if (this.currentStack) this.currentStack = null
 
             this.menuTitle = "Loading..."
@@ -1855,12 +1700,6 @@ export default {
             }, 400);
         },
 
-        boardDivClicked() {
-            if (this.subMenu) {
-                this.menuPullClick()
-            }       
-        }
-
     },
 
 
@@ -2045,9 +1884,22 @@ body {
 }
 
 .link-mail {
-    color: white;
+    /* color: white; */
     text-decoration: underline;
     /* font-weight: bold; */
+    color: lightgreen;
+}
+
+.link-common {
+    color: black;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+    font-size: 13px;
+    user-select: none;
+}
+
+.link-common:hover {
     color: lightgreen;
 }
 
@@ -2156,15 +2008,7 @@ body {
 
 .menu-pull {
     width: 70px;
-    height: 19px;
-    /* position: relative; */
-    /* right: 0px; */
-    /* right: 45%; */
-    /* right: 0; */
-    /* left: 0; */
-    /* margin-left: auto; */
-    /* margin-right: auto; */
-    /* bottom: -19px; */
+    min-height: 19px;
     background-color: rgba(0, 0, 0, 0.55);
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
