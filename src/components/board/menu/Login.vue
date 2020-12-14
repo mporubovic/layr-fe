@@ -9,10 +9,11 @@
             <div class="signinup-fields">
                 <input @focus="onInputFocus($event)" id="signup-name-input" type="name" class="input-common" placeholder="Your Name">
                 <input @focus="onInputFocus($event)" id="signup-email-input" type="email" class="input-common" placeholder="Your Email">
-                <input @focus="onInputFocus($event)" id="signup-password-input" @keydown.enter="onRegisterEnter($event)" type="password" class="input-common" placeholder="Password (6+ characters)">
+                <input @focus="onInputFocus($event)" id="signup-password-input" type="password" class="input-common" placeholder="Password (6+ characters)">
+                <input @focus="onInputFocus($event)" id="signup-password-confirm-input" @keydown.enter="onRegisterEnter($event)" type="password" class="input-common" placeholder="Confirm Password">
             </div>
 
-            <button class="buttons-common button-next"
+            <button class="buttons-common button-next" id="signup-button"
                             @click="submitRegistration"
                 >
                 <p>Sign up</p>
@@ -75,6 +76,7 @@ export default {
         submitRegistration() {
             let email = this.$el.querySelector('#signup-email-input').value
             let password = this.$el.querySelector('#signup-password-input').value
+            let confirmPassword = this.$el.querySelector('#signup-password-confirm-input').value
             let name = this.$el.querySelector('#signup-name-input').value
             
             if (!name) {
@@ -92,10 +94,22 @@ export default {
                 return
             }
 
+            if (!confirmPassword) {
+                this.$el.querySelector('#signup-password-confirm-input').classList.add('input-common-error')
+                return
+            }
+
+            if (password !== confirmPassword) {
+                this.$el.querySelector('#signup-password-confirm-input').classList.add('input-common-error')
+                return
+            }
+
+            this.$el.querySelector('#signup-button').disabled = true
 
             let requestPayload = {
                 email, password, name
             }
+
             this.$http.get('/auth/csrf-cookie').then((response) => {
                 console.log("CSRF COOKIE", response)
                 this.$http.post('/auth/register', requestPayload)
