@@ -30,6 +30,15 @@
                                     >
                                     Sign in
                         </button>                        
+
+                        <button class="buttons-common button-text-primary" 
+                                    @click="menuClick('register')" 
+                                    id="menu-register-button"
+                                    v-if="user === null"          
+                                    :style="{backgroundColor: subMenu === 'register' ? 'lightgreen' : 'white'}"
+                                    >
+                                    Sign up
+                        </button>                        
                         
                         <button class="buttons-common button-text-primary" 
                                     @click="menuClick('student-dashboard')" 
@@ -102,6 +111,7 @@
                                             @subMenuStackClicked="requestStack"
                                             @subMenuStackUpdatedItself="stackUpdateProperty"
                                             @loggedIn="userLoggedIn"
+                                            @forgotPassword="menuClick('reset-password')"
                                             :user="user"
                                             >
                                             
@@ -424,6 +434,15 @@ export default {
                 if (parts[2] !== undefined) this.menuClick('invite')
                 else this.menuClick('login')
                 return
+            case 'reset-password':
+                this.menuClick('reset-password')
+                return
+            case 'signin':
+                this.menuClick('login')
+                return
+            case 'signup':
+                this.menuClick('register')
+                return
         }
 
         // if (this.isInDevelopment) {
@@ -444,6 +463,7 @@ export default {
                 console.log('Logged in user ', response.data.user)
                 this.user = response.data.user
                 this.userLoggedIn(this.user)
+
             }).catch((error) => {
                 console.log(error)
                 localStorage.clear()
@@ -460,8 +480,9 @@ export default {
 
     methods: {
 
-        bodyClicked(e) {
-            if (this.subMenu && document.elementsFromPoint(e.clientX, e.clientY).filter(el => el.className === "menu" || el.className === "sub-menu").length === 0) this.menuClick('close')
+        bodyClicked() { // TODO
+            // console.log(document.elementsFromPoint(e.clientX, e.clientY))
+            // if (this.subMenu && document.elementsFromPoint(e.clientX, e.clientY).filter(el => el.className === "menu" || el.className === "sub-menu").length === 0) this.menuClick('close')
         },
 
 
@@ -981,11 +1002,15 @@ export default {
         },
 
         userLoggedIn(user) {
+
             this.user = user
             this.menuTitle = "Welcome, " + user.name.split(' ')[0]
 
             if (this.user.role === 'tutor') this.menuClick('students') 
             else this.menuClick('student-dashboard')
+
+            this.$router.push('/')
+
             
         },
 
@@ -1822,6 +1847,16 @@ body {
 
 }
 
+.container-flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.container-flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
 .container-white {
     background-color: white;
 
@@ -1861,6 +1896,10 @@ body {
 
 .container-text-black {
     color: black;
+}
+
+.container-padding {
+    padding-bottom: 10px;
 }
 
 .item-title {
@@ -1907,6 +1946,25 @@ body {
     border-top: 1px solid black;
     margin-top: 5px;
     width: 100%;
+}
+
+.form-message {
+    font-size: 14px;
+    color: black;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-message-padding {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.misc-icon {
+    height: 25px;
+    margin-right: 5px;
 }
 
 

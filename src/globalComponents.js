@@ -22,6 +22,8 @@ import FileSelector from './components/programs/modal/FileSelector.vue'
 
 import MenuStacks from './components/board/menu/Stacks.vue'
 import MenuLogin from './components/board/menu/Login.vue'
+import MenuRegister from './components/board/menu/Register.vue'
+import MenuResetPassword from './components/board/menu/ResetPassword.vue'
 import MenuStudents from './components/board/menu/Students.vue'
 import MenuPersonal from './components/board/menu/Personal.vue'
 import MenuInvite from './components/board/menu/Invite.vue'
@@ -45,6 +47,8 @@ Vue.component('file-selector', FileSelector);
 
 Vue.component('menu-stacks', MenuStacks);
 Vue.component('menu-login', MenuLogin);
+Vue.component('menu-register', MenuRegister);
+Vue.component('menu-reset-password', MenuResetPassword);
 Vue.component('menu-students', MenuStudents);
 Vue.component('menu-personal', MenuPersonal);
 Vue.component('menu-invite', MenuInvite);
