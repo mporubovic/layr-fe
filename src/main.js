@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Layr from './Layr.vue'
 
-import axios from 'axios' 
+import axios from 'axios'
 
 Vue.prototype.$http = axios.create({
     withCredentials: true,
@@ -41,10 +41,11 @@ Vue.mixin({
 })
 
 import Vue2TouchEvents from 'vue2-touch-events'
- 
+
 Vue.use(Vue2TouchEvents)
 
 import VueRouter from 'vue-router'
+import './registerServiceWorker'
 Vue.use(VueRouter)
 
 const router = new VueRouter({
