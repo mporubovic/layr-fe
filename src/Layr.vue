@@ -1975,7 +1975,7 @@ body {
     width: 100%;
     height: 100vh;
     grid-template-columns: 30px minmax(0, 1fr) 30px;
-    grid-template-rows: 70px minmax(0, 1fr) 70px;
+    grid-template-rows: 70px minmax(0, 1fr) 30px;
     overflow: hidden;
     background: linear-gradient(90deg, rgba(52,52,205,1) 0%, rgba(0,212,255,1) 100%);
 }
@@ -2393,15 +2393,35 @@ body {
 
 #sidebar-bottom {
     /* width: 40%; */
-    grid-area: 3 / 2 / 4 / 3;
+    /* grid-area: 3 / 2 / 4 / 3; */
+    /* max-height: 10px; */
+    transform: translateY(80%);
+    transition: transform 0.3s ease-out;
+    transition-delay:1s;
+
+    /* overflow: hidden; */
+    position: fixed;
+    z-index: 10000;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
     border-radius: 10px;
-    justify-self: center;
+    /* justify-self: center; */
     background-color: rgba(0, 0, 0, 0.3);
     margin-top: 5px;
 
     display: grid;
-    grid-template-columns: 50px minmax(0, 1fr) 50px;
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
     grid-template-rows: 10px minmax(0, 1fr) 10px;
+
+}
+
+#sidebar-bottom:hover {
+    transform: translateY(0);
+    transition-delay:0s;
 
 }
 
