@@ -216,7 +216,7 @@ export default {
     font-size: 16px;
     font-weight: bold;
     overflow: hidden;
-    white-space: nowrap;
+    /* white-space: nowrap; */
     text-overflow: ellipsis;
 }
 
