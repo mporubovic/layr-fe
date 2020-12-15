@@ -1,7 +1,7 @@
 <template>
     <div id="ribbon">
         <div id="title">
-            MyLayr {{ version }}
+            MyLayr v{{ version }}
         </div>
 
         <div id="subtitle">
@@ -25,15 +25,15 @@ export default {
 
 #ribbon {
     /* height: 200px; */
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 1px;
+    padding-bottom: 1px;
     padding-right: 10px;
     padding-left: 10px;
     background-color: rgba(0, 0, 0, 0.55);
     position: fixed;
     bottom: 0;
     right: 0;
-    border-top-left-radius: 10px;
+    border-top-left-radius: 8px;
 }
 
 #title {
