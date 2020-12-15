@@ -437,12 +437,6 @@ export default {
             case 'reset-password':
                 this.menuClick('reset-password')
                 return
-            case 'signin':
-                this.menuClick('login')
-                return
-            case 'signup':
-                this.menuClick('register')
-                return
         }
 
         // if (this.isInDevelopment) {
@@ -471,7 +465,14 @@ export default {
                 this.menuClick('login')
             })
         } else {
-            this.menuClick('login')
+            switch (parts[1]) {
+                case 'signin':
+                    this.menuClick('login')
+                    return
+                case 'signup':
+                    this.menuClick('register')
+                    return
+            }
         }
 
         
