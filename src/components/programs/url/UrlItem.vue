@@ -531,7 +531,7 @@ export default {
     /* max-width: 2000px;  */
 
     overflow: hidden;
-    white-space: nowrap;
+    /* white-space: nowrap; */
     text-overflow: ellipsis;
     /* margin-right: 25px; */
     transition: all 0.3s;
