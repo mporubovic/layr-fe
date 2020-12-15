@@ -141,7 +141,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
-
+    flex-shrink: 0;
     /* width: 100%; */
 }
 
