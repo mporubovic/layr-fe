@@ -1009,7 +1009,7 @@ export default {
             if (this.user.role === 'tutor') this.menuClick('students') 
             else this.menuClick('student-dashboard')
 
-            this.$router.push('/')
+            if (window.location.pathname.split('/')[1] !== "") this.$router.push('/')
 
             
         },
