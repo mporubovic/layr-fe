@@ -82,13 +82,13 @@ export default {
                 selector: ".editor",
                 // contextmenu: 'math',
                 external_plugins: { tiny_mce_wiris: 'https://cdn.jsdelivr.net/npm/@wiris/mathtype-tinymce5@7.24.6/plugin.min.js' },
-                plugins: "powerpaste lists advlist link autolink image emoticons charmap print table wordcount codesample fullscreen",
+                plugins: "powerpaste lists advlist link autolink image emoticons charmap print table wordcount codesample fullscreen formatpainter",
                 toolbar_mode: "floating",
                 // height: 500,
                 height: '100%',
                 resize: false,
                 toolbar:
-                "fontsizeselect | bold italic underline strikethrough | backcolor | alignleft aligncenter alignright alignjustify | numlist bullist",
+                "fontsizeselect | bold italic underline strikethrough | backcolor | alignleft aligncenter alignright alignjustify | numlist bullist | formatpainter",
                 menubar: "edit insert tools",
                 menu: {
                     edit: { title: "Edit", items: "undo redo | copy paste cut" },
