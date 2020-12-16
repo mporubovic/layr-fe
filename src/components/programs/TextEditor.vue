@@ -107,6 +107,7 @@ export default {
                     width: '100%',
                     border: '1',
                 },
+                table_toolbar: '',
                 // block_unsupported_drop: true,
                 powerpaste_block_drop: true,
                 content_style:
