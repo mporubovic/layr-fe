@@ -110,7 +110,7 @@ export default {
                 // block_unsupported_drop: true,
                 powerpaste_block_drop: true,
                 content_style:
-                "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap'); body { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }",
+                "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap'); body { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; } tbody {vertical-align: top} p {margin-block-start: 0}",
             
                 images_upload_handler: this.imageUploadHandler,
                 setup: function(editor) {
@@ -239,6 +239,7 @@ export default {
     height: 30px !important;
     padding-top: 3px;
 }
+
 
 
 
