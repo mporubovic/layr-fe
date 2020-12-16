@@ -466,11 +466,11 @@ export default {
             })
         } else {
             switch (parts[1]) {
-                case 'signin':
-                    this.menuClick('login')
-                    return
                 case 'signup':
                     this.menuClick('register')
+                    return
+                default:
+                    this.menuClick('login')
                     return
             }
         }
