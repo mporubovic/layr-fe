@@ -13,6 +13,8 @@ import UrlItem from './components/programs/url/UrlItem.vue'
 import VueYoutube from 'vue-youtube'
 Vue.use(VueYoutube)
 
+import TinymceEditor from "@tinymce/tinymce-vue";
+
 
 import YoutubePlayer from './components/programs/youtube/YoutubePlayer.vue'
 import Whiteboard from './components/programs/whiteboard/Whiteboard.vue'
@@ -54,3 +56,5 @@ Vue.component('menu-personal', MenuPersonal);
 Vue.component('menu-invite', MenuInvite);
 Vue.component('menu-student-dashboard', MenuStudentDashboard);
 Vue.component('menu-help', MenuHelp);
+
+Vue.component('tinymce-editor', TinymceEditor);

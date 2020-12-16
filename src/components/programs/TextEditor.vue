@@ -5,20 +5,19 @@
         
         <div class="text-editor-container-wrapper" v-show="!contentLoading">   
             <div class="text-editor-container" :id="editorId" >
-                <editor api-key="k579ttia58ux83p72dnl63ipvrbirtk3hjzzbgvp4frh2bne" :init="tinymcesettings" v-model="localText"/>
+                <tinymce-editor :api-key='apiKey' :init="tinymcesettings" v-model="localText"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import Editor from "@tinymce/tinymce-vue";
 
 
 export default {
-    components: {
-        'editor': Editor
-    },
+    // components: {
+    //     'editor': Editor
+    // },
     
     props: {
         cardId: {
@@ -44,6 +43,7 @@ export default {
         cardUnload: {
             type: Boolean,
         },
+
     },
 
     computed: {
@@ -53,7 +53,12 @@ export default {
 
         editorDynamicStyle() {
             return this.hasFocus ? {'pointer-events': ''} : {'pointer-events': 'none'}
-        }
+        },
+
+        apiKey() {
+            return process.env.NODE_ENV === "development" ? 'w8gwrhljdlhbw1yc9m0xp6e0qtu5xdrcqyynbrg1dx1te1jd' : 'k579ttia58ux83p72dnl63ipvrbirtk3hjzzbgvp4frh2bne'
+            // return 'k579ttia58ux83p72dnl63ipvrbirtk3hjzzbgvp4frh2bne'
+        },
     },
     
     mounted() {
@@ -75,8 +80,9 @@ export default {
             localText: null,
             tinymcesettings: {
                 selector: ".editor",
-                plugins:
-                "paste lists advlist autolink link image charmap print table emoticons wordcount codesample fullscreen",
+                // contextmenu: 'math',
+                external_plugins: { tiny_mce_wiris: 'https://cdn.jsdelivr.net/npm/@wiris/mathtype-tinymce5@7.24.6/plugin.min.js' },
+                plugins: "powerpaste lists advlist link autolink image emoticons charmap print table wordcount codesample fullscreen",
                 toolbar_mode: "floating",
                 // height: 500,
                 height: '100%',
@@ -89,26 +95,38 @@ export default {
                     // view: {},
                     insert: {
                         title: "Insert",
-                        items: "image link | inserttable | charmap emoticons | codesample",
+                        items: "image link | inserttable | charmap emoticons | codesample | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry",
                     },
                     tools: { title: "Tools", items: "print fullscreen | wordcount" },
                 },
                 image_description: false,
                 image_dimensions: false,
                 file_picker_types: "image",
-                ui_container: '#text-editor-136',
-                // block_unsupported_drop: false,
+                powerpaste_word_import: 'merge',
+                table_default_styles: {
+                    width: '100%',
+                    border: '1',
+                },
+                // block_unsupported_drop: true,
+                powerpaste_block_drop: true,
                 content_style:
                 "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap'); body { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }",
             
                 images_upload_handler: this.imageUploadHandler,
                 setup: function(editor) {
-                    
-                    // editor.on('NodeChange', this.editorInput)
-                    // editor.on('Paste Change input Undo Redo', function(e) {
-                    //     console.log(e)
-                    // })
                     editor.on('Paste Change input Undo Redo', editorChange)
+
+
+                    // TODO redefine all context menus for MathType right click to work
+                    // editor.ui.registry.addContextMenu('math', {
+                    //     update: function (element) {
+                    //         if (element.className === "Wirisformula") {
+                    //             return (element.getAttribute('data-custom-editor') === "chemistry") 
+                    //             ? 'tiny_mce_wiris_formulaEditorChemistry'
+                    //             : 'tiny_mce_wiris_formulaEditor'
+                    //         }
+                    //     }
+                    // });
                 },
 
                 ///// Waiting for bugfix https://github.com/tinymce/tinymce/issues/6321
@@ -221,6 +239,7 @@ export default {
     height: 30px !important;
     padding-top: 3px;
 }
+
 
 
 </style>
