@@ -196,7 +196,7 @@
         </div>
         
         
-        <div id="board-controls" v-if="currentBoard">
+        <div id="board-controls" v-if="userRole === 'tutor' && currentBoard">
             <img src="@/assets/common/deletewhite.svg" @click="boardDeleteConfirm = !boardDeleteConfirm">
             <modal-confirm v-if="boardDeleteConfirm" confirmText="Delete"
                     @selectionConfirmed="deleteBoard(currentBoardId)"
