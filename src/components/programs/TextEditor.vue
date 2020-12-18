@@ -88,14 +88,14 @@ export default {
                 height: '100%',
                 resize: false,
                 toolbar:
-                "fontsizeselect | bold italic underline strikethrough | backcolor | alignleft aligncenter alignright alignjustify | numlist bullist | formatpainter",
+                "fontsizeselect | bold italic underline strikethrough | backcolor formatpainter | alignleft aligncenter alignright alignjustify | numlist bullist",
                 menubar: "edit insert tools",
                 menu: {
                     edit: { title: "Edit", items: "undo redo | copy paste cut" },
                     // view: {},
                     insert: {
                         title: "Insert",
-                        items: "image link | inserttable | charmap emoticons | codesample | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry",
+                        items: "image link | inserttable | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry | charmap emoticons | codesample",
                     },
                     tools: { title: "Tools", items: "print fullscreen | wordcount" },
                 },
