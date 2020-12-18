@@ -194,6 +194,16 @@
 
 
         </div>
+        
+        
+        <div id="board-controls" v-if="currentBoard">
+            <img src="@/assets/common/deletewhite.svg" @click="boardDeleteConfirm = !boardDeleteConfirm">
+            <modal-confirm v-if="boardDeleteConfirm" confirmText="Delete"
+                    @selectionConfirmed="deleteBoard(currentBoardId)"
+                    @selectionCanceled="boardDeleteConfirm = !boardDeleteConfirm"
+                    >Are you sure<br>you want to delete this board?</modal-confirm>
+            <!-- <modal-confirm>Hello</modal-confirm> -->
+        </div>
            
     </div>
 </template>
@@ -207,6 +217,8 @@ import screenfull from 'screenfull'
 import CardSelector from './components/board/CardSelector.vue';
 import LayoutSelector from './components/board/LayoutSelector.vue';
 
+import ModalConfirm from './components/modal/Confirm.vue';
+
 export default {
     
     name: 'layr',
@@ -217,7 +229,8 @@ export default {
         Credits,
         Ribbon,
         CardSelector,
-        LayoutSelector
+        LayoutSelector,
+        ModalConfirm
     },
 
     data() {
@@ -236,6 +249,7 @@ export default {
             students: null,
             user: null,
             cardsHaveFocus: true,
+            boardDeleteConfirm: false,
         }
     },
 
@@ -435,6 +449,28 @@ export default {
                             })
 
 
+        },
+
+        deleteBoard(id) {
+            if (this.boardDeleteConfirm) this.boardDeleteConfirm = false
+
+            let boardIndex = this.currentStack.boards.findIndex(b => b.info.id === id)
+            let boards = this.currentStack.boards
+
+            let nextBoard = boards[boardIndex-1]
+                            ? boards[boardIndex-1].info.id
+                            : boards[boardIndex+1]
+                                ? boards[boardIndex+1].info.id
+                                : null
+
+            if (nextBoard) this.openBoard(nextBoard)
+
+            this.currentStack.boards.splice(boardIndex, 1)
+
+            this.$http.delete('/api/boards/' + this.currentBoardId)
+                .then(response => {
+                    console.log(`API BOARD ${this.currentBoardId} RESPONSE`, response.status)
+                })
         },
 
         cellHasCard(cell) {
@@ -764,6 +800,7 @@ export default {
         },
 
         openBoard(id) {
+            if (this.boardDeleteConfirm) this.boardDeleteConfirm = false
             this.boardUnload = true
             this.$nextTick(() => {
                 this.currentBoardId = id
@@ -1205,6 +1242,15 @@ body {
 
 }
 
+.buttons-common-red {
+    background-color: rgb(255, 91, 91);
+}
+
+.buttons-common-red:hover:not([disabled]) {
+    box-shadow: 0 0 0pt 2pt rgb(248, 26, 26);
+
+}
+
 .button-next {
     box-sizing: border-box;
     display: flex;
@@ -1422,6 +1468,24 @@ body {
     display: grid;
     grid-template-columns: 5px minmax(0, 1fr) 5px;
     grid-template-rows: 5px minmax(0, 1fr) 5px;
+}
+
+#board-controls {
+    position: fixed;
+    z-index: 10000;
+    right: 0;
+    top: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgba(0,0,0,.35);
+    border-radius: 0 0 0 5px;
+}
+
+#board-controls img {
+    height: 20px;
+    cursor: pointer;
 }
 
 #layout-grid {
