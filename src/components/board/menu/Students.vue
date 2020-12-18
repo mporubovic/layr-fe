@@ -178,11 +178,16 @@ export default {
         this.loadStudents()
     },
 
+    mounted() {
+    },
+
     methods: {
         loadStudents() {
             this.$http.get('/api/students').then((response) => {
                 console.log('API STUDENTS RESPONSE DATA', response.data)
                 this.students = response.data.students
+                if (this.students[0]) this.selectStudent(this.students[0].id)
+
             })
         },
         
