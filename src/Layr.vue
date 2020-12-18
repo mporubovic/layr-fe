@@ -756,7 +756,7 @@ export default {
             this.stackDataLoaded = false
             this.currentStack = stack
             this.$nextTick(() => {
-                this.openBoard(stack.boards[0].info.id)
+                if (stack.boards?.length > 0) this.openBoard(stack.boards[0].info.id)
                 this.stackDataLoaded = true
                 this.menuTitle = stack.info.title
             })
