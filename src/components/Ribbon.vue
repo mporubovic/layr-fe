@@ -14,7 +14,7 @@
 export default {
     computed: {
         version() {
-            return process.env.VUE_APP_VERSION
+            return this.$layrVersion
         }
     }
 }

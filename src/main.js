@@ -16,6 +16,8 @@ Vue.prototype.$httpCross = axios.create(
     // headers: { 'Access-Control-Allow-Origin': '*' }
 )
 
+Vue.prototype.$layrVersion = "1.2"
+
 import '@/globalComponents'
 
 // import ImageViewer from './components/programs/ImageViewer.vue'
