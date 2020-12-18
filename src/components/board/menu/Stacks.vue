@@ -1,4 +1,3 @@
-                    :style="'margin-top: '+  (index-1)*30 + 'px'"
 <template>
     <div class="stacks">
         <div class="stacks-menu" v-if="createStack">
@@ -21,8 +20,8 @@
                 >
 
                 <div class="carousel-stack-icon">
-                    <div class="carousel-board-icon" v-for="index in boardIcons" :key="index"
-                        :style="{marginBottom: ((index-1)*20) + 'px', backgroundColor: randomColor()}"
+                    <div class="carousel-board-icon" v-for="index in (stack.boards ? stack.boards.length : 1)" :key="index"
+                        :style="{marginBottom: ((index-1)*65)/stack.boards.length + 'px', backgroundColor: randomColor()}"
                     >
 
                     </div>
@@ -59,11 +58,11 @@ export default {
             type: Boolean,
             default: true,
         },
+
     },
 
     data() {
         return {
-            boardIcons: 3,
             stackEditingId: null,
         }
     },
@@ -122,6 +121,7 @@ export default {
 }
 
 .carousel-container {
+    margin-top: 10px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
