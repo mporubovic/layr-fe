@@ -228,21 +228,13 @@ export default {
 
         },
 
-        createStack(withTag) {
+        createStack() {
             // let stack = this.generateStacks(1)[0]
             let title = "New stack"
-            let boardSettings = {
-                dimensions: {
-                    width: 4,
-                    height: 3
-                }
-            } 
 
             let requestPayload = {
                 title: title,
                 studentId: this.selectedStudentId,
-                ...(withTag && {tag: withTag}),
-                boardSettings: JSON.stringify(boardSettings)
             }
 
 

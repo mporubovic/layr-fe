@@ -16,14 +16,9 @@
     <div class="card card-transitions" 
         :ref="'card' + id"  
         key="id"
-        :style="`grid-area: ${card.settings.dimensions.y+1} / ${card.settings.dimensions.x+1} / ${card.settings.dimensions.y + 1 + card.settings.dimensions.height} / ${card.settings.dimensions.x + 1 + card.settings.dimensions.width}`"
         :id="'card-'+id"
         >
 
-        <div class="card-corner">
-
-        </div>
-        
         <div class="card-header"
             >
             <div class="card-header-title card-header-drag-handle"
@@ -84,7 +79,6 @@
                         @programCreatedContent="programCreatedContent"
                         @programDeletedContent="programDeletedContent"
                         :autoSaveInterval="5000"
-                        :cardDimensions="dimensions"
                         :cardRect="boundingRect"
                         >
             </component>        
@@ -111,8 +105,6 @@
 </template>
 
 <script>
-import interact from 'interactjs';
-
 export default {
     
     props: {
@@ -123,10 +115,6 @@ export default {
         hasFocus: {
             type: Boolean,
             required: true
-        },
-
-        dropzoneGrid: {
-            type: Object
         },
 
         boardUnload: {
@@ -198,7 +186,6 @@ export default {
     
     mounted() {
         this.calcBoundingRect();
-        this.initializeInteractjs();
         this.loadContent = true
     },
 
@@ -220,17 +207,12 @@ export default {
                 
                 case("image") :
                     
-                    switch (card.settings.program) {
-                        case "gallery":
-                            setTimeout(() => {
-                                this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
+                    setTimeout(() => {
+                        this.$el.querySelector(".card-body").style["background-color"] = "rgba(0,0,0,0.15)";
 
-                            }, 0);
-                            
-                            return "image-viewer";  
-                    }
-                break
- 
+                    }, 0);
+                    
+                    return "image-viewer";  
                     
                 case("video") :
                     return "VideoViewer";                
@@ -341,173 +323,6 @@ export default {
             event.target.blur()
             this.isHeaderEditing = false
         },
-
-        
-        initializeInteractjs() {
-            let self = this;
-
-            interact('#card-'+this.id)
-            // interact('.card')
-                    .draggable({
-                        enabled: true,
-                        modifiers: [
-                            interact.modifiers.restrictRect({
-                                restriction: 'parent',
-                            }),
-
-                        ],
-                        autoScroll: false,
-                        allowFrom: '.card-header',
-
-                        listeners: {
-                            move (event) {
-                                let target = event.target
-
-                                target.classList.remove('card-transitions')
-                                target.classList.add('card-semitransparent')
-                                
-                                let x = (self.interactx || 0) + event.dx
-                                let y = (self.interacty || 0) + event.dy
-                                
-                                target.style.webkitTransform =
-                                    target.style.transform =
-                                    'translate(' + x + 'px, ' + y + 'px)'
-
-                                self.interactx = x
-                                self.interacty = y
-
-                                let cardRect = target.getBoundingClientRect()
-
-                                self.$emit('cardDragStart', self.id, cardRect.left, cardRect.top)
-                            },
-
-                            end (event) {
-                                self.$emit('cardDragEnd', self.id)
-
-                                let target = event.target
-                                target.classList.add('card-transitions')
-
-                                self.interactx = self.interacty = null
-                                
-
-                                if (!self.overlap) {
-                                    target.style.webkitTransform =
-                                    target.style.transform =
-                                    'translate(' + self.card.local.dx + 'px, ' + self.card.local.dy + 'px)'  
-
-                                } else {
-                                    target.style.transform = null
-
-                                }
-                                 
-                                setTimeout(() => {
-                                    target.classList.remove('card-transitions')
-                                    target.classList.remove('card-semitransparent')
-                                    target.style.transform = null
-
-                                }, 200);
-
-                            }
-                        }
-                    }).resizable({
-                    enabled: true,
-                    edges: { right: '.card-corner', bottom: '.card-corner' },
-                    ratio: 1,
-                    listeners: {
-                        move (event) {
-                            var target = event.target
-
-                            target.classList.remove('card-transitions')
-                            target.classList.add('card-semitransparent')
-
-                            target.style.width = event.rect.width + 'px'
-                            target.style.height = event.rect.height + 'px'
-
-                            // let els = document.elementsFromPoint(event.clientX, event.clientY)
-                            
-                            // let newCell = els.find(el => el.classList.contains("dropzone"))
-                            // let newCellRow = parseInt(newCell.getAttribute('row'))
-                            // let newCellColumn = parseInt(newCell.getAttribute('column'))
-
-                            // let newCellRect = newCell.getBoundingClientRect()
-
-                            // let offsetX = (event.clientX - newCellRect.left) > (self.dropzoneGrid.cellWidth *0.5) ? 0 : -1
-                            // let offsetY = (event.clientY - newCellRect.top) > (self.dropzoneGrid.cellHeight *0.5) ? 0 : -1
-
-                            // let anchorCellRow = self.dimensions.y
-                            // let anchorCellColumn = self.dimensions.x
-                            
-                            // if (newCellColumn+offsetX < anchorCellColumn) offsetX = 0
-                            // if (newCellRow+offsetY < anchorCellRow) offsetY = 0
-                            
-                            // self.newColumn = newCellColumn + offsetX
-                            // self.newRow = newCellRow + offsetY
-
-                            self.$emit('cardResizeStart', self.id, event.clientX, event.clientY)
-
-                            
-                            
-                            // let overlap = self.checkOverlap(self.id, anchorCellColumn, anchorCellRow, newCellColumn+offsetX, newCellRow+offsetY)
-                            
-                            // self.overlap = overlap
-
-                            // self.deactivateAllDropzones()
-                            // self.activateDropzonesInArea(anchorCellColumn, anchorCellRow, newCellColumn+offsetX, newCellRow+offsetY, overlap)
-                        
-                        },
-
-                        end (event) {
-                            let target = event.target
-                            self.$emit('cardResizeEnd', self.id)
-                            
-
-                            // target.style.webkitTransform = target.style.transform = null
-                            
-                            // let width = !self.overlap ? self.newColumn + 1 - self.dimensions.x : self.dimensions.w
-                            // let height = !self.overlap ? self.newRow + 1 - self.dimensions.y : self.dimensions.h
-                                
-                            // target.style.height = height * self.dropzoneGrid.cellHeight - 10 +'px'
-                            // target.style.width = width * self.dropzoneGrid.cellWidth - 10 +'px'
-                            target.classList.add('card-transitions')
-
-                            target.style.width = "100%"
-                            target.style.height = "100%"
-
-                            setTimeout(() => {
-                                target.classList.remove('card-transitions')
-                                target.classList.remove('card-semitransparent')
-                                self.cardResized()
-
-                            }, 200);
-
-
-
-                            // setTimeout(() => {
-                            //     target.style.height = null                            
-                            //     target.style.width = null   
-                            //     target.classList.remove('card-delay')
-                            //     self.deactivateAllDropzones()
-
-                            //     self.w = width
-                            //     self.h = height
-                            // }, 200);
-
-                        }
-
-                    },
-                    modifiers: [
-                        interact.modifiers.restrictEdges({
-                            outer: 'parent'
-                        }),
-                        interact.modifiers.restrictSize({
-                            min: { width: 100, height: 100 }
-                        }),
-                    ],
-
-                })
-
-        },
-
 
         programUpdatedContent(programName, updatedContent) {
             // console.log(programName, updateFunction, updatedContent)
@@ -672,6 +487,8 @@ export default {
     border-radius: 10px;
     /* box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.75); */
     overflow: hidden;
+    width: 100%;
+    height: 100%;
 }
 
 .card-corner {

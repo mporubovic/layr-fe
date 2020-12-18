@@ -72,7 +72,6 @@ export default {
         stackClicked(id) {
             if (!this.stackEditingId) {
                 this.$emit('subMenuStackClicked', id)
-                document.querySelector('#dropzone-grid').style.outline = "solid 3px rgba(235, 235, 235, 0.2)"
             } 
         },
 

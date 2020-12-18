@@ -161,75 +161,37 @@
 
         </div>
 
-        <div id="sidebar-bottom" v-show="stackDataLoaded">
-            <div id="card-carousel">
-                <div class="card-button" v-for="(card, index) in newCards" :key="index">
-                    <div class="card-button-draggable" :data-type="card.type">
-                        <img :src="card.icon" draggable="false">
-                        <p>{{ card.title }}</p>
-                    </div>
 
-                </div>
-            </div>
+        <div class="board" id="board" @scroll.prevent="onBoardDivWheel" v-if="currentBoard">
+            <div id="layout-grid" v-if="currentBoard.settings && currentBoard.settings.layout" :style="gridSettingsStyle">
+                <div class="grid-cell" v-for='(cell, i) in currentBoard.settings.layout' :key="i" :style="{gridArea: cell}">
+                    
+                    <card
+                        v-if="cellHasCard(cell)"
+                        :key="currentBoard.cards.find(c => c.settings.dimensions === cell).info.id"
+                        :card='currentBoard.cards.find(c => c.settings.dimensions === cell)'
+                        :hasFocus="cardsHaveFocus"
+                        :boardUnload="boardUnload"
+                        @cardProgramUpdatedContent="cardProgramUpdatedContent"
+                        @cardProgramCreatedContent="cardProgramCreatedContent"
+                        @cardProgramDeletedContent="cardProgramDeletedContent"
+                        @cardUpdatedItself="cardUpdatedItself"
+                    ></card>   
 
-            <div id="card-carousel-ghost">
-                <div class="card-button-ghost" v-for="(card, index) in newCards" :key="index">
-                    <img :src="card.icon" draggable="false">
-                    <p>{{ card.title }}</p>
-
-                </div>                        
-            </div>
-        </div>
-
-
-        <div class="board" id="board" @scroll.prevent="onBoardDivWheel">
-            
-
-            <div id="layout-grid">
-                <!-- eslint-disable --> 
-                <!-- v-if and v-for don't mix well -->
-                <card
-                    v-if="stackDataLoaded"
-                    v-for="(card, index) in cards" 
-                    :key="card.info.id"
-                    :card=card
-                    :index=index
-                    :hasFocus="cardsHaveFocus"
-                    :boardUnload="boardUnload"
-                    :dropzoneGrid='dropzoneGrid'
-                    @cardInteractJsDrag="cardsSetFocus"
-                    @cardInteractJsResize="cardsSetFocus"
-                    @cardProgramUpdatedContent="cardProgramUpdatedContent"
-                    @cardProgramCreatedContent="cardProgramCreatedContent"
-                    @cardProgramDeletedContent="cardProgramDeletedContent"
-                    @cardUpdatedItself="cardUpdatedItself"
-                    @cardDragStart="cardDragStart"
-                    @cardResizeStart="cardResizeStart"
-                    @cardDragEnd="cardDragEnd"
-                    @cardResizeEnd="cardResizeEnd"
-
-                ></card>   
-                <!--eslint-enable-->
-
-
-                </div>
-
-            
-            <div id="dropzone-grid">
-
-
-                <div v-for="(cell, index) in dropzoneGrid.cells" 
-                        :key="index"
-                        class="dropzone" 
-                        :ref="'dropzone-cell'"
-                        :id="'cell-'+index"
-                        :column='cell.column'
-                        :row='cell.row'
-                        >
+                    <card-selector v-else 
+                        @cardSelected="createNewCard"
+                        :dimensions='cell'
                         
-                        <div class="dropzone-placeholder"></div>
+                        > </card-selector>
+
                 </div>
+
             </div>
+
+            <div id="layout-selector-container" v-else>
+                <layout-selector @templateSelected='boardTemplateSelected'></layout-selector>
+            </div>
+
 
         </div>
            
@@ -241,7 +203,9 @@ import Card from './components/Card.vue'
 import Credits from './components/Credits.vue'
 import Ribbon from './components/Ribbon.vue'
 import screenfull from 'screenfull'
-import interact from "interactjs";
+
+import CardSelector from './components/board/CardSelector.vue';
+import LayoutSelector from './components/board/LayoutSelector.vue';
 
 export default {
     
@@ -252,6 +216,8 @@ export default {
         Card,
         Credits,
         Ribbon,
+        CardSelector,
+        LayoutSelector
     },
 
     data() {
@@ -267,95 +233,9 @@ export default {
             menuTitle: "Welcome",
             isMenuTitleEditing: false,
             menuTitleTapCount: 0,
-            userDomain: null,
-            userSubdomain: null,
             students: null,
             user: null,
-            // cards: [],
-            dropzoneGrid: {
-                cells: [],
-                cellHeight: 0,
-                cellWidth:0,
-                DOMcells: []
-            },
-
-            tempCard: {},
-
             cardsHaveFocus: true,
-            newCards: [              
-                {
-                    "type": "whiteboard",
-                    "program": "whiteboard",
-                    "available": true,
-                    "title": "Draw",
-                    "icon": require('@/assets/cards/icons/whiteboard.svg'),
-                    "description": "Create a whiteboard",
-                    "width": 2,
-                    "height": 2,
-                },                 
-                {
-                    "type": "pdf",
-                    "program": "pdfviewer",
-                    "available": true,
-                    "title": "PDF",
-                    "icon": require('@/assets/cards/icons/pdf.svg'),
-                    "description": "Upload a PDF from your device",
-                    "width": 1,
-                    "height": 2,
-                },      
-                {
-                    "type": "youtube",
-                    "program": "youtubeplayer",
-                    "available": true,
-                    "title": "Video",
-                    "icon": require('@/assets/cards/icons/youtube.svg'),
-                    "description": "Play a video from YouTube",
-                    "width": 2,
-                    "height": 2,
-                },                
-                {
-                    "type": "text",
-                    "program": "texteditor",
-                    "available": true,
-                    "title": "Notes",
-                    "icon": require('@/assets/cards/icons/text.svg'),
-                    "description": "Create a note with a text editor",
-                    "width": 1,
-                    "height": 2,
-                },                
-                {
-                    "type": "url",
-                    "program": "list",
-                    "title": "URL",
-                    "available": true,
-                    "icon": require('@/assets/cards/icons/link.svg'),
-                    "description": "Create a list of URLs",
-                    "width": 1,
-                    "height": 1,
-                },                
-                {
-                    "type": "image",
-                    "program": "gallery",
-                    "available": true,
-                    "title": "Image",
-                    "icon": require('@/assets/cards/icons/image.svg'),
-                    "description": "Upload images from your device",
-                    "width": 1,
-                    "height": 1,
-                },                  
-                {
-                    "type": "todo",
-                    "program": "list",
-                    "available": true,
-                    "title": "Todo",
-                    "icon": require('@/assets/cards/icons/todo.svg'),
-                    "description": "Create a todo list",
-                    "width": 1,
-                    "height": 1,
-                },  
-
-
-            ],
         }
     },
 
@@ -412,18 +292,30 @@ export default {
 
         showRibbon() {
             return true
+        },
+
+        gridSettingsStyle() {
+            let cells = this.currentBoard.settings.layout
+            let maxRow = 0
+            let maxCol = 0
+
+            cells.forEach(cell => {
+                let split = cell.replaceAll(" ", "").split('/')
+                let row = split[2]
+                let col = split[3]
+
+                if (row > maxRow) maxRow = row
+                if (col > maxCol) maxCol = col
+            });
+
+            let w = maxCol - 1
+            let h = maxRow - 1
+
+            return {grid: `repeat(${h}, minmax(0, 1fr)) / repeat(${w}, minmax(0, 1fr))`}
         }
 
     },
 
-    created() {
-        window.addEventListener("resize", this.windowResized);
-    },
-
-    destroyed() {
-        window.removeEventListener("resize", this.windowResized);
-    },
-    
     mounted() { 
         
         let path = window.location.pathname
@@ -491,312 +383,17 @@ export default {
 
         },
 
-        dropzoneGridSetup() {
-            this.dropzoneGrid.cells = []
-            this.dropzoneGrid.DOMcells = []
-            
-            let w = this.currentBoard.settings.dimensions.width
-            let h = this.currentBoard.settings.dimensions.height
-            let gap = 10
-
-            let dropzoneGrid = this.$el.querySelector('#dropzone-grid').style
-
-            dropzoneGrid.grid = `repeat(${h}, minmax(0, 1fr)) / repeat(${w}, minmax(0, 1fr))`
-            let layoutGrid = this.$el.querySelector('#layout-grid').style
-
-            layoutGrid.grid = `repeat(${h}, minmax(0, 1fr)) / repeat(${w}, minmax(0, 1fr))`
-            layoutGrid.gap = gap + 'px'
-
-            let gridArea = w * h
-            
-            for (let index = 0; index < gridArea; index++) {
-                let column = index - Math.floor(index/(w))*w
-                let row = Math.floor(index/(w))
-
-                let cell = {
-                    column,
-                    row
-                }
-                this.dropzoneGrid.cells.push(cell)
-            }
-
-        },
-
-        windowResized() {
-            if (!this.currentBoard) return
-            let r = this.$el.querySelector('#cell-0').getBoundingClientRect()
-            this.dropzoneGrid.cellHeight = r.height
-            this.dropzoneGrid.cellWidth = r.width
-            this.dropzoneGrid.rect = this.$el.querySelector('#dropzone-grid').getBoundingClientRect()
-        },
-
-        cardDragStart(id, left, top) {
-            this.cardsHaveFocus = false
-            
-            
-            let card = this.currentBoard.cards.find(c => c.info.id === id)
-            let tempX = Math.floor((left - this.dropzoneGrid.rect.left + 0.5*this.dropzoneGrid.cellWidth) / this.dropzoneGrid.cellWidth)
-            let tempY = Math.floor(((top - this.dropzoneGrid.rect.top + 0.5*this.dropzoneGrid.cellHeight) / this.dropzoneGrid.cellHeight))
-
-            card.local.newColumn = tempX 
-            card.local.newRow = tempY
-
-            let w = card.settings.dimensions.width
-            let h = card.settings.dimensions.height
-
-            let overlap = this.checkOverlap(id, tempX, tempY, tempX + w - 1, tempY + h - 1)
-            card.local.overlap = overlap
-            // console.log(tempX, tempY, tempX + w - 1, tempY + h - 1, overlap)
-            this.deactivateAllDropzones()
-            this.activateDropzonesInArea(tempX, tempY, tempX + w - 1, tempY + h - 1, overlap)
-        },
-
-        cardDragEnd(id) { 
-            this.cardsHaveFocus = true
-            
-            let card = this.currentBoard.cards.find(c => c.info.id === id)
-
-            let anchorCell = this.dropzoneGrid.DOMcells.find(drop => parseInt(drop.getAttribute('column')) === card.settings.dimensions.x &&
-                                                            parseInt(drop.getAttribute('row')) === card.settings.dimensions.y
-            
-            )
-
-            let newCell = this.dropzoneGrid.DOMcells.find(drop => parseInt(drop.getAttribute('column')) === card.local.newColumn &&
-                                                            parseInt(drop.getAttribute('row')) === card.local.newRow
-            
-            )
-
-            if (!card.local.overlap) {
-                let dx = (parseInt(newCell.getAttribute('column')) - parseInt(anchorCell.getAttribute('column')))  * this.dropzoneGrid.cellWidth
-                let dy = (parseInt(newCell.getAttribute('row')) - parseInt(anchorCell.getAttribute('row'))) * this.dropzoneGrid.cellHeight
-                card.local.dx = dx
-                card.local.dy = dy
-
-
-
-                setTimeout(() => {
-                    this.cardUpdatedItself(id, 'settings.dimensions.x', card.local.newColumn)
-                    this.cardUpdatedItself(id, 'settings.dimensions.y', card.local.newRow)
-                }, 200);
-            }
-
-            setTimeout(() => {
-                this.deactivateAllDropzones()
-                
-            }, 200);
-            
-        },
-
-        cardResizeStart(id, x, y) {
-            this.cardsHaveFocus = false
-
-            let els = document.elementsFromPoint(x, y)
-            let card = this.currentBoard.cards.find(c => c.info.id === id)
-                            
-            let newCell = els.find(el => el.classList.contains("dropzone"))
-            let newCellRow = parseInt(newCell.getAttribute('row'))
-            let newCellColumn = parseInt(newCell.getAttribute('column'))
-
-            let newCellRect = newCell.getBoundingClientRect()
-
-            let offsetX = (x - newCellRect.left) > (this.dropzoneGrid.cellWidth *0.5) ? 0 : -1
-            let offsetY = (y - newCellRect.top) > (this.dropzoneGrid.cellHeight *0.5) ? 0 : -1
-
-            let anchorCellRow = card.settings.dimensions.y
-            let anchorCellColumn = card.settings.dimensions.x
-            
-            if (newCellColumn+offsetX < anchorCellColumn) offsetX = 0
-            if (newCellRow+offsetY < anchorCellRow) offsetY = 0
-            
-            card.local.newColumn = newCellColumn + offsetX
-            card.local.newRow = newCellRow + offsetY
-            
-            let overlap = this.checkOverlap(id, anchorCellColumn, anchorCellRow, newCellColumn+offsetX, newCellRow+offsetY)
-            card.local.overlap = overlap
-            
-            this.deactivateAllDropzones()
-            this.activateDropzonesInArea(anchorCellColumn, anchorCellRow, newCellColumn+offsetX, newCellRow+offsetY, overlap)
-                        
-        },
-
-        cardResizeEnd(id) {
-            this.cardsHaveFocus = true
-
-            let card = this.currentBoard.cards.find(c => c.info.id === id)
-            
-            if (!card.local.overlap) {
-                let width = card.local.newColumn + 1 - card.settings.dimensions.x
-                let height = card.local.newRow + 1 - card.settings.dimensions.y
-                this.cardUpdatedItself(id, 'settings.dimensions.width', width)
-                this.cardUpdatedItself(id, 'settings.dimensions.height', height)
-            }
-            this.deactivateAllDropzones()
-
-        
-        },
-
-
-        getOuterDropzones(dropzones) {
-            let topleftDrop = dropzones[0]
-            let bottomrightDrop = dropzones[dropzones.length-1]
-
-            let firstColumn = parseInt(topleftDrop.getAttribute('column'))
-            let lastColumn = parseInt(bottomrightDrop.getAttribute('column'))
-            let firstRow = parseInt(topleftDrop.getAttribute('row'))
-            let lastRow = parseInt(bottomrightDrop.getAttribute('row'))
-
-
-            let toprightDrop = firstRow !== lastRow ? dropzones.find(drop => parseInt(drop.getAttribute('row')) === firstRow && 
-                                                        parseInt(drop.getAttribute('column')) === lastColumn)
-
-                                                    : bottomrightDrop
-            
-            let bottomleftDrop = firstColumn !== lastColumn ? dropzones.find(drop => parseInt(drop.getAttribute('row')) === lastRow && 
-                                                                parseInt(drop.getAttribute('column')) === firstColumn)
-                                                            : bottomrightDrop
-
-            let leftBetween = dropzones.filter(drop => parseInt(drop.getAttribute('row')) > firstRow && 
-                                                        parseInt(drop.getAttribute('row')) < lastRow && 
-                                                        parseInt(drop.getAttribute('column')) === firstColumn)
-            
-            let topBetween = dropzones.filter(drop => parseInt(drop.getAttribute('column')) > firstColumn && 
-                                                        parseInt(drop.getAttribute('column')) < lastColumn &&
-                                                        parseInt(drop.getAttribute('row')) === firstRow
-                                                        
-                                                        )
-            
-            let rightBetween = dropzones.filter(drop => parseInt(drop.getAttribute('row')) > firstRow && 
-                                                        parseInt(drop.getAttribute('row')) < lastRow && 
-                                                        parseInt(drop.getAttribute('column')) === lastColumn)
-            
-            let bottomBetween = dropzones.filter(drop => parseInt(drop.getAttribute('column')) > firstColumn && 
-                                                        parseInt(drop.getAttribute('column')) < lastColumn && 
-                                                        parseInt(drop.getAttribute('row')) === lastRow)
-            
-            return {
-                corners: [topleftDrop, toprightDrop, bottomrightDrop, bottomleftDrop],
-                middle: {
-                    
-                    left: leftBetween,
-                    top: topBetween,
-                    right: rightBetween,
-                    bottom: bottomBetween
-                }
-
-            }
-        },
-        
-        activateDropzonesInArea(x1, y1, x2, y2, restrict) {
-            let cells = this.dropzoneGrid.DOMcells
-            if (x1 < 0) x1 = 0
-            if (x2 < 0) x2 = 0
-            if (y1 < 0) y1 = 0
-            if (y2 < 0) y2 = 0
-
-            // console.log(x1, y1, x2, y2)
-            let dropzones = cells.filter(drop => drop.getAttribute('column') >= x1 &&
-                                                    drop.getAttribute('column') <= x2 &&
-                                                    drop.getAttribute('row') >= y1 &&
-                                                    drop.getAttribute('row') <= y2
-            )
-
-            dropzones.forEach(drop => {
-                drop.children[0].style['background-color'] = restrict ? 'rgba(247, 82, 82, 0.4)' : 'rgba(78, 255, 55, 0.2)'
-                drop.children[0].style['border-color'] = restrict ? 'rgba(255, 0, 0, 0.8)' : 'rgba(57, 255, 31, 0.8)'
-            })
-
-            let outerDropzones = this.getOuterDropzones(dropzones)
-
-            let cornerDropzones = outerDropzones.corners
-
-            cornerDropzones[0].children[0].style['border-top-left-radius'] = '10px'
-            cornerDropzones[1].children[0].style['border-top-right-radius'] = '10px'
-            cornerDropzones[2].children[0].style['border-bottom-right-radius'] = '10px'
-            cornerDropzones[3].children[0].style['border-bottom-left-radius'] = '10px'            
-            
-            let middleDropzones = outerDropzones.middle
-
-            for (const [side, drops] of Object.entries(middleDropzones)) {
-                if (drops) drops.forEach(drop => {
-                    drop.children[0].style[`border-${side}-width`] = '5px'
-                    drop.style[`padding-${side}`] = restrict ? '0' : '5px' 
-                })
-            }
-
-            if (!restrict) {
-                cornerDropzones[0].style['padding-left'] = '5px'
-                cornerDropzones[0].style['padding-top'] = '5px'
-                cornerDropzones[1].style['padding-right'] = '5px'
-                cornerDropzones[1].style['padding-top'] = '5px'
-                cornerDropzones[2].style['padding-right'] = '5px'
-                cornerDropzones[2].style['padding-bottom'] = '5px'
-                cornerDropzones[3].style['padding-left'] = '5px'
-                cornerDropzones[3].style['padding-bottom'] = '5px'
-            }
-
-            cornerDropzones[0].children[0].style['border-left-width'] = '5px'
-            cornerDropzones[0].children[0].style['border-top-width'] = '5px'
-            cornerDropzones[1].children[0].style['border-right-width'] = '5px'
-            cornerDropzones[1].children[0].style['border-top-width'] = '5px'
-            cornerDropzones[2].children[0].style['border-right-width'] = '5px'
-            cornerDropzones[2].children[0].style['border-bottom-width'] = '5px'
-            cornerDropzones[3].children[0].style['border-left-width'] = '5px'
-            cornerDropzones[3].children[0].style['border-bottom-width'] = '5px'
-            
-
-
-
-        },
-        
-        deactivateAllDropzones() {
-            this.dropzoneGrid.DOMcells.forEach(drop => {
-                // drop.children[0].style['background-color'] = 'white'
-                drop.children[0].style['background-color'] = null
-                drop.children[0].style['border-radius'] = null
-                drop.children[0].style['border'] = null
-                drop.style['padding'] = null
-
-            })
-        },
-
-        checkOverlap(id, minx2, miny2, maxx2, maxy2) {
-            let result = false
-            let grid = this.dropzoneGrid
-
-
-            if (maxy2 >= grid.height || miny2 < 0 || minx2 < 0 || maxx2 >= grid.width) {
-                if (minx2 === maxx2 && miny2 === maxy2) return false
-                else return true
-            }
-
-            this.currentBoard.cards.filter(crd => crd.info.id !== id).forEach(c => {
-                let minx1 = c.settings.dimensions.x
-                let miny1 = c.settings.dimensions.y
-                let maxx1 = minx1 + c.settings.dimensions.width - 1
-                let maxy1 = miny1 + c.settings.dimensions.height - 1
-
-                if (maxx2 >= minx1 && minx2 <= maxx1 && maxy2 >= miny1 && miny2 <= maxy1) { // AABB algorithm
-                    result = true
-                }
-            })
-            return result
-        },
-
         sidebarBoardClicked(id) {
             this.openBoard(id)
         },
 
         createNewBoard() {
             let title = "New board"
-            let settings = {dimensions: {
-                        width: 4,
-                        height: 3
-                    }}
 
             let requestPayload = {
                 title: title,
                 stackId: this.currentStackId,
-                settings: JSON.stringify(settings),
+                // settings: JSON.stringify(settings),
                 // ...(withTag && {tag: withTag})
             }
 
@@ -820,158 +417,30 @@ export default {
                         })
         },
 
-        initializeBottomSidebar() {
-            let self = this
-            interact('.card-button-draggable').draggable({
-                enabled: true,
-                autoScroll: false,
-                cursorChecker () {
-                    return null
-                },
+        boardTemplateSelected(template) {
+            console.log("UPDATE TEMPLATE TO \"", template, "\" BOARD", this.currentBoardId)
 
-                modifiers: [
-                    interact.modifiers.restrictRect({
-                        restriction: document.body,
-                    }),
-
-                ],
-
-                listeners: {
-                    move (event) {
-                        let target = event.target
-                        
-                        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-                        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
-                        
-                        target.style.webkitTransform =
-                            target.style.transform =
-                            'translate(' + x + 'px, ' + y + 'px)'
-
-                        target.setAttribute('data-x', x)
-                        target.setAttribute('data-y', y)
-
-                        let dropzoneRect = self.$el.querySelector('#dropzone-grid').getBoundingClientRect()
-                        // let cardRect = event.rect
-                        let cardRect = target.getBoundingClientRect()
-                        // console.log(dropzoneRect.right, cardRect.left)
-                        self.deactivateAllDropzones()
+            this.setNestedObjectValue(this.currentBoard, 'settings.layout', template)
 
 
-                        if (dropzoneRect.bottom >= (event.rect.bottom + 20) && dropzoneRect.right >= event.rect.left + 20) {
-                        // if (dropzoneRect.bottom >= (cardRect.bottom) && dropzoneRect.right >= cardRect.left) {
-                        // if (dropzoneRect.bottom >= (cardRect.bottom - cardRect.height) && dropzoneRect.right >= (cardRect.right - cardRect.width)) {
-                            let type = target.getAttribute('data-type')
-                            let newCard = self.newCards.find(c => c.type == type)
-
-                            if (target.className !== 'card-on-board') {
-                                target.className = ('card-on-board')
-
-                                self.$set(newCard, 'onboard', true)
-                                target.style.width = (self.dropzoneGrid.cellWidth)*newCard.width  - 10 + 'px'
-                                target.style.height = (self.dropzoneGrid.cellHeight)*newCard.height - 10 + 'px'
-                                let nx = x - self.dropzoneGrid.cellWidth*0.3
-                                let ny = y - self.dropzoneGrid.cellHeight*0.3
-                                target.style.webkitTransform =
-                                    target.style.transform =
-                                    'translate(' + nx + 'px, ' + ny + 'px)'
-                                target.setAttribute('data-x', nx)
-                                target.setAttribute('data-y', ny)
-
-                                self.tempCard.w = newCard.width
-                                self.tempCard.h = newCard.height
-
-                            } 
-
-                            // console.log(dropzoneRect.bottom, cardRect.bottom, cardRect.height)
-
-                            if (dropzoneRect.bottom >= (cardRect.bottom - cardRect.height) && dropzoneRect.right >= (cardRect.right - cardRect.width)) {
-
-                                // console.log("aaa")
-
-                                let tempX = Math.floor((event.clientX - dropzoneRect.left) / self.dropzoneGrid.cellWidth)
-                                let tempY = Math.floor(((event.clientY - dropzoneRect.top) / self.dropzoneGrid.cellHeight))
-
-                                self.tempCard.x = tempX
-                                self.tempCard.y = tempY
-                                
-                                let overlap = self.checkOverlap(-1, tempX, tempY, tempX + newCard.width -1, tempY + newCard.height - 1)
-                                self.tempCard.overlap = overlap
-
-                                self.activateDropzonesInArea(tempX, tempY, tempX + newCard.width -1, tempY + newCard.height - 1, overlap)
-                            }
-                        } 
-                        
-                    },
-
-                    end (event) {
-
-                        let target = event.target
-                        let tempCard = self.tempCard
-                        let cardRect = target.getBoundingClientRect()
-                        let dropzoneRect = self.$el.querySelector('#dropzone-grid').getBoundingClientRect()
-
-
-                        // if (!(dropzoneRect.bottom >= cardRect.bottom && dropzoneRect.right >= cardRect.right)) {
-                        if (tempCard.overlap || !(dropzoneRect.bottom >= (event.rect.bottom) && dropzoneRect.right >= event.rect.left)) {
-                            target.style = null
-                            target.className = 'card-button-draggable'
-
-                            target.removeAttribute('data-x')
-                            target.removeAttribute('data-y')
-
-                            self.deactivateAllDropzones()
-
-                            return
-                        }
-                        let cell = self.dropzoneGrid.DOMcells.find(drop => parseInt(drop.getAttribute('column')) === tempCard.x &&
-                                                                        parseInt(drop.getAttribute('row')) === tempCard.y
-                        )
-
-                        let cellx = parseInt(cell.getAttribute('column'))
-                        let celly = parseInt(cell.getAttribute('row'))
-
-                        let ghostx = parseInt(target.getAttribute('data-x'))
-                        let ghosty = parseInt(target.getAttribute('data-y'))
-
-                        target.removeAttribute('data-x')
-                        target.removeAttribute('data-y')
-
-                        let cellRect = cell.getBoundingClientRect()
-                        
-                        let dx = !tempCard.overlap ? cardRect.left - cellRect.left : 0
-                        let dy = !tempCard.overlap ? cardRect.top - cellRect.top : 0
-
-                        // if (!tempCard.overlap) {
-                        target.classList.add('temp-card-delay')
-
-                        target.style.webkitTransform =
-                        target.style.transform =
-                        'translate(' + (ghostx - dx + 5) + 'px, ' + (ghosty - dy + 5) + 'px)'      
-
-                        let cardType = target.getAttribute('data-type')
-                        
-                        self.createNewCard(cardType, cellx, celly).then(() => {
-                            target.style = null
-                            target.className = 'card-button-draggable'
-
-                        })
-                        self.tempCard = {}
-                        
-                        setTimeout(() => {
-                            self.deactivateAllDropzones()
-                            target.classList.remove('temp-card-delay')
-                            // target.style = null
-
-                        }, 200);
-                        // } else {
-                        //     target.style = null
-                        //     target.className = 'card-button-draggable'
-                        //     self.deactivateAllDropzones()
-                        // }
-                    }
+            let requestPayload = {
+                settings: {
+                    layout: template
                 }
-            })
+            }
+
+            this.$http.patch('/api/boards/' + this.currentBoardId, requestPayload)
+                            .then(response => {
+                                console.log(`API BOARD ${this.currentBoardId} RESPONSE`, response.status)
+                            })
+
+
         },
+
+        cellHasCard(cell) {
+            return this.currentBoard.cards?.filter(c => c.settings.dimensions === cell).length === 1
+        },
+
 
         cardsSetFocus(start) {
             
@@ -1035,13 +504,8 @@ export default {
                             "icon": require('@/assets/cards/icons/image.svg'),
                         },
                         "settings": {
-                            "dimensions": {
-                                "x": card.settings.dimensions.x,
-                                "y": card.settings.dimensions.y,
-                                "width": 1,
-                                "height": 1,
-                            },
-                            "program": "gallery",
+                            "dimensions": card.settings.dimensions,
+                            // "program": "gallery",
 
                         
                         },
@@ -1061,13 +525,9 @@ export default {
                             "icon": require('@/assets/cards/icons/todo.svg'),
                         },
                         "settings": {
-                            "dimensions": {
-                                "x": card.settings.dimensions.x,
-                                "y": card.settings.dimensions.y,
-                                "width": 1,
-                                "height": 1,
-                            },
-                            "program": "list",
+                            "dimensions": card.settings.dimensions,
+
+                            // "program": "list",
                         },
 
                         "content": [
@@ -1099,13 +559,9 @@ export default {
                             "icon": require('@/assets/cards/icons/link.svg'),
                         },
                         "settings": {
-                            "dimensions": {
-                                "x": card.settings.dimensions.x,
-                                "y": card.settings.dimensions.y,
-                                "width": 1,
-                                "height": 1,
-                            },  
-                            "program": "list",
+                            "dimensions": card.settings.dimensions,
+ 
+                            // "program": "list",
                         },
 
                         "content": [
@@ -1137,13 +593,9 @@ export default {
                             "icon": require('@/assets/cards/icons/text.svg'),
                         },
                         "settings": {
-                            "dimensions": {
-                                "x": card.settings.dimensions.x,
-                                "y": card.settings.dimensions.y,
-                                "width": 1,
-                                "height": 2,
-                            },  
-                            "program": "texteditor",
+                            "dimensions": card.settings.dimensions,
+ 
+                            // "program": "texteditor",
                         },
 
                         "content": [
@@ -1169,13 +621,9 @@ export default {
                             "icon": require('@/assets/cards/icons/pdf.svg'),
                         },
                         "settings": {
-                            "dimensions": {
-                                "x": card.settings.dimensions.x,
-                                "y": card.settings.dimensions.y,
-                                "width": 1,
-                                "height": 2,
-                            },
-                            "program": "pdfviewer",
+                            "dimensions": card.settings.dimensions,
+
+                            // "program": "pdfviewer",
                         },
 
                         "content": [],
@@ -1191,13 +639,9 @@ export default {
                             "icon": require('@/assets/cards/icons/youtube.svg'),
                         },
                         "settings": {
-                            "dimensions": {
-                                "x": card.settings.dimensions.x,
-                                "y": card.settings.dimensions.y,
-                                "width": 2,
-                                "height": 2,
-                            },
-                            "program": "youtubeplayer",
+                            "dimensions": card.settings.dimensions,
+
+                            // "program": "youtubeplayer",
                         },
 
                         "content" : [],
@@ -1214,13 +658,9 @@ export default {
                             "icon": require('@/assets/cards/icons/whiteboard.svg'),
                         },
                         "settings": {
-                            "dimensions": {
-                                "x": card.settings.dimensions.x,
-                                "y": card.settings.dimensions.y,
-                                "width": 2,
-                                "height": 2,
-                            },  
-                            "program": "whiteboard",
+                            "dimensions": card.settings.dimensions,
+ 
+                            // "program": "whiteboard",
                         },
 
                         "content": [
@@ -1316,10 +756,8 @@ export default {
             this.stackDataLoaded = false
             this.currentStack = stack
             this.$nextTick(() => {
-
                 this.openBoard(stack.boards[0].info.id)
                 this.stackDataLoaded = true
-                this.initializeBottomSidebar()
                 this.menuTitle = stack.info.title
             })
 
@@ -1328,54 +766,37 @@ export default {
         openBoard(id) {
             this.boardUnload = true
             this.$nextTick(() => {
-
                 this.currentBoardId = id
                 this.processCards(this.currentBoard.cards)
-                this.dropzoneGridSetup()
-                this.$nextTick(() => this.windowResized())
-                this.$nextTick(() => {
-                    this.dropzoneGrid.DOMcells = this.$refs['dropzone-cell']
-                    this.dropzoneGrid.height = this.currentBoard.settings.dimensions.height
-                    this.dropzoneGrid.width = this.currentBoard.settings.dimensions.width
-                    this.boardUnload = false
-
-                } )
+                this.boardUnload = false
             })
         },
 
-        createNewCard(cardType, x, y) {
+        createNewCard(cardType, dimensions) {
             if (this.user === "guest") {
                 return
             }
 
-            let card = this.newCards.find(c=>c.type == cardType)
-
-
             let newCardDefaults = this.cardTemplate(
                 {
                     "info": {
-                        "type": card.type
+                        "type": cardType
                     },
                     "settings": {
-                        "program": card.program,
-                        "dimensions": {
-                            x, y,
-                            "height": card.height,
-                            "width": card.width
-                        }
+                        // "program": card.program,
+                        "dimensions": dimensions
                     },
                 }
             )            
 
             let requestPayload = {
-                type: card.type,
+                type: cardType,
                 boardId: this.currentBoard.info.id,
                 title: newCardDefaults.info.title,
                 settings: JSON.stringify(newCardDefaults.settings),
                 content: newCardDefaults.content,
             }      
             
-            // console.log(requestPayload)
             let cards = this.currentBoard.cards
 
             return this.$http.post('/api/cards', requestPayload)
@@ -1878,6 +1299,7 @@ body {
     padding-left: 20px;
     border-radius: 10px 10px 0 0;
     overflow: hidden;
+    user-select: none;
     /* height: 40px; */
     /* display: flex; */
     /* flex-direction: row; */
@@ -1885,6 +1307,14 @@ body {
     /* justify-content: center; */
     /* margin-bottom: 5px; */
 }
+
+.container-header-center{
+    text-align: center;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+
 .container-text {
     font-size: 14px;
     color: white;
@@ -1994,16 +1424,6 @@ body {
     grid-template-rows: 5px minmax(0, 1fr) 5px;
 }
 
-#dropzone-grid {
-    display: grid;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    z-index: 100;
-    /* box-shadow: 0px 0px 0px 3px red; */
-    grid-area: 1 / 1 / 4 / 4;
-}
-
 #layout-grid {
     width: 100%;
     height: 100%;
@@ -2012,19 +1432,19 @@ body {
     display: grid;
     overflow: hidden;
     grid-area: 2 / 2 / 3 / 3;
+    gap: 10px;
+    box-shadow: 0px 0px 0px 2px rgba(235, 235, 235, 0.2);
 }
 
-.dropzone {
-    box-shadow: 0px 0px 0px 0.5px rgba(235, 235, 235, 0.2);
-}
-
-.dropzone-placeholder {
+#layout-selector-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-    border-style: solid;
+    grid-area: 2 / 2 / 3 / 3;
 }
+
 
 .cards {
     height:100%;
@@ -2389,135 +1809,6 @@ body {
 .sidebar-board-new-icon img {
     height: 25px;
     user-select: none;
-}
-
-
-#sidebar-bottom {
-    /* width: 40%; */
-    /* grid-area: 3 / 2 / 4 / 3; */
-    /* max-height: 10px; */
-    transform: translateY(80%);
-    transition: transform 0.3s ease-out;
-    transition-delay:1s;
-
-    /* overflow: hidden; */
-    position: fixed;
-    z-index: 10000;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 10px;
-    /* justify-self: center; */
-    background-color: rgba(0, 0, 0, 0.3);
-    margin-top: 5px;
-
-    display: grid;
-    grid-template-columns: 30px minmax(0, 1fr) 30px;
-    grid-template-rows: 10px minmax(0, 1fr) 10px;
-
-}
-
-#sidebar-bottom:hover {
-    transform: translateY(0);
-    transition-delay:0s;
-
-}
-
-#card-carousel, #card-carousel-ghost {
-    grid-area: 2 / 2 / 3 / 3;
-    /* background-color: red; */
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-}
-
-#card-carousel {
-    z-index: 300;
-}
-
-#card-carousel-ghost {
-    z-index: 200;
-}
-
-
-.card-button-draggable, .card-button-ghost {
-    width: 65px;
-    height: 45px;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-left: 5px;
-    margin-right: 5px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    border-radius: 5px;
-    cursor: grab;
-    user-select: none;
-    touch-action: none;
-}
-
-.card-button:active {
-    cursor: grabbing;
-}
-
-.card-button img, .card-button-ghost img {
-    height: 25px;
-    transition: all 0.2s;  
-}
-
-.card-button p, .card-button-ghost p {
-    font-size: 14px;
-    transition: all 0.2s;    
-
-}
-
-.card-button-ghost {
-    opacity: 0.5;
-}
-
-.card-on-board {
-    /* width: 200px; */
-    /* height: 200px; */
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.3);
-    border: 5px white solid;
-    box-sizing: border-box;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 0 2px 0 black;
-    user-select: none;
-    overflow: hidden;
-
-}
-
-.card-on-board img {
-    height: 60px;
-}
-
-.card-on-board p {
-    font-size: 20px;
-}
-
-
-.card-button {
-    touch-action: none;
-    max-width: 75px;
-    max-height: 55px;
-    min-width: 75px;
-    min-height: 55px;
-    
-}
-
-.temp-card-delay {
-    transition: all 0.2s;
 }
 
 

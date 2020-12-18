@@ -149,10 +149,6 @@ export default {
     },
     
     props: {
-        cardDimensions: {
-            type: Object
-        },
-
         content: {
             type: Array,
             required: true,
