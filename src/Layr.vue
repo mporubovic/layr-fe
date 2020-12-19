@@ -201,7 +201,7 @@
             <modal-confirm v-if="boardDeleteConfirm" confirmText="Delete"
                     @selectionConfirmed="deleteBoard(currentBoardId)"
                     @selectionCanceled="boardDeleteConfirm = !boardDeleteConfirm"
-                    >Are you sure<br>you want to delete this board?</modal-confirm>
+                    >Are you sure<br>you want to delete this page?</modal-confirm>
             <!-- <modal-confirm>Hello</modal-confirm> -->
         </div>
            
@@ -804,7 +804,7 @@ export default {
             this.boardUnload = true
             this.$nextTick(() => {
                 this.currentBoardId = id
-                this.processCards(this.currentBoard.cards)
+                if (this.currentBoard.cards) this.processCards(this.currentBoard.cards)
                 this.boardUnload = false
             })
         },
