@@ -328,6 +328,10 @@ export default {
                 this.$nextTick(() => {
                     let el = this.$el.querySelector('#students-list')
                     el.scrollTop = el.scrollHeight
+                    this.selectedStudentId = newStudent.id
+                    this.stacks = []
+
+
 
                 })
 
