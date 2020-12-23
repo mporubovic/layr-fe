@@ -25,12 +25,18 @@
    
         </div>
 
+        <demo-block></demo-block>
+
+
+
     </div>
 </template>
 
 <script>
+import DemoBlock from './Demo.vue'
 
 export default {
+  components: { DemoBlock },
     methods: {
         submitLogin() {
             let email = this.$el.querySelector('#signin-email-input').value
@@ -80,7 +86,8 @@ export default {
 
         forgotPassword() {
             this.$emit('forgotPassword')
-        }
+        },
+
     }
 }
 </script>
@@ -88,7 +95,7 @@ export default {
 .login {
     /* height: 500px; */
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding-top: 50px;

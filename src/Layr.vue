@@ -1501,6 +1501,13 @@ body {
     padding-bottom: 10px;
 }
 
+.container-padding-full {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 140px;
+    padding-right: 140px;
+}
+
 .item-title {
     overflow: hidden;
     color: white;

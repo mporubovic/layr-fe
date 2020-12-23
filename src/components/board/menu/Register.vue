@@ -23,13 +23,17 @@
 
         </div>
 
+        <demo-block></demo-block>
+
+
     </div>
 </template>
 
 <script>
-// import Boards from './Boards.vue'
+import DemoBlock from './Demo.vue'
 
 export default {
+  components: { DemoBlock },
     // name: 'menu-boards'
     // components: {
     //     Boards
@@ -119,7 +123,7 @@ export default {
 .register {
     /* height: 500px; */
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding-top: 50px;
