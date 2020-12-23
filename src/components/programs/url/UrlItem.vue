@@ -132,8 +132,7 @@ export default {
 
     // },
     
-    created() {
-        console.log("// CONTENT", this.content)
+    mounted() {
         if(this.content.url.path === "placeholder") {
             let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )
 
@@ -144,7 +143,7 @@ export default {
             this.setNestedObjectValue(updatedUrl, 'local.update', "terminate")  
             this.$emit('urlItemUpdated', updatedUrl)
 
-        } else if (this.content.url.name === null) {
+        } else if (this.content.url.name === null || this.content.url.name === undefined) {
             // this.content.url.name = "Loading..."
             console.log("FETCH")
             let updatedUrl = JSON.parse ( JSON.stringify ( this.content) )

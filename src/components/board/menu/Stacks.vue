@@ -20,8 +20,8 @@
                 >
 
                 <div class="carousel-stack-icon">
-                    <div class="carousel-board-icon" v-for="index in (stack.boards ? stack.boards.length : 1)" :key="index"
-                        :style="{marginBottom: ((index-1)*65)/stack.boards.length + 'px', backgroundColor: randomColor()}"
+                    <div class="carousel-board-icon" v-for="index in boardCount(stack.info.id)" :key="index"
+                        :style="{marginBottom: ((index-1)*65)/boardCount(stack.info.id) + 'px', backgroundColor: randomColor()}"
                     >
 
                     </div>
@@ -98,6 +98,7 @@ export default {
             this.stackEditingId = null
             let stack = this.stacks.find(s=>s.info.id === id)
             stack.info.title = title
+            if (this.$root.demo) return
             this.$emit('stackUpdatedItself', id, 'info.title', title)
         },
 
@@ -107,6 +108,10 @@ export default {
                 this.$el.querySelector('#stack-title-input-'+id).focus()
             })
         },
+
+        boardCount(stackId) {
+            return this.stacks.find(s => s.info.id === stackId).boards?.length ?? 1
+        }
 
     },
 

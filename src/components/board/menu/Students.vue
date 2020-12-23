@@ -170,7 +170,6 @@ export default {
             // return this.stacks
         },
 
-
     },
 
     created() {
@@ -183,6 +182,11 @@ export default {
 
     methods: {
         loadStudents() {
+            if (this.$root.demo) {
+                this.students = this.$root.demo.students
+                this.selectStudent(this.students[0].id)
+                return
+            }
             this.$http.get('/api/students').then((response) => {
                 console.log('API STUDENTS RESPONSE DATA', response.data)
                 this.students = response.data.students
@@ -196,6 +200,11 @@ export default {
             if (this.newStudentPinCode) this.newStudentPinCode = null
             if (this.studentResetPinCode) this.studentResetPinCode = null
             if (this.stacks) this.stacks = null
+
+            if (this.$root.demo) {
+                this.stacks = this.students.find(s => s.id === id).stacks
+                return 
+            }
             // this.$refs['students-list-item-' + id][0].style['background-color'] = 'lightgreen'
             this.$http.get('/api/students/' + id).then((response) => {
                 console.log('API STUDENT RESPONSE ', response.data)
@@ -242,6 +251,30 @@ export default {
                 studentId: this.selectedStudentId,
             }
 
+            if (this.$root.demo) {
+                let newStack = {
+                    "info": {
+                        "id": Math.floor(Math.random()*100000000),
+                        "title": "New stack",
+                    },
+                    "boards": [
+                        {
+                            info: {
+                                id: Math.floor(Math.random()*100000000)
+                            },
+                            settings: null,
+                            cards: []
+                        }
+                    ]
+                }
+
+                this.stacks.push(newStack)
+                // this.selectedStudent.stacks.push(newStack)
+                // console.log(this.stacks)
+                this.$el.querySelector('#new-stack-button').disabled = false
+                return
+            }
+
 
             this.$el.querySelector('#new-stack-button').disabled = true
             this.$http.post('/api/stacks', requestPayload)
@@ -272,6 +305,8 @@ export default {
             let requestPayload = {
                 name: newName
             }
+
+            if (this.$root.demo) return
 
             this.$http.patch('/api/students/' + id, requestPayload).then((response) => {
                 console.log("API STUDENT RESPOSNE", response.status)
@@ -313,6 +348,27 @@ export default {
                 email,
             }
 
+            if (this.$root.demo) {
+                let d = new Date
+                let newStudent = {
+                    email: email,
+                    role:"student",
+                    id:Math.floor(Math.random()*1000000000),
+                    name: name,
+                    created_at: d.toJSON(),
+                    stacks: []
+                    }
+
+                this.students.push(newStudent)
+                this.$nextTick(() => {
+                    let el = this.$el.querySelector('#students-list')
+                    el.scrollTop = el.scrollHeight
+                    this.selectedStudentId = newStudent.id
+                    this.stacks = []
+                })
+                return
+            }
+
             console.log("REQUEST PAYLOAD", requestPayload)
 
 
@@ -323,7 +379,7 @@ export default {
                 this.students.push(newStudent)
                 // this.isNewStudentFormVisible = false
                 // this.newStudentInvited = true
-                this.$el.querySelector('#new-student-form-button').disabled = false
+                // this.$el.querySelector('#new-student-form-button').disabled = false
 
                 this.$nextTick(() => {
                     let el = this.$el.querySelector('#students-list')

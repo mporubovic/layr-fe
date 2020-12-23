@@ -162,7 +162,7 @@
         </div>
 
 
-        <div class="board" id="board" @scroll.prevent="onBoardDivWheel" v-if="currentBoard">
+        <div class="board" id="board" @scroll.prevent="onBoardDivWheel" v-if="stackDataLoaded && currentBoard">
             <div id="layout-grid" v-if="currentBoard.settings && currentBoard.settings.layout" :style="gridSettingsStyle">
                 <div class="grid-cell" v-for='(cell, i) in currentBoard.settings.layout' :key="i" :style="{gridArea: cell}">
                     
@@ -269,7 +269,8 @@ export default {
         },
         
         currentBoard() {
-            return this.currentStack ? this.currentStack.boards.find(b => b.info.id === this.currentBoardId) : null
+
+            return this.currentStack ? this.currentStack.boards?.find(b => b.info.id === this.currentBoardId) : null
         },        
         
         currentStackId() {
@@ -343,6 +344,13 @@ export default {
             case 'reset-password':
                 this.menuClick('reset-password')
                 return
+
+            case 'demo':
+                this.$httpCross.get('/demoUser.json').then(r => {
+                        this.$root.demo = r.data
+                        this.userLoggedIn(r.data.user)
+                    })
+                return
         }
 
         // if (this.isInDevelopment) {
@@ -413,6 +421,27 @@ export default {
 
             // console.log(requestPayload)
 
+            if (this.$root.demo) {
+                // let stack = null
+                // this.$root.demo.students.forEach(s => {
+                //     s.stacks.forEach(st => {
+                //         if (st.info.id === this.currentStackId) stack = st
+                //     })
+                // })
+                let newBoard = {
+                    info: {
+                        id: Math.floor(Math.random()*100000000)
+                    },
+                    settings: null,
+                    cards: []
+                }
+                // stack.boards.push(newBoard)
+                this.currentStack.boards.push(newBoard)
+                this.openBoard(newBoard.info.id)
+
+                return
+            }
+
             // this.$el.querySelector('#create-stack-button').disabled = true
             this.$http.post('/api/boards', requestPayload)
                         .then(response => {
@@ -436,6 +465,9 @@ export default {
 
             this.setNestedObjectValue(this.currentBoard, 'settings.layout', template)
 
+            if (this.$root.demo) {
+                return
+            }
 
             let requestPayload = {
                 settings: {
@@ -466,6 +498,10 @@ export default {
             if (nextBoard) this.openBoard(nextBoard)
 
             this.currentStack.boards.splice(boardIndex, 1)
+
+            if (this.$root.demo) {
+                return
+            }
 
             this.$http.delete('/api/boards/' + this.currentBoardId)
                 .then(response => {
@@ -714,12 +750,22 @@ export default {
         },
 
         requestStack(id) {
-            if (!this.userRole) this.user = "guest"
+            // if (!this.userRole) this.user = "guest"
 
             this.menuClick('close')
             if (this.currentStack) this.currentStack = null
 
             this.menuTitle = "Loading..."
+            if (this.$root.demo) {
+                let stack = null
+                this.$root.demo.students.forEach(s => {
+                    s.stacks.forEach(st => {
+                        if (st.info.id === id) stack = st
+                    })
+                })
+                this.openStack(stack)
+                return
+            }
 
             this.$http.get('/api/stacks/' + id)
                 .then(response => {
@@ -749,6 +795,7 @@ export default {
 
                         card.content.forEach(content => {
                             // this.setNestedObjectValue(content, 'local.isEditing', false)
+                            if (content.local) return
                             this.$set(content, 'local', {})
                             this.$set(content.local, 'isEditing', false)                            
                         })
@@ -789,6 +836,7 @@ export default {
         },
         
         openStack(stack) {
+            console.log(stack)
             this.stackDataLoaded = false
             this.currentStack = stack
             this.$nextTick(() => {
@@ -836,6 +884,36 @@ export default {
             
             let cards = this.currentBoard.cards
 
+            if (this.$root.demo) {
+                // let board = this.$root.demo.students.forEach(s => {
+                //     s.stacks.forEach(st => {
+                //         st.boards.forEach(b => {
+                //             if (b.info.id === this.currentBoard.info.id) return b
+                //         })
+                //     })
+                // })
+                let newCard = {
+                    info: {
+                        id: Math.floor(Math.random()*100000000),
+                        title: newCardDefaults.info.title,
+                        type: cardType,
+                    },
+
+                    settings: newCardDefaults.settings,
+                    content: newCardDefaults.content,
+                }
+            
+                if (!newCard.content) newCard.content = []
+                this.processCards([newCard])
+                this.$nextTick(() => {cards.push(newCard)})
+
+
+
+                // stack.boards.push(newBoard)
+
+                return
+            }
+
             return this.$http.post('/api/cards', requestPayload)
                         .then(response => {
                             let newCard = response.data.card
@@ -850,9 +928,27 @@ export default {
             console.log("UPDATE", programName, updatedContent, "CARD", cardId)
             let c = this.currentBoard.cards.find(c => c.info.id === cardId).content.find(c => c.id === updatedContent.id)
             
+            
+            // if (this.$root.demo) {
+            //     if (updatedContent.local?.update) {
+            //         c.local = updatedContent.local
+            //         if (updatedContent.local.update === "terminate") {
+            //             c.local.update = null
+            //             return
+            //         }
+            //     }
+
+                 
+            //     c[contentKey] = updatedContent[contentKey]
+            //     return
+            //     // this.openStack(stack)
+            //     // if (updatedContent.local.update !== "terminate") return
+            // }
+            
             if (updatedContent.local) {
                 if (updatedContent.local.update) {
                     c.local = updatedContent.local
+                    console.log(updatedContent.local.update)
                     if (updatedContent.local.update === "terminate") {
                         c.local.update = null
                         return
@@ -860,16 +956,23 @@ export default {
                 }
             }
 
+            let contentKey = this.cardProgramNameToKey(programName)
+
+            if (this.$root.demo) {
+                c[contentKey] = updatedContent[contentKey]
+                return
+            }
+
             if (this.user === "guest") {
                 return
             }
 
-            let contentKey = this.cardProgramNameToKey(programName)
             let content = {[contentKey]: updatedContent[contentKey]}
             let requestPayload = {
                 cardId: cardId,
                 content: content
             }
+
             console.log("REQUEST PAYLOAD", requestPayload)
             this.$http.patch('/api/content/' + updatedContent.id, requestPayload)
                         .then(response => {
@@ -877,6 +980,8 @@ export default {
                         })
 
             c[contentKey] = updatedContent[contentKey]
+
+
 
         },
 
@@ -892,6 +997,10 @@ export default {
             let isFile = mainContent ? mainContent[0] instanceof File : false
 
             if (isFile) {
+                if (this.$root.demo) {
+                    alert('Uploading files is not possible in this demo')
+                    return
+                }
                 let formData = new FormData()
                 formData.append('content', mainContent[0])
                 formData.append('cardId', cardId)
@@ -908,6 +1017,12 @@ export default {
                     cardId: cardId,
                     content: content
                 }
+
+                if (this.$root.demo) {
+                    let card = this.currentBoard.cards.find(c => c.info.id === cardId)
+                    card.content ? card.content.push(newContent) : card.content = [newContent]
+                    return
+                }
             }
             console.log("REQUEST PAYLOAD", requestPayload)
             let card = this.currentBoard.cards.find(c => c.info.id === cardId)
@@ -923,13 +1038,14 @@ export default {
         },
 
         cardProgramDeletedContent(programName, deletedContent, cardId) {
-            if (this.user === "guest") {
-                return
-            }
             console.log("DELETE", programName, deletedContent, cardId)
             let c = this.currentBoard.cards.find(c => c.info.id === cardId).content
             let i = c.findIndex(c => c.id === deletedContent.id)
             c.splice(i, 1)
+
+            if (this.$root.demo) {
+                return
+            }
             
             let requestPayload = {
                 cardId: cardId
@@ -1005,9 +1121,9 @@ export default {
                         "meta": {},
                         "url": {
                             "path": mainContent ?? 'placeholder',
-                            "position": 1,
-                            "ico": mainContent ? null : 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
-                            "name": mainContent ? null : 'Right click to edit',
+                            // "position": 1,
+                            // "ico": mainContent ? null : 'https://icons.iconarchive.com/icons/treetog/junior/128/earth-icon.png',
+                            // "name": mainContent ? null : 'Right click to edit',
                         },
                         "local": {
                             "isEditing": false,
@@ -1108,9 +1224,9 @@ export default {
             this.setNestedObjectValue(card, propertyPath, value)
 
             if (card.local.updatePropertyTimeout) clearTimeout(card.local.updatePropertyTimeout)
-            if (this.user === "guest") {
-                return
-            }
+            
+            if (this.$root.demo) return
+
             card.local.updatePropertyTimeout = setTimeout(() => {
                 console.log("TIMEOUT CARD " + card.info.id, card.local.updatePropertyQueue)
 

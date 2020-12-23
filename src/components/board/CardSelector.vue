@@ -8,11 +8,10 @@
             </button>
         </div>
 
-        <div id="selector" v-if="addButtonClicked">
+        <div id="selector" v-if="addButtonClicked && !isCardSelected">
             <button class="card-button" 
                             v-for="newCard in newCards" 
                             :key="newCard.name"
-                            :disabled="!newCard.available"
                             @click="cardSelected(newCard)"
                             >
                     <div class="card-icon">
@@ -52,12 +51,12 @@ export default {
         return {
 
             addButtonClicked: false,
+            isCardSelected: false,
 
             newCards: [              
                 {
                     "type": "whiteboard",
                     "program": "whiteboard",
-                    "available": true,
                     "title": "Draw",
                     "icon": require('@/assets/cards/icons/whiteboard.svg'),
                     "description": "Draw on a whiteboard",
@@ -67,7 +66,6 @@ export default {
                 {
                     "type": "pdf",
                     "program": "pdfviewer",
-                    "available": true,
                     "title": "PDF",
                     "icon": require('@/assets/cards/icons/pdf.svg'),
                     "description": "Upload a PDF",
@@ -77,7 +75,6 @@ export default {
                 {
                     "type": "youtube",
                     "program": "youtubeplayer",
-                    "available": true,
                     "title": "Video",
                     "icon": require('@/assets/cards/icons/youtube.svg'),
                     "description": "Play a YouTube video",
@@ -87,7 +84,6 @@ export default {
                 {
                     "type": "text",
                     "program": "texteditor",
-                    "available": true,
                     "title": "Notes",
                     "icon": require('@/assets/cards/icons/text.svg'),
                     "description": "Write notes",
@@ -98,7 +94,6 @@ export default {
                     "type": "url",
                     "program": "list",
                     "title": "URL",
-                    "available": true,
                     "icon": require('@/assets/cards/icons/link.svg'),
                     "description": "Create a list of links",
                     "width": 2,
@@ -107,7 +102,6 @@ export default {
                 {
                     "type": "image",
                     "program": "gallery",
-                    "available": true,
                     "title": "Image",
                     "icon": require('@/assets/cards/icons/image.svg'),
                     "description": "Upload images",
@@ -117,7 +111,6 @@ export default {
                 {
                     "type": "todo",
                     "program": "list",
-                    "available": true,
                     "title": "Todo",
                     "icon": require('@/assets/cards/icons/todo.svg'),
                     "description": "Write a todo list",
@@ -134,6 +127,7 @@ export default {
     methods: {
 
         cardSelected(card) {
+            this.isCardSelected = true
             this.$emit('cardSelected', card.type, this.dimensions)
         }
     },
