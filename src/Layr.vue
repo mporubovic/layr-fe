@@ -1581,8 +1581,8 @@ body {
 
 #overlay {
     width: 100%;
-    /* background-color: rgba(0, 0, 0, 0.25); */
-    backdrop-filter: blur(5px);
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.45);
     position: fixed;
     z-index: 900;
     transition: all 0.75s;
@@ -1590,14 +1590,15 @@ body {
 }
 
 .overlay-not-visible {
-    height: 1%;
     opacity: 0;
+    visibility: hidden;
 
 }
 
 .overlay-visible {
-    height: 100%;
     opacity: 1;
+    visibility: visible;
+
 
 }
 

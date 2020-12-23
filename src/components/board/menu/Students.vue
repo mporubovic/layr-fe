@@ -42,17 +42,17 @@
             </div>
             <hr class="line-common">
             
-            <div class="stacks-list-loading" v-if="selectedStudentId && !stacks">
-                    <p class="stacks-list-loading-text">Loading...</p>
-                </div>
+            <!-- <div class="stacks-list-loading" v-if="selectedStudentId"> -->
+                    <!-- <p class="stacks-list-loading-text">Loading...</p> -->
+                <!-- </div> -->
             
-            <div class="stacks-list-carousel-container" v-if="stacks">
+            <div class="stacks-list-carousel-container" v-if="selectedStudentId">
 
                 <menu-stacks @subMenuStackClicked="selectStack" 
                                 @subMenuStackNewStack="createStack" 
                                 @stackUpdatedItself="stackUpdatedItself"
                                 :createStack='true' 
-                                :stacks="stacks"
+                                :stacks="sortedStacks"
                                 :groupBy="'category'"
                                 :flexDirection="'column'"
                                 :userTags="user.tags"
@@ -142,31 +142,39 @@ export default {
 
     data() {
         return {
-            stacks: null,
+            // stacks: null,
             students: [],
             // students: null,
-            selectedStudentId: null,
             studentNameEditingId: null,
             isNewStudentFormVisible: false,
             newStudentInvited: false,
+            selectedStudent: null,
         }
     },
 
     computed: {
-        selectedStudent() {
-            return this.students.find(s => s.id === this.selectedStudentId)
+        selectedStudentId() {
+            return this.selectedStudent?.id
         },
+
+        studentStacks() {
+            return this.selectedStudent?.stacks ?? []
+        },
+
+        // stacks() {
+        //     return this.selectStudent.stacks
+        // },
         
         stackContainerTitle() {
             return this.selectedStudent ? this.selectedStudent.name + '\'s stacks' : 'Select a student on the left'  
         },
 
         sortedStacks() {
-            return this.stacks.filter(b=>b).sort(function(a, b) {
+            return this.studentStacks?.filter(b=>b).sort(function(a, b) {
                                         let ta = new Date(a.info.created_at)
                                         let tb = new Date(b.info.created_at)
                                         return tb.getTime() - ta.getTime()
-                                    });
+                                    })
             // return this.stacks
         },
 
@@ -196,21 +204,20 @@ export default {
         },
         
         selectStudent(id) {
-            this.selectedStudentId = id
-            if (this.newStudentPinCode) this.newStudentPinCode = null
-            if (this.studentResetPinCode) this.studentResetPinCode = null
-            if (this.stacks) this.stacks = null
-
             if (this.$root.demo) {
-                this.stacks = this.students.find(s => s.id === id).stacks
+                let student = this.students.find(s => s.id === id)
+                if (!student.stacks) student.stacks = []
+                this.selectedStudent = student
                 return 
             }
             // this.$refs['students-list-item-' + id][0].style['background-color'] = 'lightgreen'
             this.$http.get('/api/students/' + id).then((response) => {
                 console.log('API STUDENT RESPONSE ', response.data)
                 let student = response.data.student
-                let stacks = student.stacks
-                this.stacks = stacks
+                if (!student.stacks) student.stacks = []
+                this.selectedStudent = student
+                // let stacks = student.stacks
+                // this.stacks = stacks
                 // this.$emit
             })
         },
@@ -268,8 +275,8 @@ export default {
                     ]
                 }
 
-                this.stacks.push(newStack)
-                // this.selectedStudent.stacks.push(newStack)
+                // this.stacks.push(newStack)
+                this.selectedStudent.stacks.push(newStack)
                 // console.log(this.stacks)
                 this.$el.querySelector('#new-stack-button').disabled = false
                 return
@@ -281,7 +288,7 @@ export default {
                         .then(response => {
                             let newStack = response.data.stack
                             console.log("API STACK RESPONSE", response.status)
-                            this.stacks.push(newStack)
+                            this.selectedStudent.stacks.push(newStack)
                             this.$el.querySelector('#new-stack-button').disabled = false
 
                             // this.menuStacksClick()
@@ -363,8 +370,8 @@ export default {
                 this.$nextTick(() => {
                     let el = this.$el.querySelector('#students-list')
                     el.scrollTop = el.scrollHeight
-                    this.selectedStudentId = newStudent.id
-                    this.stacks = []
+                    this.selectedStudent = newStudent
+                    // this.stacks = []
                 })
                 return
             }
@@ -375,6 +382,8 @@ export default {
             this.$http.post('/api/students', requestPayload).then((response) => {
                 console.log("API STUDENTS CREATE RESPONSE", response.data)
                 let newStudent = response.data.student
+                if (!newStudent.stacks) newStudent.stacks = []
+
                 // this.loadStudents()
                 this.students.push(newStudent)
                 // this.isNewStudentFormVisible = false
@@ -384,8 +393,9 @@ export default {
                 this.$nextTick(() => {
                     let el = this.$el.querySelector('#students-list')
                     el.scrollTop = el.scrollHeight
-                    this.selectedStudentId = newStudent.id
-                    this.stacks = []
+                    this.selectedStudent = newStudent
+
+                    // this.stacks = []
 
 
 
