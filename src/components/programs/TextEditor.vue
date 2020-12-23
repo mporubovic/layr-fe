@@ -103,6 +103,7 @@ export default {
                 image_dimensions: false,
                 file_picker_types: "image",
                 powerpaste_word_import: 'merge',
+                powerpaste_html_import: 'merge',
                 table_default_styles: {
                     width: '100%',
                     border: '1',
