@@ -161,6 +161,11 @@
 
         </div>
 
+        <!-- <div id="overlay" :style="{height: isOverlayVisible ? '100%' : '0'}"> -->
+        <div id="overlay" v-if="currentBoard" :class="isOverlayVisible ? 'overlay-visible' : 'overlay-not-visible'" @click="overlayClicked">
+
+        </div>
+
 
         <div class="board" id="board" @scroll.prevent="onBoardDivWheel" v-if="stackDataLoaded && currentBoard">
             <div id="layout-grid" v-if="currentBoard.settings && currentBoard.settings.layout" :style="gridSettingsStyle">
@@ -250,6 +255,7 @@ export default {
             user: null,
             cardsHaveFocus: true,
             boardDeleteConfirm: false,
+            isOverlayVisible: false,
         }
     },
 
@@ -327,7 +333,7 @@ export default {
             let h = maxRow - 1
 
             return {grid: `repeat(${h}, minmax(0, 1fr)) / repeat(${w}, minmax(0, 1fr))`}
-        }
+        },
 
     },
 
@@ -401,8 +407,9 @@ export default {
         },
 
 
-        onBoardDivWheel() {
-
+        overlayClicked() {
+            if (this.isOverlayVisible) this.menuClick('close')
+            // this.isOverlayVisible = !this.isOverlayVisible
         },
 
         sidebarBoardClicked(id) {
@@ -525,6 +532,7 @@ export default {
 
 
         menuClick(menu) {
+            this.isOverlayVisible = !this.isOverlayVisible
             let current = this.subMenu
             if (menu === current || menu === "close") {
                 this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
@@ -533,11 +541,9 @@ export default {
                 setTimeout(() => {
                     this.subMenu = null
                 }, 400);
-                
                 return
             }
             this.subMenu = menu
-
             this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
                 
             this.$el.querySelector('#sub-menu').style["margin-top"] = 5 + 'px'    
@@ -1571,6 +1577,28 @@ body {
     grid-template-rows: 70px minmax(0, 1fr) 30px;
     overflow: hidden;
     background: linear-gradient(90deg, rgba(52,52,205,1) 0%, rgba(0,212,255,1) 100%);
+}
+
+#overlay {
+    width: 100%;
+    /* background-color: rgba(0, 0, 0, 0.25); */
+    backdrop-filter: blur(5px);
+    position: fixed;
+    z-index: 900;
+    transition: all 0.75s;
+
+}
+
+.overlay-not-visible {
+    height: 1%;
+    opacity: 0;
+
+}
+
+.overlay-visible {
+    height: 100%;
+    opacity: 1;
+
 }
 
 #board {
