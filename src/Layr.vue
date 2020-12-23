@@ -532,7 +532,6 @@ export default {
 
 
         menuClick(menu) {
-            this.isOverlayVisible = !this.isOverlayVisible
             let current = this.subMenu
             if (menu === current || menu === "close") {
                 this.$el.querySelector('#sub-menu-container').style["max-height"] = 0 + 'px'
@@ -541,8 +540,12 @@ export default {
                 setTimeout(() => {
                     this.subMenu = null
                 }, 400);
+
+                this.isOverlayVisible = false
                 return
             }
+            this.isOverlayVisible = true
+
             this.subMenu = menu
             this.$el.querySelector('#sub-menu-container').style["max-height"] = 800 + 'px'
                 
